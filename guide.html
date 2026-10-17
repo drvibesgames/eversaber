@@ -177,6 +177,14 @@ section{padding-block:clamp(56px,9vw,104px)}
 .final .cta-row{justify-content:center}
 footer{border-top:1px solid var(--seam);padding-block:26px;color:var(--dim);font-size:13px}
 footer .wrap{display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px}
+/* weapon colours */
+.wcolour{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.6fr);gap:24px;align-items:center;background:var(--deck);border:1px solid var(--seam);padding:20px 22px;margin:22px 0}
+.wcolour h3{font-size:24px;margin:8px 0}.wcolour p{color:var(--dim);font-size:15px}.wcolour img{display:block;width:100%;height:auto}
+.wcount{font-family:var(--f-pixel);font-size:12px;letter-spacing:1px;color:var(--gold)!important;margin:2px 0 10px}.wcount b{font-size:18px;color:var(--plasma)}
+@media (max-width:760px){.wcolour{grid-template-columns:1fr}}
+/* pocket dimension */
+.pod-head{display:grid;grid-template-columns:1fr 1fr;gap:clamp(24px,4vw,56px);align-items:start;margin-bottom:28px}.pod-shots{display:grid;grid-template-columns:1fr 1fr;gap:18px}.pod-shots figure{margin:0}.pod-shots img{display:block;width:100%;height:auto;border:1px solid var(--seam)}.pod-shots figcaption{font-family:var(--f-pixel);font-size:11px;letter-spacing:1px;color:var(--dim);margin-top:8px}@media (max-width:860px){.pod-head,.pod-shots{grid-template-columns:1fr}}
+.pod-list{list-style:none;margin:0;padding:0;display:grid;gap:12px}.pod-list li{color:var(--dim);padding-left:18px;position:relative;font-size:15px}.pod-list li::before{content:'';position:absolute;left:0;top:.6em;width:8px;height:8px;background:var(--gold);transform:rotate(45deg)}.pod-list b{color:var(--ink)}
 /* feeling stuck */
 .stuck{padding-block:clamp(44px,7vw,72px);background:var(--deck);border-top:1px solid var(--seam)}
 .stuck .wrap{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:20px 40px}
@@ -468,6 +476,7 @@ details ul{margin:8px 0 0;padding-left:18px;color:var(--dim);font-size:15px}
       <article><h3>Caged</h3><p class="where">Mara · Dunewell Town, outside the blue-roofed house</p><p>Hack the Holding Pen Lock in Kessa’s south-west corner (Hacking 22), free Jory and return to Mara. <b>Reward:</b> Healzooka.</p></article>
       <article><h3>Bar Brawl</h3><p class="where">Brakk · The Dusty Flagon (Dunewell tavern)</p><p>Beat Brakk the Brute (level 8) in a fist fight, then his friend Vagabond Victor at the east tables. <b>Reward:</b> Red Bandana.</p></article>
       <article><h3>Room with a View</h3><p class="where">Hotel Concierge · Neo-Haven, outside the hotel</p><p>Ask Officer Ryn in the south plaza, find Tess on the lake shore, get the keycard back from Vanta outside the Armory, and return it. <b>Reward:</b> unlimited Hotel Room Ticket, and the east suite chest opens.</p></article>
+      <article><h3>My Own Pocket</h3><p class="where">Estate Agent Vale · Orbital Hub Aster, beside the POCKET teleporter</p><p>Buy a Pocket Dimension (₵100; a Camp Cot and Stool come free), step through the teleporter, use the Home Sphere to place one piece of furniture in Build mode, then leave Build mode and talk to Vale by your portal. <b>Reward:</b> Questing XP.</p></article>
       <article><h3>Paper Trail</h3><p class="where">Dex the Whistleblower · outside Neo-Haven Town Hall</p><p>Hack the Mayor’s Terminal in the Town Hall (Hacking 27), then confront Mayor Castellan. <b>Reward:</b> Hybrid Servo Legs.</p></article>
       <article><h3>Swamp Fever</h3><p class="where">Injured Man · Mirehold Infirmary</p><p>Nothing in the swamp cures him. Equip the <b>Healzooka</b> from Caged and talk to him again. <b>Reward:</b> ★ Dart of Destruction (legendary).</p></article>
       <article><h3>Leap of Faith</h3><p class="where">Mother Silt · Mirehold Chapel</p><p>Answer her four questions correctly. Talk to her again to retake. <b>Reward:</b> Focus Band (+10 focus).</p>
