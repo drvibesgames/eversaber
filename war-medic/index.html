@@ -1,0 +1,299 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Intergalactic War Medic</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="A frantic co-op-style management game for one: drag the wounded out of the tunnels, patch them up, feed them and send them back to the front. Free in your browser.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Lilita+One&display=swap" rel="stylesheet">
+<style>
+/* Layout: field-manual landing page. Hero monitor + triage-tag cards; one dark warzone theme, committed. */
+:root{
+  --void:#0b1020; --hull:#131b2d; --hull2:#1a2439; --line:#2a3854;
+  --ink:#eef3f8; --mute:#9aa8bd;
+  --medic:#ff5a4e; --medic-d:#b8352c; --plasma:#5ee0ff; --gold:#ffc94a;
+  --tag-g:#6ee07a; --tag-y:#ffc94a; --tag-r:#ff5a4e; --paper:#f4efe4; --paper-ink:#1d2330;
+  --display:'Lilita One','Arial Black',system-ui,sans-serif;
+  --ui:'Chakra Petch','Segoe UI',system-ui,sans-serif;
+  color-scheme:dark;
+}
+[hidden]{display:none!important}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--void);color:var(--ink);font-family:var(--ui);font-size:17px;line-height:1.55;overflow-x:hidden}
+img{max-width:100%;height:auto;display:block}
+a{color:inherit}
+:focus-visible{outline:3px solid var(--plasma);outline-offset:3px;border-radius:6px}
+.wrap{max-width:1160px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1,h2,h3{font-family:var(--display);font-weight:400;letter-spacing:.01em;text-wrap:balance;margin:0}
+.eyebrow{font-weight:700;letter-spacing:.32em;text-transform:uppercase;font-size:13px;color:var(--plasma)}
+.btn{display:inline-flex;align-items:center;gap:10px;font-family:var(--display);font-size:21px;letter-spacing:.03em;text-decoration:none;color:#fff;background:var(--medic);border-radius:14px;padding:14px 26px;box-shadow:0 6px 0 var(--medic-d);transition:transform .08s}
+.btn:hover{filter:brightness(1.07)} .btn:active{transform:translateY(4px);box-shadow:0 2px 0 var(--medic-d)}
+.btn svg{width:22px;height:22px}
+.btn.ghost{background:var(--hull2);box-shadow:0 6px 0 #070b16;color:var(--ink)}
+.btn.ghost:active{box-shadow:0 2px 0 #070b16}
+
+/* header */
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:rgba(11,16,32,.92);border-bottom:1px solid var(--line)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:21;background:var(--void)}
+.nav{display:flex;align-items:center;gap:20px;padding-block:12px}
+.brand{display:flex;align-items:center;gap:10px;text-decoration:none;font-family:var(--display);font-size:22px}
+.mark{width:34px;height:34px;border-radius:10px;background:var(--paper);display:grid;place-items:center;box-shadow:0 3px 0 #b9b1a0}
+.mark svg{width:22px;height:22px}
+.nav ul{display:flex;gap:22px;list-style:none;margin:0 0 0 auto;padding:0;font-weight:600;font-size:15px}
+.nav ul a{text-decoration:none;color:var(--mute)} .nav ul a:hover{color:var(--ink)}
+.nav .btn{font-size:17px;padding:9px 18px;box-shadow:0 4px 0 var(--medic-d)}
+@media (max-width:760px){.nav ul{display:none}.nav .btn{margin-left:auto}}
+
+/* hero */
+.hero{position:relative;padding-block:56px 72px;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(60% 50% at 78% 40%,rgba(94,224,255,.12),transparent 70%),radial-gradient(40% 40% at 10% 90%,rgba(255,90,78,.14),transparent 70%);pointer-events:none}
+.hero-grid{position:relative;display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:48px;align-items:center}
+.hero h1{font-size:clamp(64px,10vw,124px);line-height:.86;margin-top:6px;color:#fff;text-shadow:0 6px 0 var(--medic-d),0 12px 0 rgba(0,0,0,.35)}
+.hero h1 span{color:var(--medic)}
+.lead{font-size:clamp(18px,2vw,21px);color:#cdd7e5;max-width:36ch;margin:22px 0 28px}
+.ctas{display:flex;gap:14px;flex-wrap:wrap}
+.facts{display:flex;flex-wrap:wrap;gap:8px 18px;margin-top:26px;color:var(--mute);font-size:14px;font-weight:600;letter-spacing:.04em}
+.facts span{display:inline-flex;align-items:center;gap:7px}
+.facts i{width:8px;height:8px;border-radius:50%;background:var(--tag-g)}
+.monitor{position:relative;border-radius:18px;padding:10px;background:linear-gradient(#2a3854,#1a2439);box-shadow:0 10px 0 #070b16,0 40px 80px rgba(0,0,0,.5);transform:rotate(1.2deg)}
+.monitor img{border-radius:10px;aspect-ratio:16/9;object-fit:cover;width:100%}
+.monitor .lbl{position:absolute;left:22px;top:-14px;background:var(--plasma);color:#06212a;font-weight:700;font-size:12px;letter-spacing:.18em;text-transform:uppercase;padding:4px 10px;border-radius:6px}
+.sticker{position:absolute;right:-12px;bottom:-26px;transform:rotate(-7deg)}
+@media (max-width:860px){.hero-grid{grid-template-columns:1fr}.hero{padding-block:32px 64px}.sticker{right:6px}}
+
+/* triage tag */
+.tag{position:relative;background:var(--paper);color:var(--paper-ink);border-radius:12px 12px 12px 12px;padding:18px 18px 16px 18px;box-shadow:0 5px 0 #b9b1a0;min-width:0}
+.tag::before{content:"";position:absolute;top:14px;right:14px;width:14px;height:14px;border-radius:50%;background:var(--void);box-shadow:inset 0 0 0 3px #cfc6b3}
+.tag .band{display:flex;height:10px;border-radius:4px;overflow:hidden;margin:-4px 26px 12px 0}
+.tag .band b{flex:1} .band .g{background:var(--tag-g)} .band .y{background:var(--tag-y)} .band .r{background:var(--tag-r)} .band .k{background:#1d2330}
+.tag .band b.off{opacity:.18}
+.tag small{display:block;font-weight:700;letter-spacing:.18em;text-transform:uppercase;font-size:11px;color:#6b6556}
+.tag h3{font-size:24px;margin:2px 0 6px;color:var(--paper-ink)}
+.tag p{margin:0;font-size:15px;line-height:1.5;color:#3a3f4c}
+.tag .perf{border-top:2px dashed #cfc6b3;margin:14px -18px 0;padding:10px 18px 0;display:flex;justify-content:space-between;font-weight:700;font-size:13px;color:#6b6556;font-variant-numeric:tabular-nums}
+.sticker.tag{width:230px;padding:14px 14px 12px}
+.sticker.tag h3{font-size:20px}
+
+section{padding-block:72px}
+.sec-head{display:grid;gap:10px;margin-bottom:34px;max-width:680px}
+.sec-head h2{font-size:clamp(36px,5vw,56px);line-height:1}
+.sec-head p{margin:0;color:var(--mute);font-size:18px}
+
+/* shift */
+.shift{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px;counter-reset:s}
+.step{background:var(--hull);border:2px solid var(--line);border-radius:16px;padding:20px;min-width:0}
+.step .ic{width:52px;height:52px;border-radius:14px;background:var(--paper);display:grid;place-items:center;box-shadow:0 4px 0 #b9b1a0;margin-bottom:14px}
+.step .ic svg{width:32px;height:32px}
+.step .n{font-family:var(--display);color:var(--medic);font-size:15px;letter-spacing:.06em}
+.step h3{font-size:26px;margin:2px 0 8px}
+.step p{margin:0;color:#c3cddb;font-size:15.5px}
+@media (max-width:900px){.shift{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:520px){.shift{grid-template-columns:1fr}}
+
+/* droids band */
+.band-droid{background:linear-gradient(180deg,var(--hull) 0%,#101a2c 100%);border-block:1px solid var(--line)}
+.droid-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px;align-items:center}
+.parts{display:grid;gap:12px}
+.part{display:grid;grid-template-columns:52px 1fr;gap:14px;align-items:center;background:var(--hull2);border:2px solid var(--line);border-radius:14px;padding:12px 14px}
+.part .ic{width:52px;height:52px;border-radius:12px;background:var(--paper);display:grid;place-items:center}
+.part .ic svg{width:30px;height:30px}
+.part b{font-family:var(--display);font-weight:400;font-size:20px;display:block}
+.part span{color:var(--mute);font-size:15px}
+.round-track{display:flex;gap:6px;margin-top:22px}
+.round-track div{flex:1;text-align:center;border-radius:8px;padding:8px 0;background:var(--hull2);border:2px solid var(--line);font-family:var(--display);font-size:18px;color:var(--mute)}
+.round-track div.on{border-color:var(--plasma);color:var(--ink)}
+.round-track div.d{background:rgba(94,224,255,.12)}
+.round-track + .key{display:flex;gap:16px;flex-wrap:wrap;margin-top:8px;font-size:13px;color:var(--mute)}
+.key i{display:inline-block;width:10px;height:10px;border-radius:3px;background:rgba(94,224,255,.4);margin-right:6px;vertical-align:-1px}
+@media (max-width:860px){.droid-grid{grid-template-columns:1fr}}
+
+/* features */
+.tags{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:22px}
+.tags .tag:nth-child(3n+1){transform:rotate(-.6deg)} .tags .tag:nth-child(3n+2){transform:rotate(.5deg)} .tags .tag:nth-child(3n){transform:rotate(-.3deg)}
+@media (max-width:900px){.tags{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:560px){.tags{grid-template-columns:1fr}}
+
+/* kit */
+.kit{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,8fr);gap:36px;align-items:center}
+.looks{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.looks figure{margin:0;background:radial-gradient(circle at 50% 35%,#24304a,#121a2b);border:2px solid var(--line);border-radius:16px;overflow:hidden;aspect-ratio:1/1.12;max-width:100%}
+.looks img{width:100%;height:100%;object-fit:cover}
+.counts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:22px}
+.counts div{background:var(--hull);border:2px solid var(--line);border-radius:12px;padding:10px 14px}
+.counts b{font-family:var(--display);font-weight:400;font-size:30px;display:block;line-height:1;font-variant-numeric:tabular-nums;color:var(--gold)}
+.counts span{font-size:14px;color:var(--mute)}
+@media (max-width:860px){.kit{grid-template-columns:1fr}}
+
+/* capture */
+.capture{position:relative;border-radius:22px;overflow:hidden;border:2px solid var(--line)}
+.capture img{width:100%;aspect-ratio:16/8;object-fit:cover;filter:saturate(.9)}
+.capture .over{position:absolute;inset:auto 0 0 0;padding:28px;background:linear-gradient(transparent,rgba(11,16,32,.95) 55%)}
+.capture h2{font-size:clamp(32px,5vw,54px);color:#fff}
+.capture h2 span{color:var(--medic)}
+.capture p{margin:8px 0 0;color:#cdd7e5;max-width:58ch}
+@media (max-width:640px){.capture img{aspect-ratio:4/3}.capture .over{position:static;background:var(--hull)}}
+
+/* controls */
+.controls{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.ctl{background:var(--hull);border:2px solid var(--line);border-radius:16px;padding:20px}
+.ctl h3{font-size:22px;margin-bottom:10px}
+.ctl dl{display:grid;grid-template-columns:auto 1fr;gap:10px 16px;margin:0;align-items:center}
+.ctl dt{white-space:nowrap}
+.ctl dd{margin:0;color:#c3cddb;font-size:15.5px}
+kbd{font-family:var(--display);font-size:14px;background:var(--hull2);border:2px solid var(--line);border-bottom-width:4px;border-radius:8px;padding:2px 8px;color:var(--ink)}
+@media (max-width:700px){.controls{grid-template-columns:1fr}}
+
+/* final cta */
+.final{text-align:center;padding-block:90px}
+.final h2{font-size:clamp(40px,7vw,80px);line-height:.95}
+.final p{color:var(--mute);margin:14px auto 28px;max-width:44ch}
+footer{border-top:1px solid var(--line);padding-block:28px calc(28px + env(safe-area-inset-bottom,0px));color:var(--mute);font-size:14px}
+footer .wrap{display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+footer b{color:var(--ink);font-weight:700;letter-spacing:.12em;text-transform:uppercase;font-size:12px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}.btn,.monitor,.tags .tag{transition:none;transform:none!important}}
+</style>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="#top"><span class="mark"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="18" rx="1.5" fill="#ff5a4e"/><rect x="3" y="9" width="18" height="6" rx="1.5" fill="#ff5a4e"/></svg></span>War Medic</a>
+    <ul><li><a href="#shift">How it plays</a></li><li><a href="#droids">Droids</a></li><li><a href="#features">Features</a></li><li><a href="#kit">Kit up</a></li><li><a href="#controls">Controls</a></li></ul>
+    <a class="btn play" href="play.html">Play</a>
+  </div>
+</header>
+
+<main id="top">
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="eyebrow">Intergalactic</div>
+      <h1>War <span>Medic</span></h1>
+      <p class="lead">The front line is losing soldiers and you are the only medic. Drag the wounded out of the tunnels, patch them up, cook them a hot meal and march them back into battle. Lose one and the line breaks.</p>
+      <div class="ctas">
+        <a class="btn play" href="play.html"><svg viewBox="0 0 24 24"><path d="M7 4.5v15l12-7.5z" fill="currentColor"/></svg>Play free in your browser</a>
+        <a class="btn ghost" href="#shift">How it plays</a>
+      </div>
+      <div class="facts"><span><i></i>Free</span><span><i></i>No download</span><span><i></i>Desktop and phone</span><span><i></i>7-round campaigns</span></div>
+    </div>
+    <div class="monitor">
+      <span class="lbl">Round 4 &middot; Red Dust Mesa</span>
+      <img src="shot-ward.jpg" alt="The clinic and battlefield: a medic carries a soldier on a stretcher while a patient waits in bed and a droid recharges on a power station. Troopers fight in the background." width="1280" height="720">
+      <div class="tag sticker" aria-hidden="true">
+        <div class="band"><b class="g"></b><b class="y off"></b><b class="r off"></b><b class="k off"></b></div>
+        <small>Casualty tag</small>
+        <h3>Cpl. Vance</h3>
+        <p>Needs: Nanogel, Hot Stew, Starberries</p>
+        <div class="perf"><span>Patience</span><span>72%</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="shift">
+  <div class="wrap">
+    <div class="sec-head"><span class="eyebrow">A shift on the ward</span><h2>Rescue. Treat. Feed. Return.</h2><p>Every casualty runs on two clocks: one while they wait in the dirt, a fresh one once they are in your care.</p></div>
+    <div class="shift">
+      <article class="step"><div class="ic"><svg viewBox="0 0 24 24"><rect x="2" y="10" width="20" height="5" rx="1.5" fill="#d84a3c"/><rect x="2" y="10" width="20" height="1.6" fill="#7a3a30"/><circle cx="12" cy="7" r="2.6" fill="#ff5a4e"/></svg></div><span class="n">01</span><h3>Rescue</h3><p>Soldiers fall in the battle behind you, then crawl out of one of three tunnels. Grab a stretcher and haul them in before their timer runs dry.</p></article>
+      <article class="step"><div class="ic"><svg viewBox="0 0 24 24"><rect x="8.5" y="2.5" width="7" height="4" rx="1" fill="#ff5a4e"/><rect x="7" y="6.5" width="10" height="15" rx="3" fill="#cfe7f0"/><rect x="8.6" y="11" width="6.8" height="9" rx="2" fill="#20c4b2"/></svg></div><span class="n">02</span><h3>Treat</h3><p>Lay them on a bed frame. A bubble shows what they need next. Nanogel comes straight from the med cabinet.</p></article>
+      <article class="step"><div class="ic"><svg viewBox="0 0 24 24"><path d="M2.5 11h19a9.5 7.5 0 0 1-19 0z" fill="#e2d8c6"/><ellipse cx="12" cy="11" rx="9.5" ry="2.4" fill="#b8572a"/><circle cx="9" cy="10.6" r="1.3" fill="#e08a3a"/><circle cx="14" cy="11" r="1.2" fill="#7fae3a"/><path d="M8 7c0-2 2-2 2-4M13.5 7c0-2 2-2 2-4" stroke="#9fb1c4" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg></div><span class="n">03</span><h3>Feed</h3><p>Cook Protein Packs into Hot Stew, pick Starberries off the bushes outside, brew Glow Broth from Glowshrooms. Pull food off the stove before it burns.</p></article>
+      <article class="step"><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 21s-8-5.2-8-11a4.6 4.6 0 0 1 8-3 4.6 4.6 0 0 1 8 3c0 5.8-8 11-8 11z" fill="#3fbf55"/></svg></div><span class="n">04</span><h3>Return</h3><p>Healed troops march back into the tunnels and you can watch them rejoin the firefight in the background. Every save earns credits.</p></article>
+    </div>
+  </div>
+</section>
+
+<section class="band-droid" id="droids">
+  <div class="wrap droid-grid">
+    <div>
+      <div class="sec-head" style="margin-bottom:0"><span class="eyebrow">From round 3</span><h2>The droids go down too.</h2><p>Robots don't fit on stretchers. Wheel them in on a trolley, plug them into a power station and get your hands dirty with scrap from the battlefield.</p></div>
+      <div class="round-track" aria-label="Campaign rounds 1 to 7, droids appear from round 3">
+        <div class="on">1</div><div class="on">2</div><div class="on d">3</div><div class="on d">4</div><div class="on d">5</div><div class="on d">6</div><div class="on d">7</div>
+      </div>
+      <div class="key"><span><i></i>Droid rounds</span><span>Each round brings more casualties and less time</span></div>
+    </div>
+    <div class="parts">
+      <div class="part"><div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="12" width="15" height="3.5" rx="1" fill="#f5b800"/><path d="M18 12V5h3" stroke="#5d6876" stroke-width="2" fill="none"/><circle cx="6" cy="18.5" r="2.2" fill="#3a4250"/><circle cx="15" cy="18.5" r="2.2" fill="#3a4250"/></svg></div><div><b>Wheely Trolley</b><span>Collect the downed droid from the tunnels.</span></div></div>
+      <div class="part"><div class="ic"><svg viewBox="0 0 24 24"><polygon points="12,2.5 20.5,7.25 20.5,16.75 12,21.5 3.5,16.75 3.5,7.25" fill="#9aa6b5"/><polygon points="12,5 18.3,8.6 18.3,15.4 12,19 5.7,15.4 5.7,8.6" fill="#b9c3cf"/><circle cx="12" cy="12" r="3" fill="#5d6876"/></svg></div><div><b>Hull Plating</b><span>Salvaged from the wrecked walker outside.</span></div></div>
+      <div class="part"><div class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2" fill="#2f9a52"/><rect x="9" y="9" width="6" height="6" rx="1" fill="#1b2a22"/><path d="M5 8h4M5 16h4M15 8h4M15 16h4M12 4v5M12 15v5" stroke="#ffd25a" stroke-width="1.5"/></svg></div><div><b>Circuit Board</b><span>Pried out of a crashed probe.</span></div></div>
+      <div class="part"><div class="ic"><svg viewBox="0 0 24 24"><path d="M13.5 2L4.5 14h7l-1 8 9-12h-7z" fill="#f5b800"/></svg></div><div><b>Recharge</b><span>Once the parts are in, the power station does the rest.</span></div></div>
+    </div>
+  </div>
+</section>
+
+<section id="features">
+  <div class="wrap">
+    <div class="sec-head"><span class="eyebrow">Field report</span><h2>Easy to start. Hard to put down.</h2><p>Short, loud rounds with a calm prep phase in between to spend your credits and rebuild the clinic your way.</p></div>
+    <div class="tags">
+      <article class="tag"><div class="band"><b class="g"></b><b class="y"></b><b class="r"></b><b class="k off"></b></div><small>Campaign</small><h3>Seven rounds</h3><p>From four casualties to fourteen. Rescue everyone and earn up to three stars a round.</p><div class="perf"><span>Rounds</span><span>7</span></div></article>
+      <article class="tag"><div class="band"><b class="g"></b><b class="y off"></b><b class="r off"></b><b class="k off"></b></div><small>Prep phase</small><h3>Build your clinic</h3><p>New offers land on the delivery pads each round: bed frames, stoves, prep tables, power stations. Hold to pick up furniture and rearrange.</p><div class="perf"><span>Placeable items</span><span>7</span></div></article>
+      <article class="tag"><div class="band"><b class="g"></b><b class="y"></b><b class="r off"></b><b class="k off"></b></div><small>Upgrades</small><h3>Gear that matters</h3><p>Sprint Boots, a Grav-Stretcher, a Smart Stove that never burns, Comfy Mattresses, Berry Fertiliser and Tunnel Beacons.</p><div class="perf"><span>Upgrades</span><span>6</span></div></article>
+      <article class="tag"><div class="band"><b class="g"></b><b class="y"></b><b class="r"></b><b class="k"></b></div><small>Under fire</small><h3>A war in the background</h3><p>Laser pistols, plasma blades, energy bazookas and light crossbows. Bolts and rockets scream past your head. They never quite hit.</p><div class="perf"><span>Direct hits on you</span><span>0</span></div></article>
+      <article class="tag"><div class="band"><b class="g"></b><b class="y off"></b><b class="r off"></b><b class="k off"></b></div><small>Worlds</small><h3>Pick your posting</h3><p>Five clinic themes from a starship medbay to a neon ward, and five warzones from red dust to crystal flats.</p><div class="perf"><span>Combinations</span><span>25</span></div></article>
+      <article class="tag"><div class="band"><b class="g"></b><b class="y"></b><b class="r off"></b><b class="k off"></b></div><small>Medals</small><h3>21 achievements</h3><p>From First Responder to the Golden Scalpel for a perfect campaign. Progress saves in your browser.</p><div class="perf"><span>Difficulties</span><span>Recruit &middot; Veteran</span></div></article>
+    </div>
+  </div>
+</section>
+
+<section id="kit" class="band-droid">
+  <div class="wrap kit">
+    <div>
+      <div class="sec-head" style="margin-bottom:0"><span class="eyebrow">Kit up</span><h2>Dress for the front.</h2><p>Build your medic before every campaign. Combat helmet and a medic coat, or a top hat and a neon hoodie. Nobody is going to stop you.</p></div>
+      <div class="counts"><div><b>10</b><span>hats</span></div><div><b>10</b><span>tops and coats</span></div><div><b>10</b><span>trousers</span></div><div><b>8</b><span>skin tones</span></div></div>
+    </div>
+    <div class="looks">
+      <figure><img src="look0.jpg" alt="Medic in a ranger hat and bomber jacket" loading="lazy"></figure>
+      <figure><img src="look1.jpg" alt="Medic in a halo visor and neon hoodie" loading="lazy"></figure>
+      <figure><img src="look2.jpg" alt="Medic in a pilot helmet and flight suit" loading="lazy"></figure>
+      <figure><img src="look3.jpg" alt="Medic in a gala top hat and royal tunic" loading="lazy"></figure>
+      <figure><img src="look4.jpg" alt="Medic in a chef toque and frost parka" loading="lazy"></figure>
+      <figure><img src="look5.jpg" alt="Medic in a crested helm and plate armour" loading="lazy"></figure>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="capture">
+      <img src="shot-capture.jpg" alt="Enemy troopers in crimson armour surround the medic after storming out of the tunnels." loading="lazy" width="1280" height="720">
+      <div class="over"><h2>Lose one. <span>Lose everything.</span></h2><p>If a single soldier or droid dies in your care, the line is outnumbered and enemy troops storm through the tunnels to capture you. No second chances.</p></div>
+    </div>
+  </div>
+</section>
+
+<section id="controls">
+  <div class="wrap">
+    <div class="sec-head"><span class="eyebrow">Controls</span><h2>One button does the medicine.</h2><p>Everything runs on a single action button. Tap to pick up, put down and treat. Hold to salvage scrap or move furniture.</p></div>
+    <div class="controls">
+      <div class="ctl"><h3>Keyboard</h3><dl>
+        <dt><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd></dt><dd>Move (arrow keys work too)</dd>
+        <dt><kbd>E</kbd> / <kbd>Space</kbd></dt><dd>Interact. Hold to salvage or move furniture</dd>
+        <dt><kbd>Enter</kbd></dt><dd>Start the next round</dd>
+        <dt><kbd>Esc</kbd></dt><dd>Pause</dd></dl></div>
+      <div class="ctl"><h3>Phone and tablet</h3><dl>
+        <dt><kbd>Drag</kbd></dt><dd>Anywhere on the left half of the screen to move</dd>
+        <dt><kbd>ACT</kbd></dt><dd>Tap to interact, hold to salvage or move furniture</dd>
+        <dt><kbd>Start</kbd></dt><dd>Begin the round from the prep phase</dd>
+        <dt><kbd>II</kbd></dt><dd>Pause</dd></dl></div>
+    </div>
+  </div>
+</section>
+
+<section class="final">
+  <div class="wrap">
+    <span class="eyebrow">Report for duty</span>
+    <h2>They're waiting at the tunnels.</h2>
+    <p>Free, in your browser, on desktop or phone. Sound on.</p>
+    <a class="btn play" href="play.html"><svg viewBox="0 0 24 24"><path d="M7 4.5v15l12-7.5z" fill="currentColor"/></svg>Start your first shift</a>
+  </div>
+</section>
+</main>
+
+<footer><div class="wrap"><b>A Dr Vibes Games Lab production</b><span>Intergalactic War Medic &middot; Made for the browser</span></div></footer>
+
+<script>
+const GAME_URL = "play.html";
+document.querySelectorAll('a.play').forEach(a => a.href = GAME_URL);
+</script>
+
+</html>
