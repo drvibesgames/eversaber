@@ -1,3 +1,4 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <!doctype html>
 <html lang="en">
 <meta charset="utf-8">
@@ -102,13 +103,6 @@ body.touch #tip{bottom:auto;top:calc(env(safe-area-inset-top,0px) + 64px);font-s
 .link{background:none;border:0;color:var(--mute);font-weight:700;text-decoration:underline;cursor:pointer;padding:8px}
 .row-btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
 
-#scrBoot,#scrSplash{background:#06090f;flex-direction:column;gap:18px;cursor:pointer}
-#scrBoot p{font-family:var(--display);font-size:26px;letter-spacing:.06em;color:var(--plasma)}
-.studio{text-align:center;animation:sfade 2.8s ease-in-out forwards}
-.studio .lab{font-family:var(--display);font-size:clamp(34px,7vw,64px);color:#fff;letter-spacing:.02em}
-.studio .lab i{font-style:normal;color:var(--plasma)}
-.studio small{display:block;margin-top:8px;font-weight:700;letter-spacing:.32em;color:var(--mute);text-transform:uppercase;font-size:13px}
-@keyframes sfade{0%{opacity:0;transform:scale(.95)}20%,80%{opacity:1;transform:none}100%{opacity:0}}
 
 #scrTitle{justify-content:flex-start;align-items:center}
 .title-wrap{max-width:520px;display:flex;flex-direction:column;gap:22px;margin-left:clamp(0px,5vw,80px)}
@@ -161,6 +155,20 @@ body.touch #tip{bottom:auto;top:calc(env(safe-area-inset-top,0px) + 64px);font-s
   .hud-l .chip{padding:4px 9px} .chip b{font-size:17px}
 }
 @media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important}}
+/* Dr Vibes Games Lab splash (shared with EverSaber) */
+#splash{position:fixed;inset:0;z-index:50;background:radial-gradient(ellipse at 50% 45%,#140a24 0%,#030308 70%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:#fff;font-family:'Segoe UI',Arial,sans-serif;cursor:pointer;transition:opacity .8s;-webkit-user-select:none;user-select:none;touch-action:manipulation}
+#splash.out{opacity:0;pointer-events:none;transition:opacity .5s}
+#splash svg{width:132px;height:132px;filter:drop-shadow(0 0 14px #0ff8) drop-shadow(0 0 30px #f0f5);animation:spl-in 1s ease-out both}
+#splash .t1{font-size:44px;font-weight:900;font-style:italic;letter-spacing:5px;background:linear-gradient(90deg,#5ff8ff,#ff5fd8);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 0 10px #f0f8);animation:spl-in 1s .15s ease-out both}
+#splash .t2{font-size:15px;font-weight:bold;letter-spacing:11px;color:#bfefff;margin-top:-6px;padding-left:11px;text-shadow:0 0 8px #0ff;animation:spl-in 1s .3s ease-out both}
+#splash .bar{width:220px;height:6px;border:1px solid #0ff6;border-radius:3px;margin-top:22px;overflow:hidden;background:#0008}#splash .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#0ff,#f0f);box-shadow:0 0 10px #0ff}
+#splash .st{font:bold 12px monospace;letter-spacing:3px;color:#8ef;min-height:18px;text-align:center;padding:0 16px}
+#splash .st.blink{animation:spl-blink 1s steps(2) infinite;color:#fff;font-size:14px}
+#splash .st.say{color:#ffd27a;letter-spacing:2px;font-size:13px}
+#splash .bub{animation:spl-bub 1.6s ease-in infinite}#splash .bub:nth-of-type(2){animation-delay:.5s}#splash .bub:nth-of-type(3){animation-delay:1s}
+@keyframes spl-in{from{opacity:0;transform:translateY(12px) scale(.96)}to{opacity:1;transform:none}}@keyframes spl-blink{50%{opacity:.25}}@keyframes spl-bub{0%{transform:translateY(0);opacity:0}20%{opacity:1}100%{transform:translateY(-34px);opacity:0}}
+@media (prefers-reduced-motion:reduce){#splash *{animation:none!important}}
+#splash .bar{transform:none}#splash .bar i{transform:none}
 </style>
 
 <canvas id="c" tabindex="0" aria-label="Game view"></canvas>
@@ -186,8 +194,15 @@ body.touch #tip{bottom:auto;top:calc(env(safe-area-inset-top,0px) + 64px);font-s
 <div id="toasts"></div>
 <div id="banner"><h3 id="bnT"></h3><p id="bnP"></p></div>
 
-<section class="screen" id="scrBoot"><p>Tap to deploy</p><span class="foot">Sound on for the full experience</span></section>
-<section class="screen" id="scrSplash" hidden><div class="studio"><div class="lab">Dr Vibes <i>Games Lab</i></div><small>presents</small></div></section>
+<div id="splash"><svg viewBox="0 0 120 120"><defs><linearGradient id="spl" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#5ff8ff"/><stop offset="1" stop-color="#ff5fd8"/></linearGradient><clipPath id="splc"><path d="M48 18 L48 50 L22 96 Q18 106 30 106 L90 106 Q102 106 98 96 L72 50 L72 18 Z"/></clipPath></defs><g clip-path="url(#splc)"><rect x="0" y="66" width="120" height="60" fill="url(#spl)" opacity=".85"/><path d="M0 66 Q15 58 30 66 T60 66 T90 66 T120 66 V74 H0Z" fill="#fff6"/><circle class="bub" cx="52" cy="96" r="4" fill="#fff9"/><circle class="bub" cx="66" cy="100" r="3" fill="#fff9"/><circle class="bub" cx="60" cy="92" r="2.5" fill="#fff9"/></g><path d="M48 18 L48 50 L22 96 Q18 106 30 106 L90 106 Q102 106 98 96 L72 50 L72 18" fill="none" stroke="#e8ffff" stroke-width="4" stroke-linejoin="round"/><rect x="42" y="12" width="36" height="8" rx="3" fill="#e8ffff"/><path d="M36 38 Q30 30 36 22 M84 38 Q90 30 84 22 M28 44 Q18 30 28 16 M92 44 Q102 30 92 16" fill="none" stroke="#ff5fd8" stroke-width="3" stroke-linecap="round"/></svg><div class="t1">DR VIBES</div><div class="t2">GAMES LAB</div><div class="bar"><i></i></div><div class="st">LOADING...</div></div>
+<script>
+(function(){const sp=document.getElementById('splash');if(!sp)return;const bar=sp.querySelector('.bar i'),st=sp.querySelector('.st'),t0=performance.now();let done=false;
+ const fill=()=>{if(done)return;const u=Math.min(1,(performance.now()-t0)/2200);bar.style.width=(u*100)+'%';if(u<1)requestAnimationFrame(fill)};requestAnimationFrame(fill);
+ const txt='A DR VIBES GAMES LAB PRODUCTION';setTimeout(()=>{if(done)return;st.classList.add('say');let i=0;st.textContent='';const ty=setInterval(()=>{if(done||i>=txt.length)return clearInterval(ty);st.textContent=txt.slice(0,++i)},40)},500);
+ const finish=()=>{if(done)return;done=true;sp.classList.add('out');setTimeout(()=>sp.remove(),850)};
+ setTimeout(finish,2500);
+ sp.addEventListener('pointerdown',e=>{e.stopPropagation();finish()})})();
+</script>
 
 <section class="screen" id="scrTitle" hidden>
   <div class="title-wrap">
@@ -1590,12 +1605,7 @@ $('#bPause').onclick=()=>setPause(!G.paused);
 $('#bMute').onclick=()=>{audioInit();setMuted(!SAVE.muted)};
 drawMute();
 
-$('#scrBoot').addEventListener('pointerdown',()=>{
-  audioInit();show('scrSplash');
-  try{const u=new SpeechSynthesisUtterance('A Doctor Vibes Games Lab production');u.rate=.92;u.pitch=.9;speechSynthesis.speak(u)}catch(e){}
-  tone(220,1.4,'sine',.2,2,0);tone(330,1.4,'sine',.12,2,.15);
-  setTimeout(openTitle,2800);
-},{once:true});
+openTitle();
 
 /* ================= INPUT ================= */
 addEventListener('keydown',e=>{
@@ -1649,3 +1659,5 @@ requestAnimationFrame(frame);
 </script>
 
 </html>
+
+</body></html>
