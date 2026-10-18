@@ -300,13 +300,13 @@ const fmt=n=>Math.round(n).toLocaleString('en-GB');
 
 const PPM=30, G=760, STEP=20, START_X=300;
 const TIER=[1,1.7,2.6,3.8,5.4], DEFT=[2,3.6,6];
-const FUEL_MULT=[1,1.4,1.9,2.5,3.2,4];
+const FUEL_MULT=[1,1.18,1.36,1.54,1.72,1.9];
 const FUEL_NAMES=['Jerry Can','Twin Tanks','Hydrogen Cell','Fusion Cell','Zero-Point Core'];
 const OUT='#0b0910';
 
 /* ================= LEVELS ================= */
 const LEVELS=[
-{name:'Kawasaki Scrapyards',jp:'川崎スクラップ街',len:1000,rate:1.2,kp:8,hpM:1,dmgM:1,seed:11,dens:4.2,mix:[80,17,3,0],crate:.7,
+{name:'Kawasaki Scrapyards',jp:'川崎スクラップ街',len:1000,rate:1.2,kp:8,hpM:1,dmgM:1,seed:11,dens:7.5,mix:[74,18,8,0],crate:1.2,
  terr:{a1:55,a2:22,rh:70,ramps:[190,430,660,880]},props:'scrap',fx:'dust',decor:['lamp','wreck','barrel','sign','cone'],
  signs:['危険','解体屋','川崎','立入禁止','鉄くず'],
  pal:{sky:['#140a22','#5e2147','#f0743a'],sun:{c1:'#ffe0a8',c2:'#ff6a3d',x:.74,y:.5,r:84,kind:'sun'},stars:0,
@@ -330,7 +330,7 @@ const LEVELS=[
  pal:{sky:['#0e0208','#40081a','#9a1e2a'],sun:{c1:'#ffc1b0',c2:'#ff2a2a',x:.66,y:.32,r:118,kind:'moon'},stars:1,
   far:'#3a0c1a',mid:'#220711',near:'#10030a',haze:'#ff3b3b',neon:['#ff3b3b','#ffb321','#ff6bd6'],
   g1:'#2c1515',g2:'#120707',road:'#241111',edge:'#ff4a3d',rock:'#1e0d0d',bridge:'#8a2424'}},
-{name:'Fuji Citadel',jp:'富士要塞',len:2800,rate:5.6,kp:45,hpM:4,dmgM:3.1,seed:67,dens:7.4,mix:[30,30,20,20],crate:.8,
+{name:'Fuji Citadel',jp:'富士要塞',len:2800,rate:5.6,kp:45,hpM:4,dmgM:3.1,seed:67,dens:6.4,mix:[30,30,20,20],crate:.8,
  terr:{a1:110,a2:36,rh:125,ramps:'auto'},props:'fuji',fx:'snow',decor:['pine','lamp','wreck','sign','barrel'],
  signs:['富士','要塞','最終','母体','封鎖'],
  pal:{sky:['#030512','#0f1d48','#4a68b8'],sun:null,stars:1,aurora:1,
@@ -356,7 +356,7 @@ const CLOTH=[{c:'#2c3140',p:'#1c1f2a',t:'#c7343b'},{c:'#4a3b2a',p:'#2b2219',t:'#
 /* ================= CARS ================= */
 const CARS=[
 {id:'buggy',name:'Rust Hopper',jp:'錆ホッパー',blurb:'A beaten dune buggy welded from scrap. Light, bouncy and very easy to flip.',
- L:54,top:-48,bot:9,wheels:[[-36,14],[36,14]],wr:17,k:80,c:9,acc:330,vmax:560,mu:1.3,tilt:9,hp:100,fuel:22,ram:1,heft:1,
+ L:54,top:-48,bot:9,wheels:[[-36,14],[36,14]],wr:17,k:80,c:9,acc:330,vmax:560,mu:1.3,tilt:9,hp:100,fuel:30,ram:1,heft:1,
  mount:[-5,-48],fr:[54,-4],cam:1,eng:[-46,-22],base:220,knobby:1,hub:'#ffb321',acc2:'#ff7a1a',shell:['#a8642e','#3a1e0c'],
  arm:{grill:[52,-14,6],side:[-40,30,-15,12],cage:[-24,12,-44,-18],plough:[55,-16,10],rear:[-56,-24,4],roof:[-24,14,-48]},
  armour:['Scrap Plating','Bull Bar Frame','Mesh Roll Cage','Riveted Ram Plates','Neon-Seam Shell'],
@@ -370,7 +370,7 @@ const CARS=[
   {name:'Lightsaber Bayonet',kind:'saber',n:1,len:54,col:'#4dfcff',ram:2.6,dps:150,reach:46,slow:.45,d:'A plasma blade that slices zombies before they touch you.'}],
  draw:drawBuggy},
 {id:'gt',name:'Kitsune GT',jp:'狐GT',blurb:'A stolen street racer with a fox-tail spoiler. Fast, low and hungry for open road.',
- L:66,top:-34,bot:8,wheels:[[-44,12],[44,12]],wr:15,k:85,c:10,acc:420,vmax:760,mu:1.25,tilt:8,hp:150,fuel:24,ram:1.2,heft:1.1,
+ L:66,top:-34,bot:8,wheels:[[-44,12],[44,12]],wr:15,k:85,c:10,acc:420,vmax:760,mu:1.25,tilt:8,hp:150,fuel:40,ram:1.2,heft:1.1,
  mount:[2,-33],fr:[67,-4],cam:1,eng:[-52,-10],base:620,hub:'#ff2f7d',acc2:'#ff2f7d',shell:['#dcdae6','#4e4c60'],glow:'#ff2f9b',
  arm:{grill:[66,-14,6],side:[-56,40,-13,11],cage:[-14,30,-31,-21],plough:[68,-16,8],rear:[-68,-14,6],roof:[-12,18,-34]},
  armour:['Carbon Skirts','Chrome Bull Bar','Window Grilles','Shock Ram Plates','Kitsune Battle Shell'],
@@ -384,7 +384,7 @@ const CARS=[
   {name:'Plasma Flails',kind:'flail',n:3,col:'#ff3dd2',glow:1,rad:70,fdmg:90,ram:2,dps:60,reach:16,slow:.45,d:'Three glowing flails that smash anything close.'}],
  draw:drawGT},
 {id:'hauler',name:'Oni Hauler',jp:'鬼ホーラー',blurb:'A horned armoured cargo truck. Heavy enough to plough through crowds.',
- L:74,top:-54,bot:18,wheels:[[-48,22],[48,22]],wr:21,k:80,c:10,acc:380,vmax:680,mu:1.3,tilt:6,hp:300,fuel:30,ram:2.2,heft:1.7,
+ L:74,top:-54,bot:18,wheels:[[-48,22],[48,22]],wr:21,k:80,c:10,acc:380,vmax:680,mu:1.3,tilt:6,hp:300,fuel:50,ram:2.2,heft:1.7,
  mount:[-34,-50],fr:[75,0],cam:.92,eng:[10,-56],base:1350,hub:'#3dffb0',acc2:'#3dffb0',shell:['#8e1c24','#2a0608'],
  arm:{grill:[74,-24,10],side:[-72,10,-12,14],cage:[20,56,-48,-30],plough:[76,-28,16],rear:[-78,-48,10],roof:[-74,10,-50]},
  armour:['Dock Plating','Steel Bull Bar','Cab Grilles','Harbor Ram Plates','Oni Fortress Shell'],
@@ -398,7 +398,7 @@ const CARS=[
   {name:'Grinder Drum',kind:'grinder',ram:2.6,dps:220,reach:26,slow:.55,d:'A spinning toothed drum. Nothing gets past it.'}],
  draw:drawHauler},
 {id:'raijin',name:'Raijin Interceptor',jp:'雷神',blurb:'A stealth pursuit car with lightning stripes. Quick, stable and deadly at speed.',
- L:72,top:-38,bot:10,wheels:[[-48,14],[48,14]],wr:17,k:85,c:10,acc:480,vmax:880,mu:1.3,tilt:8,hp:320,fuel:28,ram:1.8,heft:1.3,
+ L:72,top:-38,bot:10,wheels:[[-48,14],[48,14]],wr:17,k:85,c:10,acc:480,vmax:880,mu:1.3,tilt:8,hp:320,fuel:46,ram:1.8,heft:1.3,
  mount:[-6,-37],fr:[75,-4],cam:.92,eng:[-58,-14],base:2600,hub:'#ffe14d',acc2:'#ffe14d',shell:['#555c6e','#15171c'],glow:'#ffe14d',
  arm:{grill:[74,-14,6],side:[-60,40,-14,12],cage:[-12,34,-34,-21],plough:[76,-16,8],rear:[-72,-14,6],roof:[-14,24,-38]},
  armour:['Shadow Plating','Storm Bull Bar','Canopy Grilles','Thunder Ram Plates','Raijin Storm Shell'],
@@ -412,15 +412,15 @@ const CARS=[
   {name:'Saber Halo',kind:'halo',col:'#fff15c',rad:70,fdmg:160,ram:3,dps:240,reach:52,slow:.55,d:'A ring of blades spinning around the bonnet.'}],
  draw:drawRaijin},
 {id:'susanoo',name:'Susanoo Dreadnought',jp:'須佐之男',blurb:'A samurai-armoured mega rig built for the final climb. Slow to tilt, impossible to stop.',
- L:86,top:-58,bot:14,wheels:[[-58,24],[58,24]],wr:25,k:80,c:10,acc:520,vmax:920,mu:1.35,tilt:5.5,hp:480,fuel:36,ram:3,heft:2.2,
+ L:86,top:-58,bot:14,wheels:[[-58,24],[58,24]],wr:25,k:80,c:10,acc:520,vmax:920,mu:1.35,tilt:5.5,hp:480,fuel:72,ram:3,heft:2.2,
  mount:[-24,-56],fr:[89,-2],cam:.84,eng:[-72,-30],base:4400,hub:'#9ef2ff',acc2:'#7a5cff',shell:['#dfe3f0','#3e4466'],
  arm:{grill:[88,-22,10],side:[-80,60,-24,20],cage:[30,58,-50,-36],plough:[90,-28,16],rear:[-90,-30,10],roof:[-60,30,-56]},
  armour:['Lacquer Plates','Iron Bull Bar','Visor Guard','Shogun Ram Plates','Kami Shell'],
- weapons:[{name:'Arc Coil',type:'arc',dmg:40,rate:2.5,range:420,chain:3,col:'#9ef2ff',d:'Lightning that jumps between three zombies.'},
-  {name:'Storm Arc',type:'arc',dmg:55,rate:3.4,range:460,chain:4,col:'#b19cff',d:'Chains to four targets.'},
-  {name:'Laser Array',type:'laser',dmg:40,rate:10,range:750,col:'#ff2f7d',twin:3,d:'Rapid twin beams with long reach.'},
-  {name:'Plasma Storm',type:'plasma',dmg:80,rate:5,range:720,splash:110,col:'#7a5cff',d:'Huge plasma bursts.'},
-  {name:'Amaterasu Beam',type:'rail',dmg:300,rate:2.2,range:1100,col:'#ffd34d',wide:1,d:'A solar beam that burns through everything.'}],
+ weapons:[{name:'Arc Coil',type:'arc',dmg:60,rate:2.5,range:420,chain:3,col:'#9ef2ff',d:'Lightning that jumps between three zombies.'},
+  {name:'Storm Arc',type:'arc',dmg:82,rate:3.4,range:460,chain:4,col:'#b19cff',d:'Chains to four targets.'},
+  {name:'Laser Array',type:'laser',dmg:60,rate:10,range:750,col:'#ff2f7d',twin:3,d:'Rapid twin beams with long reach.'},
+  {name:'Plasma Storm',type:'plasma',dmg:150,rate:7,range:760,splash:130,col:'#7a5cff',d:'Huge plasma bursts.'},
+  {name:'Amaterasu Beam',type:'rail',dmg:450,rate:2.2,range:1100,col:'#ffd34d',wide:1,d:'A solar beam that burns through everything.'}],
  defs:[{name:'Katana Ram',kind:'saber',n:1,len:80,col:'#e9f1ff',ram:2.4,dps:220,reach:62,slow:.4,d:'A giant blade out front.'},
   {name:'Plasma Flail Array',kind:'flail',n:4,col:'#7a5cff',glow:1,rad:86,fdmg:260,ram:2.8,dps:260,reach:20,slow:.5,d:'Four plasma flails in a whirling storm.'},
   {name:'Kusanagi Saber Wall',kind:'saber',n:3,len:84,col:'#ffd34d',ram:3.6,dps:420,reach:70,slow:.65,d:'Three legendary blades. Pure destruction.'}],
@@ -433,13 +433,19 @@ for(const S of CARS){
 }
 
 /* ================= SAVE ================= */
-function defSave(){return{pts:0,unl:1,cleared:[0,0,0,0,0],up:[0,1,2,3,4].map(()=>({a:0,w:0,f:0,d:0})),best:[0,0,0,0,0],lvl:0,kills:0,runs:0,mute:0,ended:0};}
+function defSave(){return{pts:0,unl:1,cleared:[0,0,0,0,0],up:[0,1,2,3,4].map(()=>({a:0,w:0,f:0,d:0,wh:0})),best:[0,0,0,0,0],lvl:0,kills:0,runs:0,mute:0,ended:0};}
 let save=defSave();
 try{const s=JSON.parse(localStorage.getItem('cyborgia_save'));if(s&&s.up)save=Object.assign(defSave(),s);}catch(e){}
 if(window.claude&&window.claude.hot&&window.claude.hot.data&&window.claude.hot.data.save&&!save.runs){save=Object.assign(defSave(),window.claude.hot.data.save);}
+save.up.forEach((u,ci)=>{if(u.wh==null)u.wh=0;if(u.d>0){const b=[220,620,1350,2600,4400][ci],m=[2,3.6,6];for(let t=0;t<u.d;t++)save.pts+=Math.round(b*m[t]/10)*10;u.d=0;}});
 try{window.claude&&window.claude.hot&&window.claude.hot.snapshot&&window.claude.hot.snapshot(()=>({save}));}catch(e){}
 function store(){try{localStorage.setItem('cyborgia_save',JSON.stringify(save));}catch(e){}}
-function cost(ci,k,t){const b=CARS[ci].base;return Math.round(b*(k==='d'?DEFT[t]:TIER[t])/10)*10;}
+function cost(ci,k,t){const b=CARS[ci].base;return Math.round(b*TIER[t]*(k==='a'?1.4:1)/10)*10;}
+const defTier=a=>a>=5?3:a>=3?2:a>=1?1:0;
+const WHEEL_NAMES=['All-Terrain Tyres','Lift Kit','Mud Crawlers','Monster Wheels','Mag-Grip Hubs'];
+const specCache={};
+function specFor(ci,wh){const k=ci+'_'+wh;if(specCache[k])return specCache[k];const S=CARS[ci];if(!wh)return specCache[k]=S;
+  const lift=wh*3;return specCache[k]=Object.assign({},S,{wr:S.wr*(1+.1*wh),wheels:S.wheels.map(w=>[w[0],w[1]+lift]),wy:S.wy+lift,mu:S.mu+.08*wh,acc:S.acc*(1+.1*wh),vmax:S.vmax*(1+.08*wh),c:S.c*(1+.08*wh),knobby:S.knobby||wh>=3,wtier:wh,lift});}
 
 /* ================= AUDIO ================= */
 const AU={ctx:null,last:{},
@@ -636,12 +642,14 @@ function drawSusanoo(g,t){
 function drawWheel(g,S,spin){
   const r=S.wr;g.save();g.rotate(spin);
   circ(g,0,0,r);g.fillStyle='#141217';g.fill();g.lineWidth=1.6;g.strokeStyle=OUT;g.stroke();
-  const n=S.knobby?12:16;g.fillStyle=S.knobby?'#1d1b21':'#25232b';
-  for(let i=0;i<n;i++){g.save();g.rotate(i/n*TAU);g.fillRect(-(S.knobby?2.6:1.2),-r-(S.knobby?1.8:0),S.knobby?5.2:2.4,S.knobby?4:3);g.restore();}
+  const wt=S.wtier||0,kb=S.knobby,n=kb?12+wt:16,kw=kb?2.6+wt*.4:1.2,kh=kb?4+wt*.6:3;g.fillStyle=kb?'#1d1b21':'#25232b';
+  for(let i=0;i<n;i++){g.save();g.rotate(i/n*TAU);g.fillRect(-kw,-r-(kb?1.8+wt*.4:0),kw*2,kh);if(wt>=3){g.fillRect(-kw*.5,-r-3.4-wt*.4,kw,2);}g.restore();}
   circ(g,0,0,r*.6);g.fillStyle='#2b2930';g.fill();
   circ(g,0,0,r*.48);g.fillStyle=vg(g,-r*.5,r*.5,'#a3a1ad','#55535e');g.fill();
   g.strokeStyle='#2b2930';g.lineWidth=2;for(let i=0;i<5;i++){const a=i/5*TAU;line(g,0,0,Math.cos(a)*r*.46,Math.sin(a)*r*.46);}
   circ(g,0,0,r*.16);g.fillStyle=S.hub;g.fill();
+  if(wt>=2){g.strokeStyle=S.hub;g.lineWidth=1.4;circ(g,0,0,r*.52);g.stroke();for(let i=0;i<6;i++){const a=i/6*TAU;g.fillStyle='#d9dce4';circ(g,Math.cos(a)*r*.32,Math.sin(a)*r*.32,1.1);g.fill();}}
+  if(wt>=5){g.save();g.globalCompositeOperation='lighter';g.strokeStyle=S.acc2;g.lineWidth=2.4;g.globalAlpha=.85;circ(g,0,0,r*.66);g.stroke();g.restore();glowDot(g,0,0,r*.5,S.acc2,.45);}
   g.restore();
 }
 
@@ -765,13 +773,17 @@ function drawWeapon(g,S,W,aim,t,fl){
   if(fl>0&&W.type!=='flame'&&W.type!=='cryo'&&W.type!=='arc')for(const o of offs)glowDot(g,tipX+3,W.type==='rail'?o*1.6:o,14+T*2,col,Math.min(1,fl*9));
   g.restore();
 }
-function carMods(ci,up){const S=CARS[ci];return{W:up.w?Object.assign({tier:up.w},S.weapons[up.w-1]):null,D:up.d?S.defs[up.d-1]:null};}
+function carMods(ci,up){const S=CARS[ci],dt=defTier(up.a);return{W:up.w?Object.assign({tier:up.w},S.weapons[up.w-1]):null,D:dt?S.defs[dt-1]:null,S:specFor(ci,up.wh||0)};}
 function drawCarFull(g,S,up,W,D,o){
   if(S.glow){g.save();g.globalCompositeOperation='lighter';g.globalAlpha=.5;const q=g.createRadialGradient(0,S.bot+6,4,0,S.bot+6,S.L);q.addColorStop(0,S.glow);q.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=q;g.beginPath();g.ellipse(0,S.bot+6,S.L,10,0,0,TAU);g.fill();g.restore();}
   if(D&&(D.kind==='flail'||D.kind==='halo'))drawDefence(g,S,D,o.t);
   S.draw(g,o.t);
   drawArmour(g,S,up.a,o.t);
-  for(let i=0;i<2;i++){const w=S.wheels[i];g.save();g.translate(w[0],w[1]-Math.min(S.wr*.55,Math.max(0,o.comp?o.comp[i]:4)*.9));drawWheel(g,S,o.spin?o.spin[i]:0);g.restore();}
+  for(let i=0;i<2;i++){const w=S.wheels[i],wy=w[1]-Math.min(S.wr*.55,Math.max(0,o.comp?o.comp[i]:4)*.9);
+    if(S.wtier>=1){const top=S.bot-6;tube(g,[[w[0]-3,top],[w[0]-2,wy]],'#5a5e6a',3.6);g.strokeStyle=S.wtier>=4?S.acc2:'#d8a43a';g.lineWidth=1.6;g.beginPath();
+      const n2=4+S.wtier;for(let k=0;k<=n2;k++){const yy=lerp(top+2,wy-4,k/n2);g.lineTo(w[0]+(k%2?3.5:-6.5),yy);}g.stroke();
+      if(S.wtier>=2){tube(g,[[w[0]+(i?-14:14),S.bot-2],[w[0],wy]],'#7b8090',2.6);}}
+    g.save();g.translate(w[0],wy);drawWheel(g,S,o.spin?o.spin[i]:0);g.restore();}
   if(D&&D.kind!=='flail'&&D.kind!=='halo')drawDefence(g,S,D,o.t);
   if(W)drawWeapon(g,S,W,o.aim==null?-.12:o.aim,o.t,o.fl||0);
 }
@@ -1020,12 +1032,12 @@ addEventListener('resize',resize);resize();
 const input={gas:false,brake:false,tb:false,tf:false};
 function startRun(){
   AU.init();const i=save.lvl;if(!lvl||lvl.i!==i)setLevel(i);else resetBridges();
-  const S=CARS[i],up=save.up[i],{W:Wp,D}=carMods(i,up);
+  const up=save.up[i],{W:Wp,D,S}=carMods(i,up);
   const car={spec:S,up,x:START_X,y:0,vx:0,vy:0,a:0,av:0,wheels:S.wheels.map(w=>({ox:w[0],oy:w[1],d:4,spin:0})),
     hpMax:Math.round(S.hp*(1+.35*up.a)),fuelMax:S.fuel*FUEL_MULT[up.f],dr:1/(1+.3*up.a),armRam:S.ram*(1+.3*up.a),
-    slow:(1/(1+.35*up.a))*(1-(D?[.35,.55,.75][up.d-1]:0))/S.heft,wpn:Wp,def:D,aim:-.1,cd:0,fl:0,ftick:0,flipT:0,outT:0,gnd:0,airT:0};
+    slow:(1/(1+.35*up.a))*(1-(D?[.35,.55,.75][defTier(up.a)-1]:0))/S.heft,wpn:Wp,def:D,aim:-.1,cd:0,fl:0,ftick:0,flipT:0,outT:0,gnd:0,airT:0};
   car.ram=car.armRam*(D?D.ram:1);car.hp=car.hpMax;car.fuel=car.fuelMax;car.y=groundY(START_X)-S.wy-S.wr+4;
-  run={car,zs:genSpawns(i),proj:[],beams:[],parts:[],pops:[],kills:0,crates:0,t:0,maxX:START_X,over:false,endT:0,clear:false,shake:0,hurt:0,done:false,reason:''};
+  run={car,zs:genSpawns(i),proj:[],beams:[],parts:[],pops:[],kills:0,crates:0,lost:0,gunB:0,t:0,maxX:START_X,over:false,endT:0,clear:false,shake:0,hurt:0,done:false,reason:''};
   cam.x=car.x+250;cam.y=car.y-40;
   for(const k in input)input[k]=false;
   mode='run';show(null);$('#hud').hidden=false;$('#pad').hidden=false;document.body.classList.add('running');
@@ -1058,7 +1070,8 @@ function stepCar(h){
   }
   C.gnd=gnd;C.airT=gnd?0:C.airT+h;
   const tilt=run.over?0:(input.tf?1:0)-(input.tb?1:0);
-  C.av+=(tq/S.I+tilt*S.tilt*(gnd?.45:1))*h;C.av*=1-(gnd?1.1:.25)*h;
+  {const wt=S.wtier||0;let st=0;if(wt){const an=Math.atan2(Math.sin(C.a),Math.cos(C.a));const ref=gnd?Math.atan(groundSlope(C.x)):0;const e=angDiff(ref,an);if(gnd||Math.abs(e)>.5)st=e*wt*(gnd?2.2:.9)-C.av*wt*.25;}
+  C.av+=(tq/(S.I*(1+.12*wt))+tilt*S.tilt*(gnd?.45:1)+st)*h;}C.av*=1-(gnd?1.1:.25)*h;
   C.vx+=fx*h;C.vy+=fy*h;
   const sp=Math.hypot(C.vx,C.vy),mx=S.vmax*1.9;if(sp>mx){C.vx*=mx/sp;C.vy*=mx/sp;}
   C.x+=C.vx*h;C.y+=C.vy*h;C.a+=C.av*h;
@@ -1080,13 +1093,13 @@ function stepCar(h){
 /* zombies */
 function killZ(z,kx,ky,how){
   if(z.dead)return;z.dead=true;const D=lvl.D,Z=ZT[z.t];
-  if(z.t==='barrel'){run.crates+=2;pop(z.x,z.y-60,'+'+D.kp,'#ffb321');barrelBoom(z.x,z.y-18);return;}
+  if(z.t==='barrel'){run.crates+=2;pop(z.x,z.y-60,'+'+D.kp,'#ffb321');barrelBoom(z.x,z.y-18,how==='boom');return;}
   if(z.t==='wall'){run.crates+=4;pop(z.x,z.y-120,'BREAKTHROUGH +'+D.kp*2,'#ffb321');AU.play('boom');AU.play('crate');run.shake=Math.max(run.shake,13);
     for(let k=0;k<30;k++)part('debris',z.x+(Math.random()-.5)*40,z.y-Math.random()*100,kx*(.6+Math.random()*.7)+(Math.random()-.2)*260,-150-Math.random()*420,3,['#7a7a86','#4a4a56','#ffb321','#2e2e38'][k%4],0,1.4+Math.random()*1.4);
     for(let k=0;k<20;k++)part('spark',z.x,z.y-50,(Math.random()-.2)*500,-Math.random()*400,.5);for(let k=0;k<10;k++)part('smoke',z.x,z.y-40,(Math.random()-.5)*120,-Math.random()*80,1.4,'#55505e');return;}
   if(z.t==='crate'){run.crates++;pop(z.x,z.y-70,'+'+Math.round(D.kp*.5),'#ffb321');AU.play('crate');
     for(let k=0;k<14;k++)part('debris',z.x+(Math.random()-.5)*40,z.y-Math.random()*50,kx*.6+(Math.random()-.3)*300,ky-Math.random()*300,2.5,Math.random()<.5?'#5a4430':'#3c4150');return;}
-  run.kills++;pop(z.x,z.y-Z.h-10,'+'+D.kp,'#ff2f7d');
+  run.kills++;if(z.lg&&how!=='ram'){const b=Math.round(D.kp*.5);run.gunB=(run.gunB||0)+b;pop(z.x,z.y-Z.h-10,'+'+(D.kp+b)+' GUN','#33e4ff');}else pop(z.x,z.y-Z.h-10,'+'+D.kp,'#ff2f7d');
   const cy=z.y-Z.h*.55,ice=how==='ice';
   AU.play(ice?'shatter':'kill');
   if(ice){for(let k=0;k<18;k++)part('ice',z.x,cy,kx*.5+(Math.random()-.5)*360,ky*.5-Math.random()*320,1.4);}
@@ -1097,13 +1110,14 @@ function killZ(z,kx,ky,how){
   for(let k=0;k<8;k++)part('spark',z.x,cy,(Math.random()-.5)*400,-Math.random()*300,.4);
   run.shake=Math.max(run.shake,z.t==='brute'?9:4);
 }
-function barrelBoom(x,y){const D=lvl.D,C=run.car;AU.play('boom');run.shake=Math.max(run.shake,12);
+function barrelBoom(x,y,hurt){const D=lvl.D,C=run.car;AU.play('boom');run.shake=Math.max(run.shake,12);
   for(let k=0;k<36;k++)part('flame',x+(Math.random()-.5)*30,y,(Math.random()-.5)*620,-Math.random()*520,.9,k%3?'#ff7a1a':'#ffd23d');
   for(let k=0;k<14;k++)part('smoke',x,y,(Math.random()-.5)*220,-Math.random()*240,2,'#2a2228');
   for(let k=0;k<10;k++)part('debris',x,y,(Math.random()-.5)*600,-200-Math.random()*400,2.5,k%2?'#8a2a24':'#ffb321');
   run.beams.push({x1:x,y1:y,x2:x,y2:y,t:.25,col:'#ff9a3d',w:1,boom:1});
   for(const z of run.zs){if(z.dead||!z.act||z.t==='wall')continue;const dx=z.x-x,dy=zc(z)-y,d=Math.hypot(dx,dy);if(d<170){const sg=dx>=0?1:-1;dmgZ(z,260*D.hpM*(1-d/240),sg*(320+Math.random()*120),-(320+Math.random()*120),'ram');}}
-  const d=Math.hypot(C.x-x,C.y-y);if(d<160&&!run.over){C.hp-=10*D.dmgM*C.dr*(1-d/160);C.vy-=200*(1-d/160);C.av+=(Math.random()-.5)*1.5;run.hurt=.5;}}
+  const d=Math.hypot(C.x-x,C.y-y);if(d<160&&!run.over&&hurt){C.hp-=10*D.dmgM*C.dr*(1-d/160);C.vy-=200*(1-d/160);C.av+=(Math.random()-.5)*1.5;run.hurt=.5;}}
+function gunDmg(z,d,kx,ky,how){if(!z.dead)z.lg=1;dmgZ(z,d,kx,ky,how);}
 function dmgZ(z,d,kx,ky,how){if(z.dead||z.t==='wall')return;z.hp-=d;z.fl=.08;if(z.hp<=0)killZ(z,kx||0,ky||0,how);}
 function updZombies(h){
   const C=run.car,S=C.spec,c=Math.cos(C.a),s=Math.sin(C.a),D=lvl.D;
@@ -1149,15 +1163,15 @@ function updZombies(h){
       continue;}
     if(!z.hit){z.hit=true;
       if(frozen){killZ(z,C.vx*1.1,-200,'ice');continue;}
-      if(ram>=z.hp){C.vx-=C.vx*Z.mass*C.slow;if(!run.over)C.hp-=Z.dmg*D.dmgM*.2*C.dr;const fs2=Math.max(Math.abs(C.vx),220)*.85+120;killZ(z,Math.sign(C.vx||1)*fs2,-fs2,'ram');continue;}
+      if(ram>=z.hp){{const dv=C.vx*Math.min(.6,Z.mass*3.5*C.slow);C.vx-=dv;run.lost+=Math.abs(dv);}if(!run.over)C.hp-=Z.dmg*D.dmgM*.2*C.dr;const fs2=Math.max(Math.abs(C.vx),220)*.85+120;killZ(z,Math.sign(C.vx||1)*fs2,-fs2,'ram');continue;}
       if(imp<2.5){z.hit=true;}else{
       z.hp-=ram;if(!run.over){C.hp-=Z.dmg*D.dmgM*.5*C.dr*clamp(imp/10,.2,1);run.hurt=.35;}AU.play('hit');
-      C.vx*=1-Math.min(.85,Z.mass*3*C.slow);run.shake=Math.max(run.shake,5);
+      {const dv=C.vx*Math.min(.85,Z.mass*5.25*C.slow);C.vx-=dv;run.lost+=Math.abs(dv);}run.shake=Math.max(run.shake,5);
       if(front&&!STATIC[z.t]){const fl=Math.max(C.vx,200)*(z.t==='brute'?.45:.8)+80;z.st='air';z.fly=1;z.vx=Math.max(C.vx,0)+fl;z.vy=-fl;z.vr=3;z.x+=10;}else{z.stg=.35;z.vx=C.vx*.5;}}
       for(let k=0;k<5;k++)part('spark',z.x-Z.w,zcy,(Math.random()-.5)*300,-Math.random()*200,.35);
     }
     if(front){const fxw=C.x+c*hl-s*ly;if(z.x<fxw+Z.w){z.x=fxw+Z.w;z.y=groundY(z.x);}
-      if(C.vx>z.vx+20)C.vx-=(C.vx-z.vx)*Z.mass*6*C.slow*h;}
+      if(C.vx>z.vx+20){const dv=(C.vx-z.vx)*Z.mass*10.5*C.slow*h;C.vx-=dv;run.lost+=dv;}}
     else{const bxw=C.x-c*S.L-s*ly;if(z.x>bxw-Z.w){z.x=bxw-Z.w;z.y=groundY(z.x);}}
     if(front&&C.def&&C.def.dps){dmgZ(z,C.def.dps*h*(1+.15*C.up.a),C.vx+120,-200,'saw');if(Math.random()<h*30)part('spark',C.x+c*(S.L+8),zcy,120+Math.random()*200,-Math.random()*240,.3);if(z.dead)continue;}
     z.atk-=h;if(z.atk<=0&&!frozen&&!STATIC[z.t]&&z.stg<=0){z.atk=1;if(!run.over){C.hp-=Z.dmg*D.dmgM*.6*C.dr;run.hurt=.4;}AU.play('hit');}
@@ -1173,7 +1187,7 @@ function updWeapon(h){
   const[mx,my]=mountPos(C);let best=null,bs=1e9,sz=0;
   for(const z of run.zs){if(z.dead||!z.act||z.t==='wall')continue;const dx=z.x-mx,dy=zc(z)-my,d=Math.hypot(dx,dy);
     if(d>W.range)continue;if(dx<-60&&z.st!=='cling')continue;if(z.st!=='cling'&&dy>140)continue;
-    const sc=d+(z.t==='crate'?350:z.t==='barrel'?140:0)-(z.st==='cling'?3000:0);if(sc<bs){bs=sc;best=z;}}
+    const sc=d+(z.t==='barrel'?-60:0)-(z.st==='cling'?3000:0);if(sc<bs){bs=sc;best=z;}}
   const want=best?Math.atan2(zc(best)-my,best.x-mx):C.a-.12;
   C.aim+=clamp(angDiff(want,C.aim),-9*h,9*h);
   C.cd-=h;
@@ -1188,31 +1202,31 @@ function fire(C,W,mx,my,a,tg){
   for(const o of tw){const bx=mx+c*L-s*o,by=my+s*L+c*o;
     switch(W.type){
     case 'bullet':{const sa=a+(Math.random()-.5)*.08;run.proj.push({k:'b',x:bx,y:by,vx:Math.cos(sa)*1500,vy:Math.sin(sa)*1500,dmg:W.dmg,life:W.range/1500,col:W.col});}break;
-    case 'plasma':run.proj.push({k:'p',x:bx,y:by,vx:c*820,vy:s*820,dmg:W.dmg,life:W.range/820,splash:W.splash,col:W.col});break;
-    case 'laser':{const hs=rayHits(bx,by,a,W.range,false,4);let len=W.range;if(hs.length){len=hs[0][0];dmgZ(hs[0][1],W.dmg,c*300,s*300-120);for(let k=0;k<3;k++)part('spark',bx+c*len,by+s*len,(Math.random()-.5)*200,-Math.random()*200,.25,W.col);}
+    case 'plasma':run.proj.push({k:'p',x:bx,y:by,vx:c*1150+C.vx*.5,vy:s*1150,dmg:W.dmg,life:W.range/1150,splash:W.splash,col:W.col});break;
+    case 'laser':{const hs=rayHits(bx,by,a,W.range,false,4);let len=W.range;if(hs.length){len=hs[0][0];gunDmg(hs[0][1],W.dmg,c*300,s*300-120);for(let k=0;k<3;k++)part('spark',bx+c*len,by+s*len,(Math.random()-.5)*200,-Math.random()*200,.25,W.col);}
       run.beams.push({x1:bx,y1:by,x2:bx+c*len,y2:by+s*len,t:.09,col:W.col,w:2.2});}break;
-    case 'rail':{const hs=rayHits(bx,by,a,W.range,true,W.wide?18:6);for(const[,z]of hs)dmgZ(z,W.dmg,c*600,s*600-150);
+    case 'rail':{const hs=rayHits(bx,by,a,W.range,true,W.wide?18:6);for(const[,z]of hs)gunDmg(z,W.dmg,c*600,s*600-150);
       run.beams.push({x1:bx,y1:by,x2:bx+c*W.range,y2:by+s*W.range,t:.22,col:W.col,w:W.wide?7:3.4});run.shake=Math.max(run.shake,W.wide?6:3);}break;
     case 'flame':case 'cryo':{const ice=W.type==='cryo';
       for(const z of run.zs){if(z.dead||!z.act)continue;const dx=z.x-bx,dy=zc(z)-by,d=Math.hypot(dx,dy);if(d>W.range+ZT[z.t].w)continue;
         if(Math.abs(angDiff(Math.atan2(dy,dx),a))>W.cone+.12)continue;
-        if(ice){z.ice=Math.min(1,z.ice+W.freeze);if(z.ice>=1&&z.iceT<=0)z.iceT=3;dmgZ(z,W.dmg,c*80,-40,'ice');}
-        else{z.burn=2.2;z.burnD=Math.max(z.burnD,W.burn);dmgZ(z,W.dmg,c*120,-120);}}
+        if(ice){z.ice=Math.min(1,z.ice+W.freeze);if(z.ice>=1&&z.iceT<=0)z.iceT=3;gunDmg(z,W.dmg,c*80,-40,'ice');}
+        else{z.burn=2.2;z.burnD=Math.max(z.burnD,W.burn);gunDmg(z,W.dmg,c*120,-120);}}
       for(let k=0;k<3;k++){const sa=a+(Math.random()-.5)*W.cone*1.6,sp=W.range*(1.6+Math.random()*.8);
         part(ice?'frost':'flame',bx,by,Math.cos(sa)*sp+C.vx*.8,Math.sin(sa)*sp+C.vy*.5,.55,W.col);}}break;
     case 'arc':{let cur=tg,px=bx,py=by;const done=new Set();for(let n=0;n<W.chain&&cur;n++){done.add(cur);const tx=cur.x,ty=zc(cur);run.beams.push({x1:px,y1:py,x2:tx,y2:ty,t:.14,col:W.col,w:2,zig:1});
-        dmgZ(cur,W.dmg,200,-160);px=tx;py=ty;let nb=null,nd=180;for(const z of run.zs){if(z.dead||!z.act||done.has(z))continue;const d=Math.hypot(z.x-tx,zc(z)-ty);if(d<nd){nd=d;nb=z;}}cur=nb;}}break;
+        gunDmg(cur,W.dmg,200,-160);px=tx;py=ty;let nb=null,nd=180;for(const z of run.zs){if(z.dead||!z.act||done.has(z))continue;const d=Math.hypot(z.x-tx,zc(z)-ty);if(d<nd){nd=d;nb=z;}}cur=nb;}}break;
     }}
   AU.play(W.type);
 }
 function updProj(h){
-  for(const p of run.proj){p.life-=h;p.x+=p.vx*h;p.y+=p.vy*h;if(p.k==='p')p.vy+=G*.08*h;
+  for(const p of run.proj){p.life-=h;p.x+=p.vx*h;p.y+=p.vy*h;
     let hit=null;for(const z of run.zs){if(z.dead||!z.act)continue;const Z=ZT[z.t];if(Math.abs(p.x-z.x)<Z.w+6&&Math.abs(p.y-(z.y-Z.h/2))<Z.h/2+6){hit=z;break;}}
     const gnd=p.y>groundY(p.x);
     if(hit||gnd||p.life<=0){p.life=-1;
-      if(p.k==='p'){for(const z of run.zs){if(z.dead||!z.act)continue;const d=Math.hypot(z.x-p.x,zc(z)-p.y);if(d<p.splash)dmgZ(z,p.dmg*(1-d/p.splash*.5),(z.x-p.x)*6,-260);}
+      if(p.k==='p'){for(const z of run.zs){if(z.dead||!z.act)continue;const d=Math.hypot(z.x-p.x,zc(z)-p.y);if(d<p.splash)gunDmg(z,p.dmg*(1-d/p.splash*.5),(z.x-p.x)*6,-260);}
         for(let k=0;k<16;k++)part('plasma',p.x,p.y,(Math.random()-.5)*420,(Math.random()-.7)*420,.45,p.col);run.shake=Math.max(run.shake,3);AU.play('hit');}
-      else{if(hit)dmgZ(hit,p.dmg,p.vx*.25,-120);for(let k=0;k<3;k++)part('spark',p.x,p.y,(Math.random()-.5)*200,-Math.random()*160,.25,p.col);}}}
+      else{if(hit)gunDmg(hit,p.dmg,p.vx*.25,-120);for(let k=0;k<3;k++)part('spark',p.x,p.y,(Math.random()-.5)*200,-Math.random()*160,.25,p.col);}}}
   run.proj=run.proj.filter(p=>p.life>0);
 }
 function updDefence(h){
@@ -1340,7 +1354,7 @@ function render(dt){
     drawParts(g);
     g.textAlign='center';g.font='700 16px "Chakra Petch",sans-serif';for(const q of run.pops){g.globalAlpha=Math.min(1,q.life*2);g.fillStyle=OUT;g.fillText(q.txt,q.x+1.5,q.y+1.5);g.fillStyle=q.col;g.fillText(q.txt,q.x,q.y);}g.globalAlpha=1;g.textAlign='start';
   }else{
-    const ci=lvl.i,Sx=CARS[ci],cx=START_X+60,cy=groundY(cx)-Sx.wy-Sx.wr+4,{W:Wp,D}=carMods(ci,save.up[ci]);
+    const ci=lvl.i,{W:Wp,D,S:Sx}=carMods(ci,save.up[ci]),cx=START_X+60,cy=groundY(cx)-Sx.wy-Sx.wr+4;
     g.save();g.translate(cx,cy);g.rotate(Math.atan(groundSlope(cx)));drawCarFull(g,Sx,save.up[ci],Wp,D,{t:perf});g.restore();
   }
   g.setTransform(dpr,0,0,dpr,0,0);
@@ -1369,7 +1383,7 @@ function updHUD(){
   hudEls.prog.style.width=(pr*100)+'%';hudEls.best.style.left=(clamp(save.best[lvl.i]/D.len,0,1)*100)+'%';
   const dt=Math.floor(Math.min(dist,D.len))+' / '+fmt(D.len)+' m';if(hudLast.d!==dt){hudEls.dist.textContent=dt;hudLast.d=dt;}
   if(hudLast.k!==run.kills){hudEls.kill.textContent=run.kills;hudLast.k=run.kills;}
-  const pts=Math.round(Math.min(dist,D.len)*D.rate)+run.kills*D.kp+run.crates*Math.round(D.kp*.5);if(hudLast.p!==pts){hudEls.pts.textContent=fmt(pts);hudLast.p=pts;}
+  const pts=Math.round(Math.min(dist,D.len)*D.rate)+run.kills*D.kp+run.crates*Math.round(D.kp*.5)+(run.gunB||0);if(hudLast.p!==pts){hudEls.pts.textContent=fmt(pts);hudLast.p=pts;}
   AU.engine(true,Math.hypot(C.vx,C.vy),input.gas&&C.fuel>0&&!run.over);
 }
 
@@ -1384,22 +1398,22 @@ function goGarage(){mode='garage';run=null;if(!lvl||lvl.i!==save.lvl)setLevel(sa
 
 function stat(lab,v,max,txt){return`<dt>${lab}</dt><dd><i style="width:${clamp(v/max,0,1)*100}%"></i></dd><span class="v">${txt}</span>`;}
 function renderGarage(){
-  const i=save.lvl,S=CARS[i],D=LEVELS[i],up=save.up[i],{W:Wp,D:Df}=carMods(i,up);
+  const i=save.lvl,S=CARS[i],D=LEVELS[i],up=save.up[i],{W:Wp,D:Df,S:Sw}=carMods(i,up);
   $('#gStageNo').textContent=`STAGE ${i+1} OF 5${save.cleared[i]?' · CLEARED':''}`;
   $('#gStageName').innerHTML=`${D.name}<i>${D.jp}</i>`;
   $('#lvPrev').disabled=i<=0;$('#lvNext').disabled=i>=save.unl-1;
   $('#gPts').textContent=fmt(save.pts);
   $('#gCar').textContent=S.name;$('#gCarJp').textContent=S.jp;$('#gCarBlurb').textContent=S.blurb;
   const hp=Math.round(S.hp*(1+.35*up.a)),fuel=S.fuel*FUEL_MULT[up.f],ram=S.ram*(1+.3*up.a)*(Df?Df.ram:1);
-  $('#gStats').innerHTML=stat('Speed',S.vmax,950,Math.round(S.vmax/PPM*3.6)+' km/h')+stat('Hull',hp,1000,hp)+stat('Fuel',fuel,110,Math.round(fuel)+' s')+stat('Ram',ram,30,ram.toFixed(1)+'×')+stat('Gun',Wp?Wp.dmg*Wp.rate:0,700,Wp?Math.round(Wp.dmg*Wp.rate)+' dps':'none');
+  $('#gStats').innerHTML=stat('Speed',Sw.vmax,1150,Math.round(Sw.vmax/PPM*3.6)+' km/h')+stat('Hull',hp,1000,hp)+stat('Fuel',fuel,110,Math.round(fuel)+' s')+stat('Ram',ram,30,ram.toFixed(1)+'×')+stat('Grip',Sw.mu,1.8,Sw.mu.toFixed(2))+stat('Gun',Wp?Wp.dmg*Wp.rate:0,700,Wp?Math.round(Wp.dmg*Wp.rate)+' dps':'none');
   const paths=[
-    {k:'a',lab:'Armour',jp:'装甲',max:5,names:S.armour,note:t=>t<5?`Hull ${Math.round(S.hp*(1+.35*t))} → ${Math.round(S.hp*(1+.35*(t+1)))}. Harder ram, less slowdown.`:'Fully plated.'},
+    {k:'a',lab:'Armour',jp:'装甲',max:5,names:S.armour,note:t=>{if(t>=5)return`Fully plated with ${S.defs[2].name}. Speed lost on impact −75%.`;const nd=defTier(t+1)>defTier(t)?` Adds ${S.defs[defTier(t+1)-1].name}.`:'';return`Hull ${Math.round(S.hp*(1+.35*t))} → ${Math.round(S.hp*(1+.35*(t+1)))}, harder ram.${nd}`;}},
     {k:'w',lab:'Weapon',jp:'武装',max:5,names:S.weapons.map(w=>w.name),note:t=>t<5?S.weapons[t].d:S.weapons[4].d},
     {k:'f',lab:'Fuel',jp:'燃料',max:5,names:FUEL_NAMES,note:t=>t<5?`Throttle time ${Math.round(S.fuel*FUEL_MULT[t])} s → ${Math.round(S.fuel*FUEL_MULT[t+1])} s.`:`${Math.round(S.fuel*FUEL_MULT[5])} s of throttle.`},
-    {k:'d',lab:'Defence',jp:'防御',max:3,names:S.defs.map(d=>d.name),note:t=>t<3?`${S.defs[t].d} Speed lost on impact −${[35,55,75][t]}%.`:`${S.defs[2].d} Speed lost on impact −75%.`}];
-  $('#gUps').innerHTML=paths.map(pth=>{const t=up[pth.k],mx=t>=pth.max,c=mx?0:cost(i,pth.k,t),can=!mx&&save.pts>=c;
+    {k:'wh',lab:'Wheels',jp:'車輪',max:5,names:WHEEL_NAMES,note:t=>t<5?`Bigger, higher wheels: +5% top speed, +8% pulling power, more grip and softer landings.`:'Maximum lift, grip and speed.'}];
+  $('#gUps').innerHTML=paths.map(pth=>{const t=up[pth.k]||0,mx=t>=pth.max,c=mx?0:cost(i,pth.k,t),can=!mx&&save.pts>=c;
     const pips=Array.from({length:pth.max},(_,j)=>`<i class="${j<t?'on':''}"></i>`).join('');
-    const cur=t?pth.names[t-1]:(pth.k==='w'?'No weapon':pth.k==='d'?'Bare bumper':pth.k==='f'?'Stock tank':'Stock frame');
+    const cur=t?pth.names[t-1]:(pth.k==='w'?'No weapon':pth.k==='wh'?'Stock wheels':pth.k==='f'?'Stock tank':'Stock frame');
     return`<div class="up${mx?' max':''}"><div class="up-h"><span class="up-l">${pth.lab}<i>${pth.jp}</i></span><span class="pips">${pips}</span></div>
       <div class="up-cur">${cur}</div><div class="up-note">${pth.note(t)}</div>
       <button class="buy" data-k="${pth.k}" ${can?'':'disabled'}>${mx?'Maxed out':`<span>${pth.names[t]}</span><b>${fmt(c)} pts</b>`}</button></div>`;}).join('');
@@ -1408,11 +1422,11 @@ function renderGarage(){
   $('#gBestBar').style.width=(clamp(best/D.len,0,1)*100)+'%';
   drawPreview();
 }
-function buy(k){AU.init();const i=save.lvl,up=save.up[i],t=up[k],mx=k==='d'?3:5;if(t>=mx)return;const c=cost(i,k,t);if(save.pts<c)return;save.pts-=c;up[k]++;store();AU.play('buy');renderGarage();}
+function buy(k){AU.init();const i=save.lvl,up=save.up[i],t=up[k]||0,mx=5;if(t>=mx)return;const c=cost(i,k,t);if(save.pts<c)return;save.pts-=c;up[k]++;store();AU.play('buy');renderGarage();}
 const prev=$('#prev');
 function drawPreview(){
   const r=prev.getBoundingClientRect();if(!r.width)return;const w=r.width,h=r.height;prev.width=Math.round(w*dpr);prev.height=Math.round(h*dpr);
-  const g=prev.getContext('2d'),i=save.lvl,S=CARS[i],{W:Wp,D}=carMods(i,save.up[i]);
+  const g=prev.getContext('2d'),i=save.lvl,{W:Wp,D,S}=carMods(i,save.up[i]);
   g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,w,h);
   const fy=h*.8;const q=g.createLinearGradient(0,fy,0,h);q.addColorStop(0,'#2a2546');q.addColorStop(1,'#120f22');g.fillStyle=q;g.fillRect(0,fy,w,h-fy);
   g.strokeStyle='rgba(51,228,255,.25)';g.lineWidth=1;for(let x=-w;x<w*2;x+=28){line(g,w/2+(x-w/2)*.25,fy,x,h);}for(let y=fy;y<h;y+=(h-fy)/4)line(g,0,y,w,y);
@@ -1426,7 +1440,7 @@ addEventListener('resize',()=>{if(mode==='garage')drawPreview();});
 
 function finishRun(){
   const i=lvl.i,D=lvl.D,dist=Math.max(0,(run.maxX-START_X)/PPM),dm=Math.min(dist,D.len);
-  const dPts=Math.round(dm*D.rate),kPts=run.kills*D.kp,cPts=run.crates*Math.round(D.kp*.5),bonus=run.clear?Math.round(D.len*D.rate*.5):0,total=dPts+kPts+cPts+bonus;
+  const dPts=Math.round(dm*D.rate),kPts=run.kills*D.kp+(run.gunB||0),cPts=run.crates*Math.round(D.kp*.5),bonus=run.clear?Math.round(D.len*D.rate*.5):0,total=dPts+kPts+cPts+bonus;
   save.pts+=total;save.runs++;save.kills+=run.kills;const prevBest=save.best[i];save.best[i]=Math.max(prevBest,Math.round(dm));
   let unlockTxt='';const first=run.clear&&!save.cleared[i];
   if(run.clear){save.cleared[i]=1;if(i<4){save.unl=Math.max(save.unl,i+2);if(first){save.lvl=i+1;unlockTxt=`New car unlocked: <b>${CARS[i+1].name}</b> for Stage ${i+2}, ${LEVELS[i+1].name}. Older cars stay in their own stages.`;}}else save.ended=1;}
@@ -1436,9 +1450,10 @@ function finishRun(){
   const jp=run.clear?'突破':run.reason==='OUT OF FUEL'?'燃料切れ':run.reason==='WRECKED'?'大破':run.reason==='FLIPPED OVER'?'転覆':run.reason==='FELL'?'落下':'終了';
   $('#resCard').innerHTML=`<h2><small>STAGE ${i+1} · ${jp}</small>${title}</h2>
     ${newBest?'<span class="flag">New best distance</span>':''}${run.clear?'<span class="flag amb">Goal reached</span>':''}
-    <dl class="tally"><dt>Distance ${fmt(dm)} m × ${D.rate}</dt><dd>${fmt(dPts)}</dd><dt>Zombies destroyed ${run.kills} × ${D.kp}</dt><dd>${fmt(kPts)}</dd>
+    <dl class="tally"><dt>Distance ${fmt(dm)} m × ${D.rate}</dt><dd>${fmt(dPts)}</dd><dt>Zombies destroyed ${run.kills} × ${D.kp}</dt><dd>${fmt(run.kills*D.kp)}</dd>${run.gunB?`<dt>Gun kill bonus</dt><dd>${fmt(run.gunB)}</dd>`:''}
     ${run.crates?`<dt>Crates, barrels and barricades</dt><dd>${fmt(cPts)}</dd>`:''}${bonus?`<dt>Stage clear bonus</dt><dd>${fmt(bonus)}</dd>`:''}
     <dt class="tot">Points earned</dt><dd>+${fmt(total)}</dd></dl>
+    <p class="story" style="font-size:12.5px;margin:0">Speed lost to impacts: <strong>${fmt(run.lost/PPM*3.6)} km/h</strong> · Hull damage: <strong>${Math.round((1-Math.max(0,run.car.hp)/run.car.hpMax)*100)}%</strong> · Top speed: <strong>${fmt(run.car.spec.vmax/PPM*3.6)} km/h</strong></p>
     ${unlockTxt?`<div class="unlock">${unlockTxt}</div>`:''}
     ${!run.clear?`<div class="mini" title="Progress"><i style="width:${clamp(dm/D.len,0,1)*100}%"></i></div><p class="story" style="font-size:12px">${tip(run.reason)}</p>`:''}
     <div class="row">${run.clear&&i===4?'<button class="btn pri" id="rEnd">See the ending</button>':'<button class="btn pri" id="rGarage">Garage</button>'}<button class="btn" id="rAgain">Drive again</button></div>`;
