@@ -1,6 +1,6 @@
 <title>Cyborgia Gauntlet</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="Cyborgia Gauntlet: drive through six neon stages of Neo-Japan, cut down cyborg zombie hordes and upgrade your cars. Free to play in your browser.">
+<meta name="description" content="Cyborgia Gauntlet: drive through six neon stages of Neo-Japan and a final battle in orbit, cut down cyborg zombie hordes and upgrade your cars. Free to play in your browser.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Dela+Gothic+One&display=swap">
@@ -137,7 +137,7 @@ kbd{font-family:var(--f-ui);font-weight:700;font-size:13px;border:1px solid var(
 
 /* final */
 .final-cta{position:relative;overflow:hidden;border-top:1px solid var(--line)}
-.final-cta .bg{position:absolute;inset:0;background:url(stage6.jpg) center/cover no-repeat;opacity:.4}
+.final-cta .bg{position:absolute;inset:0;background:url(stage7.jpg) center/cover no-repeat;opacity:.4}
 .final-cta::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,var(--ink),rgba(8,7,14,.5))}
 .final-cta .wrap{position:relative;z-index:1;padding-block:clamp(64px,10vw,120px);display:flex;flex-direction:column;align-items:flex-start;gap:18px}
 .final-cta h2{font-size:clamp(34px,6vw,72px)}
@@ -170,7 +170,7 @@ footer p{margin:0 0 0 auto;color:var(--mut);font-size:13px}
       <div class="kata">サイボーギア・ガントレット</div>
       <h1 class="logo1">CYBORGIA</h1>
       <div class="logo2"><span>GAUNTLET</span></div>
-      <p class="lede">Neo-Japan, 2099. A rogue implant signal has turned the cities into <b>cyborg zombie</b> hordes. Drive as far as your fuel allows, plough through everything in the way, and rebuild your car in the garage until you reach the <b>Mother Core</b> on Mount Fuji.</p>
+      <p class="lede">Neo-Japan, 2099. A rogue implant signal has turned the cities into <b>cyborg zombie</b> hordes. Drive as far as your fuel allows, plough through everything in the way, and rebuild your car in the garage, from the Kawasaki scrapyards all the way to the <b>Mother Core</b>'s Ark in orbit.</p>
       <div class="cta-row">
         <a class="play" href="play.html"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 1.5v13l11-6.5z"/></svg><span>Play now<small>出発</small></span></a>
         <ul class="facts"><li>Free in your browser</li><li>Phone or desktop</li><li>Progress saves automatically</li></ul>
@@ -197,8 +197,8 @@ footer p{margin:0 0 0 auto;color:var(--mut);font-size:13px}
 
   <section class="band" id="stages" style="background:var(--ink2);border-block:1px solid var(--line)">
     <div class="wrap">
-      <div class="sec-head"><span class="eyebrow">Six stages · 六つの地獄</span><h2>From the scrapyards to the burning bay</h2>
-        <p>Each stage has its own car. Clear it and the next one rolls out of the garage. Clear the sixth and the signal goes dark.</p></div>
+      <div class="sec-head"><span class="eyebrow">Seven stages · 七つの地獄</span><h2>From the scrapyards to orbit</h2>
+        <p>Each stage has its own car. Clear it and the next one rolls out of the garage. Clear the seventh and the signal goes dark.</p></div>
       <ol class="stages">
         <li class="stage"><div class="shot"><img src="stage1.jpg" alt="The rusty Rust Hopper dune buggy, roll cage and number 07, ploughing into clawed walkers in the Kawasaki scrapyards at dusk" loading="lazy"><span class="tag">STAGE 1</span></div>
           <div class="st-text"><span class="st-no">STAGE 01</span><h3>Kawasaki Scrapyards<span class="jp">川崎スクラップ街</span></h3>
@@ -220,10 +220,14 @@ footer p{margin:0 0 0 auto;color:var(--mut);font-size:13px}
           <div class="st-text"><span class="st-no">STAGE 05</span><h3>Fuji Citadel<span class="jp">富士要塞</span></h3>
           <p>A snowbound climb to the citadel under the aurora. The Mother Core is waiting there, until it flees out to sea.</p>
           <dl class="spec"><dt>Car</dt><dd>Susanoo Dreadnought stealth hyper-SUV</dd><dt>Distance</dt><dd>3,000 m</dd><dt>Zombies</dt><dd>Homing rockets from arm launchers, and blademasters windmilling laser swords as they charge</dd><dt>Weapon line</dt><dd>Arc lightning up to the Amaterasu Beam</dd></dl></div></li>
-        <li class="stage final"><div class="shot"><img src="stage6.jpg" alt="The pearl-and-jade Ryujin dragon shuttle firing its dragon-head beam at a jetpack zombie over Sagami Bay, Mount Fuji and a burning city behind" loading="lazy"><span class="tag">FINAL STAGE</span></div>
-          <div class="st-text"><span class="st-no">STAGE 06 · FINAL</span><h3>Sagami Bay Inferno<span class="jp">相模湾炎上</span></h3>
-          <p>No road left. Skim the swells of the bay on a hover shuttle while the coast burns and Mount Fuji glows behind. Reach the relay mast to end the game.</p>
+        <li class="stage"><div class="shot"><img src="stage6.jpg" alt="The pearl-and-jade Ryujin dragon shuttle firing its dragon-head beam at a jetpack zombie over Sagami Bay, Mount Fuji and a burning city behind" loading="lazy"><span class="tag">STAGE 6</span></div>
+          <div class="st-text"><span class="st-no">STAGE 06</span><h3>Sagami Bay Inferno<span class="jp">相模湾炎上</span></h3>
+          <p>No road left. Skim the swells of the bay on a hover shuttle while the coast burns and Mount Fuji glows behind. Ram the relay mast before the Mother Core escapes.</p>
           <dl class="spec"><dt>Car</dt><dd>Ryujin Hover Shuttle</dd><dt>Distance</dt><dd>3,400 m</dd><dt>Zombies</dt><dd>Jet ski riders with laser guns, and jetpack fliers that fire rockets, then dive-bomb you</dd><dt>Weapon line</dt><dd>Pulse lasers, a storm pearl and a dragon-head beam turret. Top reinforcements add wave-skimming torpedoes.</dd></dl></div></li>
+        <li class="stage final"><div class="shot"><img src="stage7.jpg" alt="The Tsukuyomi starfighter on a glowing hard-light lane in orbit, shooting down zombie mechas and astronauts, with Earth below and the Mother Ark ring station behind" loading="lazy"><span class="tag">FINAL STAGE</span></div>
+          <div class="st-text"><span class="st-no">STAGE 07 · FINAL</span><h3>Mother Ark Orbit<span class="jp">母艦軌道</span></h3>
+          <p>The only stage that leaves Japan. The Mother Core has fled to its Ark in orbit. Ride a hard-light lane above the Earth in low gravity, with asteroids and wrecked satellites drifting past, and punch through the Ark's core ring to end the game.</p>
+          <dl class="spec"><dt>Ship</dt><dd>Tsukuyomi Starfighter</dd><dt>Distance</dt><dd>3,400 m</dd><dt>Zombies</dt><dd>Zombie astronauts that drift in, grab the hull and fire laser pistols, and flying zombie mechas that strafe you with lasers and rockets, then drop onto the lane</dd><dt>Weapon line</dt><dd>Pulse blasters up to the moon-ringed Lunar Lance. Top reinforcements add homing missile pods and a moon shield.</dd></dl></div></li>
       </ol>
     </div>
   </section>
@@ -252,6 +256,7 @@ footer p{margin:0 0 0 auto;color:var(--mut);font-size:13px}
             <tr><th scope="row">Raijin Interceptor<small>雷神</small></th><td class="n">106 km/h</td><td>Plasma turret, plasma repeater, twin plasma, rail lance, twin rail lance</td><td>Twin laser chainsaws, twin energy buzzsaws, twin saber lances, saber halo</td></tr>
             <tr><th scope="row">Susanoo Dreadnought<small>須佐之男</small></th><td class="n">110 km/h</td><td>Arc coil, storm arc, laser array, plasma storm, Amaterasu Beam</td><td>Katana ram, twin tanto sabers, Kusanagi buzzsaw wall</td></tr>
             <tr><th scope="row">Ryujin Hover Shuttle<small>龍神シャトル</small></th><td class="n">120 km/h</td><td>Harpoon laser, twin pulse laser, tidal plasma cannon, storm pearl, Ryujin Dragon Beam</td><td>Laser spikes, mini laser chainsaws, twin buzzsaws, orbiting buzzsaws, dragon fang sabers with saws, plus torpedo pods</td></tr>
+            <tr><th scope="row">Tsukuyomi Starfighter<small>月読</small></th><td class="n">132 km/h</td><td>Pulse blaster, twin ion cannons, nova launcher, moonlight arc, Tsukuyomi Lunar Lance</td><td>Ion prongs, photon chainsaws, orbit saws, crescent blades, lunar halo lance, plus homing missile pods</td></tr>
           </tbody>
         </table>
       </div>
@@ -285,7 +290,7 @@ footer p{margin:0 0 0 auto;color:var(--mut);font-size:13px}
   <section class="final-cta">
     <div class="bg" aria-hidden="true"></div>
     <div class="wrap">
-      <span class="eyebrow">The road to the bay is open</span>
+      <span class="eyebrow">The road to orbit is open</span>
       <h2>Start the engine.</h2>
       <p>Your first run in the Rust Hopper won't get far. Your tenth one might.</p>
       <a class="play" href="play.html"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 1.5v13l11-6.5z"/></svg><span>Play Cyborgia Gauntlet<small>出発</small></span></a>
