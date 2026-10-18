@@ -1,7 +1,7 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Cyborgia Gauntlet</title>
 <meta name="claude:viewport-fit-sides" content="cover">
-<meta name="description" content="Cyborgia Gauntlet: drive through five neon stages of Neo-Japan, cut down cyborg zombie hordes and upgrade your cars. Free to play in your browser.">
+<meta name="description" content="Cyborgia Gauntlet: drive through six neon stages of Neo-Japan, cut down cyborg zombie hordes and upgrade your cars. Free to play in your browser.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Dela+Gothic+One&display=swap">
@@ -138,7 +138,7 @@ kbd{font-family:var(--f-ui);font-weight:700;font-size:13px;border:1px solid var(
 
 /* final */
 .final-cta{position:relative;overflow:hidden;border-top:1px solid var(--line)}
-.final-cta .bg{position:absolute;inset:0;background:url(stage5.jpg) center/cover no-repeat;opacity:.4}
+.final-cta .bg{position:absolute;inset:0;background:url(stage6.jpg) center/cover no-repeat;opacity:.4}
 .final-cta::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,var(--ink),rgba(8,7,14,.5))}
 .final-cta .wrap{position:relative;z-index:1;padding-block:clamp(64px,10vw,120px);display:flex;flex-direction:column;align-items:flex-start;gap:18px}
 .final-cta h2{font-size:clamp(34px,6vw,72px)}
@@ -198,29 +198,33 @@ footer p{margin:0 0 0 auto;color:var(--mut);font-size:13px}
 
   <section class="band" id="stages" style="background:var(--ink2);border-block:1px solid var(--line)">
     <div class="wrap">
-      <div class="sec-head"><span class="eyebrow">Five stages · 五つの地獄</span><h2>From the scrapyards to the citadel</h2>
-        <p>Each stage has its own car. Clear it and the next one rolls out of the garage. Clear the fifth and the signal goes dark.</p></div>
+      <div class="sec-head"><span class="eyebrow">Six stages · 六つの地獄</span><h2>From the scrapyards to the burning bay</h2>
+        <p>Each stage has its own car. Clear it and the next one rolls out of the garage. Clear the sixth and the signal goes dark.</p></div>
       <ol class="stages">
         <li class="stage"><div class="shot"><img src="stage1.jpg" alt="Rust Hopper dune buggy driving through the Kawasaki scrapyards at dusk, cranes and neon signs behind" loading="lazy"><span class="tag">STAGE 1</span></div>
           <div class="st-text"><span class="st-no">STAGE 01</span><h3>Kawasaki Scrapyards<span class="jp">川崎スクラップ街</span></h3>
           <p>Dusk over rusting cranes and junk piles. Slow walkers, a few runners, and the odd brute that will stop a stock buggy dead.</p>
-          <dl class="spec"><dt>Car</dt><dd>Rust Hopper dune buggy</dd><dt>Distance</dt><dd>1,000 m</dd><dt>Threats</dt><dd>Walkers, runners, brutes</dd></dl></div></li>
+          <dl class="spec"><dt>Car</dt><dd>Rust Hopper dune buggy</dd><dt>Distance</dt><dd>1,000 m</dd><dt>Zombies</dt><dd>Clawed walkers, runners and brutes</dd></dl></div></li>
         <li class="stage"><div class="shot"><img src="stage2.jpg" alt="Kitsune GT racer on the neon Neo-Shibuya skyway, skyscrapers with glowing kanji signs" loading="lazy"><span class="tag">STAGE 2</span></div>
           <div class="st-text"><span class="st-no">STAGE 02</span><h3>Neo-Shibuya Skyway<span class="jp">新渋谷スカイウェイ</span></h3>
           <p>An elevated highway through a forest of towers. Broken ramps throw you into the air, and leapers start jumping onto your roof.</p>
-          <dl class="spec"><dt>Car</dt><dd>Kitsune GT street racer</dd><dt>Distance</dt><dd>1,400 m</dd><dt>New</dt><dd>Leapers that cling to the car</dd></dl></div></li>
+          <dl class="spec"><dt>Car</dt><dd>Kitsune GT street racer</dd><dt>Distance</dt><dd>1,400 m</dd><dt>Zombies</dt><dd>Blue laser knives, and leapers that stab from the roof</dd></dl></div></li>
         <li class="stage"><div class="shot"><img src="stage3.jpg" alt="Oni Hauler truck charging zombies in the rain at the Yokohama container docks" loading="lazy"><span class="tag">STAGE 3</span></div>
           <div class="st-text"><span class="st-no">STAGE 03</span><h3>Yokohama Black Harbor<span class="jp">横浜黒港</span></h3>
           <p>Rain, lightning and container stacks. Bigger hordes, more brutes, and a horned cargo truck heavy enough to plough through them.</p>
-          <dl class="spec"><dt>Car</dt><dd>Oni Hauler armoured truck</dd><dt>Distance</dt><dd>1,800 m</dd><dt>Weapon line</dt><dd>Cryo throwers that freeze and shatter</dd></dl></div></li>
+          <dl class="spec"><dt>Car</dt><dd>Oni Hauler armoured truck</dd><dt>Distance</dt><dd>1,800 m</dd><dt>Zombies</dt><dd>Lightsabers in red, purple, blue, green or orange that slash as you pass, plus laser-pistol dockers. Watch for the rare black saber.</dd><dt>Weapon line</dt><dd>Cryo throwers that freeze and shatter</dd></dl></div></li>
         <li class="stage"><div class="shot"><img src="stage4.jpg" alt="Raijin Interceptor with a plasma saber cutting through zombies beneath a giant red moon and torii gates" loading="lazy"><span class="tag">STAGE 4</span></div>
           <div class="st-text"><span class="st-no">STAGE 04</span><h3>Kyoto of the Red Moon<span class="jp">赤月の京都</span></h3>
           <p>Pagodas and torii gates under a blood-red moon. Fast, dense hordes that need rail guns and saber blades to cut through.</p>
-          <dl class="spec"><dt>Car</dt><dd>Raijin Interceptor</dd><dt>Distance</dt><dd>2,200 m</dd><dt>Weapon line</dt><dd>Plasma turrets and rail lances</dd></dl></div></li>
-        <li class="stage final"><div class="shot"><img src="stage5.jpg" alt="Susanoo Dreadnought firing twin beams on the snowy slopes below Mount Fuji under an aurora" loading="lazy"><span class="tag">FINAL STAGE</span></div>
-          <div class="st-text"><span class="st-no">STAGE 05 · FINAL</span><h3>Fuji Citadel<span class="jp">富士要塞</span></h3>
-          <p>A snowbound climb to the Mother Core under the aurora. The longest road and the toughest zombies. Reach the citadel gate to end the game.</p>
-          <dl class="spec"><dt>Car</dt><dd>Susanoo Dreadnought mega rig</dd><dt>Distance</dt><dd>2,800 m</dd><dt>Weapon line</dt><dd>Arc lightning up to the Amaterasu Beam</dd></dl></div></li>
+          <dl class="spec"><dt>Car</dt><dd>Raijin Interceptor</dd><dt>Distance</dt><dd>2,200 m</dd><dt>Zombies</dt><dd>Laser guns with red targeting sights</dd><dt>Weapon line</dt><dd>Plasma turrets and rail lances</dd></dl></div></li>
+        <li class="stage"><div class="shot"><img src="stage5.jpg" alt="The olive-and-carbon Susanoo Dreadnought hyper-SUV charging up the snowy slopes below Mount Fuji under an aurora" loading="lazy"><span class="tag">STAGE 5</span></div>
+          <div class="st-text"><span class="st-no">STAGE 05</span><h3>Fuji Citadel<span class="jp">富士要塞</span></h3>
+          <p>A snowbound climb to the citadel under the aurora. The Mother Core is waiting there, until it flees out to sea.</p>
+          <dl class="spec"><dt>Car</dt><dd>Susanoo Dreadnought stealth hyper-SUV</dd><dt>Distance</dt><dd>2,800 m</dd><dt>Zombies</dt><dd>Homing rockets from arm launchers, and blademasters windmilling laser swords as they charge</dd><dt>Weapon line</dt><dd>Arc lightning up to the Amaterasu Beam</dd></dl></div></li>
+        <li class="stage final"><div class="shot"><img src="stage6.jpg" alt="Ryujin Hover Shuttle skimming the waves of Sagami Bay as jet ski and jetpack zombies attack, Mount Fuji and a burning city behind" loading="lazy"><span class="tag">FINAL STAGE</span></div>
+          <div class="st-text"><span class="st-no">STAGE 06 · FINAL</span><h3>Sagami Bay Inferno<span class="jp">相模湾炎上</span></h3>
+          <p>No road left. Skim the swells of the bay on a hover shuttle while the coast burns and Mount Fuji glows behind. Reach the relay mast to end the game.</p>
+          <dl class="spec"><dt>Car</dt><dd>Ryujin Hover Shuttle</dd><dt>Distance</dt><dd>3,200 m</dd><dt>Zombies</dt><dd>Jet ski riders with laser guns, and jetpack fliers that fire rockets, then dive-bomb you</dd><dt>Weapon line</dt><dd>Pulse lasers up to the Ryujin Dragon Beam</dd></dl></div></li>
       </ol>
     </div>
   </section>
@@ -228,11 +232,11 @@ footer p{margin:0 0 0 auto;color:var(--mut);font-size:13px}
   <section class="band" id="garage">
     <div class="wrap">
       <div class="sec-head"><span class="eyebrow">The garage · 整備場</span><h2>Bolt on something worse</h2>
-        <p>Every car has its own upgrade path. Armour plates appear on the car as you buy them, and every weapon and defence changes how the car looks and fights.</p></div>
+        <p>Every car has its own upgrade path. Armour, weapons, fuel tanks and wheels all show up on the car as you buy them. Customising is free: two-tone wraps that carry onto the armour plating, energy and wheel-trim colours, and eleven decals from hot rod flames to a shark mouth.</p></div>
       <div class="garage">
-        <div class="shot"><img src="garage.jpg" alt="The garage screen showing the Rust Hopper with armour, a laser turret and rebar spikes, plus four upgrade cards" loading="lazy"></div>
+        <div class="shot"><img src="garage.jpg" alt="The garage Customise tab: a blue Rust Hopper with hot rod flames, gold wheel trims and pink energy weapons, next to colour swatches and decal choices" loading="lazy"></div>
         <ul class="paths">
-          <li><div class="h"><span>Armour<i>装甲</i></span><span class="pips"><b></b><b></b><b></b><b></b><b></b></span></div><p>More hull and harder ramming. Tiers 1, 3 and 5 bolt spikes, saws or plasma blades onto the nose.</p></li>
+          <li><div class="h"><span>Armour<i>装甲</i></span><span class="pips"><b></b><b></b><b></b><b></b><b></b></span></div><p>Blocks up to 70% of every hit and keeps your speed through hordes. Adds shock plating and blades on the nose.</p></li>
           <li><div class="h"><span>Weapon<i>武装</i></span><span class="pips"><b></b><b></b><b></b><b></b><b></b></span></div><p>A roof turret that aims itself. Clears leapers off your roof.</p></li>
           <li><div class="h"><span>Fuel<i>燃料</i></span><span class="pips"><b></b><b></b><b></b><b></b><b></b></span></div><p>Bigger tanks mean longer runs. Four times the throttle time at full.</p></li>
           <li><div class="h"><span>Wheels<i>車輪</i></span><span class="pips"><b></b><b></b><b></b><b></b><b></b></span></div><p>Bigger, higher wheels on lifted suspension. More grip, speed and softer landings.</p></li>
@@ -242,11 +246,12 @@ footer p{margin:0 0 0 auto;color:var(--mut);font-size:13px}
         <table class="roster">
           <thead><tr><th scope="col">Car</th><th scope="col">Top speed</th><th scope="col">Weapon line</th><th scope="col">Front-end weapons (with armour)</th></tr></thead>
           <tbody>
-            <tr><th scope="row">Rust Hopper<small>錆ホッパー</small></th><td class="n">67 km/h</td><td>Scrap SMG, laser turret, twin laser, plasma turret, twin plasma</td><td>Rebar spikes, laser chainsaw, lightsaber bayonet</td></tr>
-            <tr><th scope="row">Kitsune GT<small>狐GT</small></th><td class="n">91 km/h</td><td>Flamethrower, napalm, blue flame, plasma torch, Dragon's Breath</td><td>Blade splitter, rotating flails, plasma flails</td></tr>
+            <tr><th scope="row">Rust Hopper<small>錆ホッパー</small></th><td class="n">67 km/h</td><td>Scrap SMG, laser turret, twin laser, plasma turret, twin plasma</td><td>Rebar spikes, laser chainsaw, twin red mini-sabers</td></tr>
+            <tr><th scope="row">Kitsune GT<small>狐GT</small></th><td class="n">91 km/h</td><td>Flamethrower, napalm, blue flame, plasma torch, Dragon's Breath</td><td>Blade splitter, energy flails, plasma mini-buzzsaws</td></tr>
             <tr><th scope="row">Oni Hauler<small>鬼ホーラー</small></th><td class="n">82 km/h</td><td>Frost sprayer, cryo thrower, glacier cannon, cryo storm, Absolute Zero</td><td>Spike plough, twin laser chainsaws, grinder drum</td></tr>
-            <tr><th scope="row">Raijin Interceptor<small>雷神</small></th><td class="n">106 km/h</td><td>Plasma turret, plasma repeater, twin plasma, rail lance, twin rail lance</td><td>Saber bayonet, twin saber lances, saber halo</td></tr>
-            <tr><th scope="row">Susanoo Dreadnought<small>須佐之男</small></th><td class="n">110 km/h</td><td>Arc coil, storm arc, laser array, plasma storm, Amaterasu Beam</td><td>Katana ram, plasma flail array, Kusanagi saber wall</td></tr>
+            <tr><th scope="row">Raijin Interceptor<small>雷神</small></th><td class="n">106 km/h</td><td>Plasma turret, plasma repeater, twin plasma, rail lance, twin rail lance</td><td>Saber bayonet, twin energy buzzsaws, twin saber lances, saber halo</td></tr>
+            <tr><th scope="row">Susanoo Dreadnought<small>須佐之男</small></th><td class="n">110 km/h</td><td>Arc coil, storm arc, laser array, plasma storm, Amaterasu Beam</td><td>Katana ram, twin tanto sabers, Kusanagi buzzsaw wall</td></tr>
+            <tr><th scope="row">Ryujin Hover Shuttle<small>龍神シャトル</small></th><td class="n">120 km/h</td><td>Harpoon laser, twin pulse laser, tidal plasma cannon, tempest arc, Ryujin Dragon Beam</td><td>Prow spikes, twin buzzsaws, dragon fang sabers</td></tr>
           </tbody>
         </table>
       </div>
@@ -278,7 +283,7 @@ footer p{margin:0 0 0 auto;color:var(--mut);font-size:13px}
   <section class="final-cta">
     <div class="bg" aria-hidden="true"></div>
     <div class="wrap">
-      <span class="eyebrow">The road to Fuji is open</span>
+      <span class="eyebrow">The road to the bay is open</span>
       <h2>Start the engine.</h2>
       <p>Your first run in the Rust Hopper won't get far. Your tenth one might.</p>
       <a class="play" href="play.html"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 1.5v13l11-6.5z"/></svg><span>Play Cyborgia Gauntlet<small>出発</small></span></a>
