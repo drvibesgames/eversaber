@@ -1,4 +1,5 @@
 <!doctype html>
+<!doctype html>
 <html lang="en">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -38,10 +39,17 @@ button:focus-visible{outline:3px solid var(--plasma);outline-offset:2px}
 .ib{width:42px;height:42px;border-radius:12px;border:2px solid var(--line);background:rgba(16,22,34,.82);display:grid;place-items:center;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,.35)}
 .ib svg{width:20px;height:20px}
 #tip{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);transform:translateX(-50%);max-width:min(620px,calc(100vw - 32px));background:rgba(16,22,34,.88);border:2px solid var(--line);border-radius:12px;padding:8px 14px;font-weight:600;text-align:center;line-height:1.35;transition:opacity .3s}
-#tip:empty{opacity:0}
+#tip:empty,#tip.gone{opacity:0}
+#tip{pointer-events:auto}
 #bStart{position:absolute;right:max(16px,env(safe-area-inset-right,0px));bottom:calc(env(safe-area-inset-bottom,0px) + 18px);pointer-events:auto}
 body.touch #bStart{bottom:calc(env(safe-area-inset-bottom,0px) + 150px)}
-body.touch #tip{bottom:auto;top:calc(env(safe-area-inset-top,0px) + 64px);font-size:13px}
+body.touch #tip{bottom:auto;top:calc(env(safe-area-inset-top,0px) + 58px);font-size:12px;padding:5px 10px;border-radius:9px;max-width:calc(100vw - 24px);line-height:1.3}
+body.touch .bub{width:34px;height:34px} body.touch .bub .ic{inset:4px} body.touch .bub .ic svg{width:17px;height:17px} body.touch .bub.small{width:28px;height:28px} body.touch .bub.small .ic svg{width:14px;height:14px}
+body.touch #prompt{font-size:12px;padding:3px 8px;gap:4px} body.touch #prompt kbd{font-size:11px}
+body.touch .tag{padding:2px 6px} body.touch .tag span{font-size:13px} body.touch .tag b{font-size:10px} body.touch .tag em{font-size:10px;max-width:120px}
+body.touch #banner{top:30%} body.touch #banner h3{font-size:34px} body.touch #banner p{font-size:12px;padding:3px 9px;max-width:86vw}
+body.touch .toast{padding:5px 10px;max-width:200px} body.touch .toast b{font-size:14px}
+body.touch .chip{padding:3px 8px;gap:5px} body.touch .chip b{font-size:15px} body.touch .chip .lbl{font-size:9px} body.touch .ib{width:36px;height:36px}
 
 /* indicators */
 #ind{position:fixed;inset:0;pointer-events:none;z-index:4;overflow:hidden}
@@ -101,6 +109,7 @@ body.touch #tip{bottom:auto;top:calc(env(safe-area-inset-top,0px) + 64px);font-s
 .btn.ghost{background:var(--panel2);color:var(--ink);box-shadow:0 5px 0 #0b1019}
 .link{background:none;border:0;color:var(--mute);font-weight:700;text-decoration:underline;cursor:pointer;padding:8px}
 .row-btns{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.opts{display:flex;flex-direction:column;gap:10px;margin-top:6px}.opt{display:flex;align-items:center;justify-content:space-between;gap:14px;background:rgba(0,0,0,.18);border:2px solid var(--line);border-radius:12px;padding:10px 12px}.opt b{display:block;font-size:16px}.opt span{display:block;font-size:13px;color:var(--mute);margin-top:2px}.opt .tog{min-width:108px;font-size:16px;padding:8px 12px;flex:none}.opt .tog.on{background:var(--medic);box-shadow:0 5px 0 var(--medic-d);color:#fff}
 
 
 #scrTitle{justify-content:flex-start;align-items:center}
@@ -218,6 +227,7 @@ body.touch #tip{bottom:auto;top:calc(env(safe-area-inset-top,0px) + 64px);font-s
       <button class="btn" id="tNew">New Campaign</button>
       <button class="btn ghost" id="tHow">How to Play</button>
       <button class="btn ghost" id="tAch">Achievements <span id="achCount"></span></button>
+      <button class="btn ghost" id="tOpt">Options</button>
     </div>
     <div class="foot">A Dr Vibes Games Lab production</div>
   </div>
@@ -244,9 +254,19 @@ body.touch #tip{bottom:auto;top:calc(env(safe-area-inset-top,0px) + 64px);font-s
     <div class="row-btns"><button class="btn ghost" id="hBack">Got it</button></div></div>
 </section>
 
+<section class="screen dim" id="scrOpt" hidden>
+  <div class="panel"><h2>Options</h2><p class="sub">Settings save in this browser.</p>
+    <div class="opts">
+      <div class="opt"><div><b>Guide arrow</b><span id="oGuideD"></span></div><button class="btn ghost tog" id="oGuide"></button></div>
+      <div class="opt"><div><b>Sound</b><span>Music and effects</span></div><button class="btn ghost tog" id="oSnd"></button></div>
+      <div class="opt"><div><b>Tutorial tips</b><span>Show the arrow again for every new job, as if it were your first tour</span></div><button class="btn ghost tog" id="oReset">Reset</button></div>
+    </div>
+    <div class="row-btns"><button class="btn ghost" id="oBack">Back</button></div></div>
+</section>
+
 <section class="screen dim" id="scrPause" hidden>
   <div class="panel"><h2>Paused</h2><p class="sub" id="pauseSub"></p>
-    <div class="row-btns"><button class="btn alt" id="pRes">Resume</button><button class="btn ghost" id="pHow">Field Manual</button><button class="btn ghost" id="pQuit">Quit to title</button></div></div>
+    <div class="row-btns"><button class="btn alt" id="pRes">Resume</button><button class="btn ghost" id="pHow">Field Manual</button><button class="btn ghost" id="pOpt">Options</button><button class="btn ghost" id="pQuit">Quit to title</button></div></div>
 </section>
 
 <section class="screen dim" id="scrSum" hidden>
@@ -286,8 +306,8 @@ if(isTouch) document.body.classList.add('touch');
 const SAVE_KEY='iwm-save-v1';
 const DEF_STATS={saves:0,droids:0,cooked:0,berries:0,flybys:0,campaigns:0,battles:{}};
 const DEF_LOOK={hat:0,top:0,pants:0,skin:0,clinic:0,battle:0,diff:0,ally:1,enemy:3};
-let SAVE={ach:{},stats:{...DEF_STATS,battles:{}},look:{...DEF_LOOK},muted:false};
-function loadSave(){try{const s=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');if(s){SAVE.ach=s.ach||{};SAVE.stats=Object.assign({...DEF_STATS,battles:{}},s.stats||{});SAVE.look=Object.assign({...DEF_LOOK},s.look||{});SAVE.muted=!!s.muted}}catch(e){}}
+let SAVE={ach:{},stats:{...DEF_STATS,battles:{}},look:{...DEF_LOOK},muted:false,learned:{},guideAlways:false};
+function loadSave(){try{const s=JSON.parse(localStorage.getItem(SAVE_KEY)||'null');if(s){SAVE.ach=s.ach||{};SAVE.stats=Object.assign({...DEF_STATS,battles:{}},s.stats||{});SAVE.look=Object.assign({...DEF_LOOK},s.look||{});SAVE.muted=!!s.muted;SAVE.learned=s.learned||{};SAVE.guideAlways=!!s.guideAlways}}catch(e){}}
 function persist(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(SAVE))}catch(e){}}
 loadSave();
 
@@ -421,11 +441,12 @@ const BATTLES=[
  {n:'Jungle Moon',ground:'#6a9442',ground2:'#5a8338',rock:'#62604c',far:'#3d5c34',fog:'#2a4038',bush:'#2f7a2a',bg:'#1d2c26',sun:'#fff0c8',sky:'#e9ffd2',deco:'jungle'},
  {n:'Ashen Wreckfield',ground:'#625c58',ground2:'#544e4a',rock:'#3e3a38',far:'#3a3433',fog:'#241f26',bush:'#6f7b44',bg:'#141218',sun:'#ffbe85',sky:'#ffcf9a',deco:'ash'},
  {n:'Crystal Flats',ground:'#cdbde8',ground2:'#b9a6da',rock:'#7c62b8',far:'#5a4690',fog:'#2e2346',bush:'#2c8a8a',bg:'#1d1630',sun:'#ffe6ff',sky:'#f0dcff',deco:'crystal'}];
-const DIFFS=[{n:'Recruit',d:'Generous timers. Best for your first tour.',m:1.35},{n:'Veteran',d:'The real war. Tight timers.',m:1}];
+const DIFFS=[{n:'Recruit',d:'Generous timers. Best for your first tour.',m:1.45},{n:'Veteran',d:'The real war. Tight timers.',m:1}];
 const FDEF={
   bed:{n:'Bed Frame',cost:50,top:.64,desc:'Room for one more patient'},
   power:{n:'Power Station',cost:70,top:.16,desc:'A bed for a broken droid'},
-  stove:{n:'Plasma Stove',cost:60,top:.92,desc:'Cooks one dish at a time'},
+  stove:{n:'Plasma Oven',cost:60,top:.92,desc:'Cooks one dish at a time'},
+  bench:{n:'Armoury Bench',cost:60,top:.9,desc:'Repairs damaged blasters'},
   table:{n:'Prep Table',cost:25,top:.9,desc:'Store a meal or ingredient'},
   medcab:{n:'Med Cabinet',cost:40,top:1.5,desc:'Unlimited Nanogel'},
   pantry:{n:'Ration Crate',cost:40,top:1.1,desc:'Unlimited Protein Packs'},
@@ -435,20 +456,22 @@ const FDEF={
 const UPG={
   boots:{n:'Sprint Boots',cost:80,desc:'Move 20% faster'},
   gravs:{n:'Grav-Stretcher',cost:60,desc:'No slowdown while carrying'},
-  smart:{n:'Smart Stove',cost:70,desc:'Food never burns'},
+  smart:{n:'Smart Oven',cost:70,desc:'Food never burns'},
   mattress:{n:'Comfy Mattresses',cost:90,desc:'Bed patients wait 25% longer'},
   fert:{n:'Berry Fertiliser',cost:45,desc:'Bushes regrow twice as fast'},
   beacon:{n:'Tunnel Beacons',cost:80,desc:'Casualties wait 25% longer outside'}};
-const ITEM_NAME={med:'Nanogel',protein:'Protein Pack',stew:'Hot Stew',burnt:'Burnt Food',berry:'Starberries',shroom:'Glowshroom',broth:'Glow Broth',plating:'Hull Plating',circuit:'Circuit Board',charge:'Recharge',stretcher:'Stretcher',trolley:'Wheely Trolley',flat:'Flat-pack'};
-const SMALL=new Set(['med','protein','stew','burnt','berry','shroom','broth','plating','circuit']);
+const ITEM_NAME={weapon:'Repaired Blaster',blaster:'Repaired Blaster',broken:'Damaged Blaster',med:'Nanogel',protein:'Protein Pack',stew:'Hot Stew',burnt:'Burnt Food',berry:'Starberries',shroom:'Glowshroom',broth:'Glow Broth',plating:'Hull Plating',circuit:'Circuit Board',charge:'Recharge',stretcher:'Stretcher',trolley:'Wheely Trolley',flat:'Flat-pack'};
+const NEED_ITEM={weapon:'blaster'};const needItem=n=>NEED_ITEM[n]||n;
+const SMALL=new Set(['blaster','broken','med','protein','stew','burnt','berry','shroom','broth','plating','circuit']);
 const ROUNDS=[
- {count:4, gap:[13,17],droid:0,  field:50,need:46,needs:[2,2],broth:false},
- {count:6, gap:[11,14],droid:0,  field:46,need:42,needs:[2,3],broth:false},
- {count:7, gap:[10,13],droid:0,  field:44,need:40,needs:[2,3],broth:false},
- {count:9, gap:[9,12], droid:.35,field:40,need:38,needs:[2,3],broth:true},
- {count:10,gap:[8,11], droid:.4, field:37,need:36,needs:[3,3],broth:true},
- {count:12,gap:[7,10], droid:.4, field:34,need:34,needs:[3,4],broth:true},
- {count:14,gap:[6,9],  droid:.45,field:31,need:32,needs:[3,4],broth:true}];
+ {count:3, gap:[16,20],droid:0,  field:62,need:58,needs:[1,2],cap:2},
+ {count:5, gap:[15,19],droid:0,  field:58,need:55,needs:[1,2],cap:3},
+ {count:6, gap:[13,16],droid:0,  field:56,need:56,needs:[1,2],cap:3},
+ {count:7, gap:[13,16],droid:.25,field:56,need:58,needs:[1,2],cap:3},
+ {count:8, gap:[11,14],droid:.3, field:48,need:46,needs:[2,2],cap:4},
+ {count:10,gap:[10,12],droid:.3, field:44,need:42,needs:[2,2],cap:5},
+ {count:12,gap:[8,11], droid:.35,field:40,need:38,needs:[2,3],cap:5}];
+const feat=(r)=>{r=r||G.round;return {stew:r>=2,weapon:r>=2,droid:r>=3,dirty:r>=3,broth:r>=4}};
 const NAMES=['Pvt. Okoro','Cpl. Negan','Sgt. Ishikawa','Pvt. Moreau','Lt. Adeyemi','Pvt. Kowalski','Cpl. Reyes','Sgt. Lindqvist','Pvt. Haddad','Cpl. Nakamura','Pvt. Brennan','Sgt. Duarte','Pvt. Sato','Cpl. Mbeki','Lt. Varga','Pvt. Quill','Sgt. Okafor','Pvt. Jansen'];
 const DROIDNAMES=['Unit K-7','Unit R-22','Unit BX-4','Unit Q-9','Unit M-31','Unit T-5','Unit Z-12','Unit V-8'];
 const ACH=[
@@ -473,9 +496,13 @@ const ACH=[
  {id:'travel',n:'World Traveller',d:'Fight on 3 different battlegrounds'},
  {id:'dodge',n:'Dodge This',d:'Have 150 laser bolts fly past you'},
  {id:'pow',n:'Prisoner of War',d:'Get captured'},
- {id:'banners',n:'Every Banner',d:'Deploy alongside all four armies'}];
+ {id:'banners',n:'Every Banner',d:'Deploy alongside all four armies'},
+ {id:'armourer',n:'Armourer',d:'Repair 20 blasters'}];
 
 const ICON={
+ weapon:'<svg viewBox="0 0 24 24"><rect x="3" y="8" width="13" height="5" rx="1.5" fill="#5d6876"/><rect x="15" y="9" width="7" height="2.6" rx="1" fill="#3a4250"/><rect x="5" y="12" width="4" height="7" rx="1.2" fill="#3a4250"/><rect x="6" y="9.6" width="7" height="1.6" fill="#6ee07a"/></svg>',
+ broken:'<svg viewBox="0 0 24 24"><rect x="3" y="8" width="13" height="5" rx="1.5" fill="#5d6876"/><rect x="15" y="9" width="7" height="2.6" rx="1" fill="#3a4250"/><rect x="5" y="12" width="4" height="7" rx="1.2" fill="#3a4250"/><rect x="6" y="9.6" width="7" height="1.6" fill="#ff4d5e"/><path d="M17 2.5l1.6 3.2L22 6l-2.6 2.2" stroke="#ffd25a" stroke-width="1.6" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+ sheets:'<svg viewBox="0 0 24 24"><rect x="3" y="7" width="18" height="11" rx="2" fill="#e8e2d4"/><path d="M3 12h18" stroke="#b9a27a" stroke-width="2"/><circle cx="8" cy="10" r="1.6" fill="#a06a3a"/><circle cx="15" cy="14.5" r="2" fill="#a06a3a"/></svg>',
  med:'<svg viewBox="0 0 24 24"><rect x="8.5" y="2.5" width="7" height="4" rx="1" fill="#ff5a4e"/><rect x="7" y="6.5" width="10" height="15" rx="3" fill="#cfe7f0"/><rect x="8.6" y="11" width="6.8" height="9" rx="2" fill="#20c4b2"/></svg>',
  stew:'<svg viewBox="0 0 24 24"><path d="M2.5 11h19a9.5 7.5 0 0 1-19 0z" fill="#e2d8c6"/><ellipse cx="12" cy="11" rx="9.5" ry="2.4" fill="#b8572a"/><circle cx="9" cy="10.6" r="1.3" fill="#e08a3a"/><circle cx="14" cy="11" r="1.2" fill="#7fae3a"/><path d="M8 7c0-2 2-2 2-4M13.5 7c0-2 2-2 2-4" stroke="#9fb1c4" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>',
  berry:'<svg viewBox="0 0 24 24"><circle cx="7.8" cy="14.5" r="4.6" fill="#6a5cff"/><circle cx="15.8" cy="15" r="4.6" fill="#4d3fe0"/><circle cx="12" cy="9.2" r="4.3" fill="#8478ff"/><path d="M12 5c1-2.2 3.2-3 5.2-2-1 2-3 2.6-5.2 2z" fill="#3fae5a"/></svg>',
@@ -863,6 +890,14 @@ function trolleyMesh(){
   return g;
 }
 function bowl(soup,e){const g=new THREE.Group();g.add(mesh(CYL(.22,.14,.14),mat('#e9e3d6'),0,.07,0));g.add(mesh(CYL(.2,.2,.02),e?mat(soup,{e:soup,ei:.5}):mat(soup),0,.13,0));return g}
+function gunMesh(ok){
+  const g=new THREE.Group();g.add(mesh(BOX(.12,.14,.42),mat('#4a5262',{m:.5,r:.4}),0,.12,0));
+  const b=mesh(CYL(.035,.035,.26,8),mat('#2b2e36',{m:.6}),0,.15,.32);b.rotation.x=PI/2;g.add(b);
+  const gr=mesh(BOX(.08,.17,.09),mat('#2b2e36'),0,.03,-.1);gr.rotation.x=-.3;g.add(gr);
+  g.add(mesh(BOX(.02,.025,.3),bmat(ok?'#6ee07a':'#ff4d5e'),.066,.15,0,false));
+  if(!ok){const c=mesh(BOX(.13,.02,.06),mat('#1b1b1b'),0,.2,.05);c.rotation.y=.6;g.add(c)}
+  return g;
+}
 function makeItem(kind,ftype){
   let g=new THREE.Group();
   switch(kind){
@@ -875,13 +910,15 @@ function makeItem(kind,ftype){
     case 'shroom': g.add(mesh(CYL(.05,.07,.18),mat('#efe6d6'),0,.09,0)); g.add(mesh(HSPH(.15),mat('#2fd6b4',{e:'#18b89a',ei:.7}),0,.17,0)); break;
     case 'plating': {const m=mesh(CYL(.23,.23,.05,6),mat('#9aa6b5',{m:.7,r:.35}),0,.03,0);g.add(m);g.add(mesh(CYL(.06,.06,.06,6),mat('#5d6876',{m:.6}),0,.05,0));break;}
     case 'circuit': g.add(mesh(BOX(.32,.03,.26),mat('#2f8f4a'),0,.02,0)); g.add(mesh(BOX(.1,.04,.1),mat('#1b2a22'),0,.05,0)); g.add(mesh(SPH(.025,6,4),mat('#ffd25a',{e:'#ffb000'}),.1,.05,.08,false)); break;
+    case 'blaster': return gunMesh(true);
+    case 'broken': return gunMesh(false);
     case 'flat': g.add(mesh(BOX(.8,.5,.8),mat('#c49a62'),0,.25,0)); g.add(mesh(BOX(.82,.08,.2),mat('#e4d2a8'),0,.5,0)); g.add(mesh(BOX(.3,.3,.02),mat(ftype==='power'?'#5ee0ff':ftype==='bed'?'#ff5a4e':'#ffc94a'),0,.27,.41)); break;
     case 'stretcher': g=stretcherMesh(); break;
     case 'trolley': g=trolleyMesh(); break;
   }
   return g;
 }
-function mkItem(kind,ftype){return {kind,ftype,mesh:makeItem(kind,ftype),pat:null}}
+function mkItem(kind,ftype){const m=makeItem(kind,ftype);return {kind,ftype,mesh:m,pat:null}}
 
 let CT=CLINICS[0],BT=BATTLES[0];
 function buildFurniture(type){
@@ -891,7 +928,8 @@ function buildFurniture(type){
     case 'bed':
       for(const x of[-.42,.42]) for(const z of[-.62,.62]) g.add(mesh(CYL(.04,.04,.42,8),dark,x,.21,z));
       g.add(mesh(BOX(1.0,.1,1.42),mat('#59606e',{m:.4,r:.45}),0,.42,0)); g.add(mesh(BOX(.92,.16,1.32),mat('#eef1f4'),0,.54,0));
-      g.add(mesh(BOX(.94,.17,.72),mat(CT.blanket),0,.555,.3)); g.add(mesh(BOX(.6,.1,.3),mat('#ffffff'),0,.66,-.5));
+      {const bl=mesh(BOX(.94,.17,.72),mat(CT.blanket),0,.555,.3);g.add(bl);g.userData.blanket=bl} g.add(mesh(BOX(.6,.1,.3),mat('#ffffff'),0,.66,-.5));
+      {const dg=new THREE.Group();dg.visible=false;g.add(dg);g.userData.dirt=dg;for(const [x,z,r] of [[-.2,.1,.12],[.18,.35,.09],[.05,-.2,.08],[-.25,.45,.07]])dg.add(mesh(CYL(r,r,.01,10),mat('#7a5a3a',{op:.85}),x,.645,z,false));const cr=mesh(BOX(.5,.08,.3),mat('#d8d0c0'),.15,.68,.0,false);cr.rotation.y=.5;dg.add(cr)}
       g.add(mesh(CYL(.025,.025,1.1,8),dark,.52,.55,-.66)); g.add(mesh(BOX(.34,.24,.05),mat('#1b2230'),.52,1.12,-.66));
       {const s=mesh(BOX(.28,.04,.06),mat('#6ee07a',{e:'#3fd060',ei:1.2}),.52,1.12,-.63,false);g.add(s);g.userData.screen=s}
       break;
@@ -900,11 +938,29 @@ function buildFurniture(type){
       g.add(mesh(BOX(.2,1.5,.2),mat('#4a5262',{m:.5}),-.48,.75,-.48)); for(const y of[.55,.95,1.35]) {const _m=mesh(TOR(.15,.035),mat('#5ee0ff',{e:'#20c8ff',ei:1}),-.48,y,-.48);_m.rotation.x=PI/2;g.add(_m)};
       g.add(mesh(BOX(.06,.06,.9),mat('#1b1f28'),-.48,.17,-.05)); g.add(mesh(BOX(.5,.06,.06),mat('#ffc94a'),.25,.15,-.55));
       break;
-    case 'stove':
-      counter(); {const bm=new THREE.MeshStandardMaterial({color:col('#2a2f3a'),emissive:col('#ff6a1a'),emissiveIntensity:.15,roughness:.4}); const b=mesh(CYL(.4,.4,.03,24),bm,0,.915,0); g.add(b); g.userData.burner=bm;}
-      for(const x of[-.35,0,.35]) {const _m=mesh(CYL(.05,.05,.05,10),mat('#ff5a4e'),x,.6,.66);_m.rotation.x=PI/2;g.add(_m)};
-      g.add(mesh(BOX(.9,.3,.04),mat('#1b2230'),0,.45,.66));
-      break;
+    case 'stove': { // a proper oven: hob on top, glass door with a glowing cavity, knobs and handle
+      const steel=mat('#c9d0d8',{m:.75,r:.25}),dk=mat('#23272f',{m:.4,r:.5});
+      g.add(mesh(BOX(1.3,.86,1.3),steel,0,.43,0));g.add(mesh(BOX(1.34,.06,1.34),dk,0,.89,0));
+      const bm=new THREE.MeshStandardMaterial({color:col('#2a2f3a'),emissive:col('#ff6a1a'),emissiveIntensity:.15,roughness:.4});
+      for(const [x,z,r] of [[-.3,-.28,.17],[.3,-.28,.14],[0,.22,.26]]){const ring=mesh(TOR(r,.025),bm,x,.925,z,false);ring.rotation.x=PI/2;g.add(ring)}
+      g.add(mesh(BOX(1.12,.58,.04),dk,0,.36,.66));
+      const win=new THREE.MeshStandardMaterial({color:col('#1a1010'),emissive:col('#ff7a1a'),emissiveIntensity:.08,roughness:.15,metalness:.3});
+      g.add(mesh(BOX(.86,.34,.02),win,0,.37,.69,false));for(let i=0;i<2;i++)g.add(mesh(BOX(.7,.012,.01),mat('#3a2a22'),0,.3+i*.12,.7,false));
+      {const h=mesh(CYL(.025,.025,.9,8),steel,0,.72,.74,false);h.rotation.z=PI/2;g.add(h);for(const x of[-.42,.42])g.add(mesh(BOX(.03,.03,.06),steel,x,.72,.71,false))}
+      for(const x of[-.45,-.25,.25,.45]){const k=mesh(CYL(.045,.05,.05,10),dk,x,.81,.66,false);k.rotation.x=PI/2;g.add(k)}
+      g.add(mesh(BOX(.22,.07,.02),mat('#5ee0ff',{e:'#29d0ff',ei:1.2}),0,.81,.665,false));
+      g.add(mesh(BOX(1.3,.06,1.3),dk,0,.03,0));
+      g.userData.burner=bm;g.userData.win=win;
+      break;}
+    case 'bench': { // Armoury Bench: vice, pegboard of tools, crate of damaged blasters
+      g.add(mesh(BOX(1.3,.84,1.3),mat('#59606e',{m:.4,r:.5}),0,.42,0));g.add(mesh(BOX(1.36,.08,1.36),mat('#8a6a44',{r:.8}),0,.88,0));
+      g.add(mesh(BOX(1.31,.06,1.31),mat('#2b303b'),0,.04,0));
+      g.add(mesh(BOX(.26,.18,.22),mat('#2f6fe0',{m:.4}),.4,1.0,.34));g.add(mesh(BOX(.05,.05,.3),mat('#c9d0d8',{m:.7}),.4,1.0,.56));
+      g.add(mesh(BOX(1.24,.82,.05),mat('#3a4250'),0,1.32,-.6));
+      for(const [x,y,w,h,c] of [[-.4,1.45,.06,.42,'#c9d0d8'],[-.2,1.4,.18,.06,'#ff7a1a'],[0,1.5,.05,.36,'#c9d0d8'],[.2,1.3,.2,.2,'#ffc94a'],[.42,1.48,.08,.3,'#c9d0d8']])g.add(mesh(BOX(w,h,.04),mat(c,{m:.5}),x,y,-.56,false));
+      g.add(mesh(BOX(.3,.06,.02),mat('#ff5a4e',{e:'#ff2a1a',ei:1}),0,1.68,-.57,false));
+      const pile=new THREE.Group();pile.position.set(-.28,.92,.1);g.add(pile);g.userData.pile=pile;
+      break;}
     case 'table': counter(); g.add(mesh(BOX(1.0,.04,.02),mat(CT.trim),0,.7,.66)); break;
     case 'medcab':
       g.add(mesh(BOX(1.2,1.5,.75),mat('#f4f6f8'),0,.75,-.2)); g.add(mesh(BOX(1.0,1.1,.03),mat('#bfe9ff',{op:.35,r:.05}),0,.85,.19,false));
@@ -941,7 +997,7 @@ const DOOR=new Set(['6,3','6,4']);
 const TUNNELS=[{x:2.2},{x:6.6},{x:10.6}];
 const PADS=[{x:1.0,z:4.7},{x:3.9,z:4.7},{x:6.8,z:4.7}];
 let STATIC_BOXES=[],STATIC_CIRCS=[],BOXES=[],CIRCS=[];
-let sun,hemi,targetRing,ghost,WORLDG;
+let sun,hemi,targetRing,ghost,guide,WORLDG;
 
 function floorTex(a,b,kitchen){
   return canvasTex(256,256,(g)=>{
@@ -1113,6 +1169,9 @@ function buildWorld(){
   // fx helpers
   targetRing=mesh(new THREE.RingGeometry(.78,.9,40),bmat('#5ee0ff',{op:.85}),0,.03,0,false); targetRing.rotation.x=-PI/2; targetRing.visible=false; scene.add(targetRing);
   ghost=mesh(BOX(1.4,.06,1.4),bmat('#6ee07a',{op:.45}),0,.04,0,false); ghost.visible=false; scene.add(ghost);
+  guide=new THREE.Group();{const am=bmat('#ffd23a');const c=mesh(CONE(.26,.42,4),am,0,0,0,false);c.rotation.x=PI;guide.add(c);const st=mesh(BOX(.12,.3,.12),am,0,.33,0,false);guide.add(st);
+    const gl=glowSprite('#ffd23a',1.1,1.1,.55);guide.add(gl);const ring=mesh(new THREE.RingGeometry(.55,.66,32),bmat('#ffd23a',{op:.7}),0,0,0,false);ring.rotation.x=-PI/2;guide.ring=ring;scene.add(ring)}
+  guide.visible=false;scene.add(guide);
 }
 const BEACONS=[],FIRES=[];
 function decoForTheme(W_){
@@ -1130,7 +1189,8 @@ const G={state:'boot',phase:'none',round:0,credits:0,time:0,furn:[],cas:[],pads:
 const RCFG=()=>ROUNDS[Math.max(0,G.round-1)];
 let UID=0;
 
-function rebuildColliders(){BOXES=STATIC_BOXES.slice();for(const f of G.furn)BOXES.push({x0:f.x-.72,x1:f.x+.72,z0:f.z-.72,z1:f.z+.72});CIRCS=STATIC_CIRCS.slice();for(const b of G.bushes)CIRCS.push({x:b.x,z:b.z,r:.5});for(const s of G.scraps)CIRCS.push({x:s.x,z:s.z,r:.55})}
+function rebuildColliders(){BOXES=STATIC_BOXES.slice();for(const f of G.furn)BOXES.push({x0:f.x-.72,x1:f.x+.72,z0:f.z-.72,z1:f.z+.72});CIRCS=STATIC_CIRCS.slice();for(const b of G.bushes)CIRCS.push({x:b.x,z:b.z,r:.5});for(const s of G.scraps)if(s.g.visible)CIRCS.push({x:s.x,z:s.z,r:.55})}
+function refreshField(){const F=feat();for(const s of G.scraps)s.g.visible=F.droid;for(const s of G.shrooms)s.g.visible=F.broth;rebuildColliders()}
 function collide(x,z,r){
   for(let it=0;it<3;it++){
     for(const b of BOXES){const cx=clamp(x,b.x0,b.x1),cz=clamp(z,b.z0,b.z1),dx=x-cx,dz=z-cz,d=Math.hypot(dx,dz);
@@ -1183,9 +1243,9 @@ function buildField(){
 /* ================= OFFERS / SHOP ================= */
 function genOffers(){
   const pool=[];const add=(o,w)=>{for(let i=0;i<w;i++)pool.push(o)};
-  add({t:'f',k:'table'},2);add({t:'f',k:'stove'},2);add({t:'f',k:'bed'},2);if(G.round>=3)add({t:'f',k:'power'},3);add({t:'f',k:'medcab'},1);add({t:'f',k:'pantry'},1);
-  for(const k in UPG) if(!G.up[k]) add({t:'u',k},2);
-  const picks=[{t:'f',k:'bed'}]; if(G.round===3) picks.push({t:'f',k:'power'});
+  const F=feat();add({t:'f',k:'table'},2);add({t:'f',k:'bed'},3);add({t:'f',k:'medcab'},1);if(F.stew){add({t:'f',k:'stove'},2);add({t:'f',k:'pantry'},1)}if(G.round>=3)add({t:'f',k:'bench'},1);
+  for(const k in UPG) if(!G.up[k]&&(k!=='smart'||F.stew)&&(k!=='fert'||G.round>=2)) add({t:'u',k},2);
+  const picks=[{t:'f',k:'bed'}];
   let guard=0; while(picks.length<3&&guard++<60){const o=pick(pool);if(!picks.some(p=>p.t===o.t&&p.k===o.k))picks.push(o)}
   picks.sort(()=>Math.random()-.5);
   G.pads.forEach((p,i)=>setPadOffer(p,picks[i]||null));
@@ -1222,10 +1282,11 @@ function swapItemKind(f,kind){const it=f.item;if(it.mesh.parent)it.mesh.parent.r
 
 /* ================= CASUALTIES ================= */
 function genNeeds(kind){
-  const c=RCFG(),n=randi(c.needs[0],c.needs[1]);
-  if(kind==='droid'){const a=[];const k=Math.max(1,n-1);for(let i=0;i<k;i++)a.push(i===0?pick(['plating','circuit']):(a[i-1]==='plating'?'circuit':'plating'));a.push('charge');return a}
-  const pool=['stew','berry','stew','berry','med'];if(c.broth)pool.push('broth','broth');
-  const a=['med'];while(a.length<n){let k=pick(pool);if(k===a[a.length-1])k=pick(pool);if(k===a[a.length-1])k=pool[0]===k?'berry':pool[0];a.push(k)}
+  const c=RCFG(),F=feat(),n=randi(c.needs[0],c.needs[1]);
+  if(kind==='droid'){const a=[pick(['plating','circuit'])];if(n>=3)a.push(a[0]==='plating'?'circuit':'plating');a.push('charge');return a}
+  const pool=['berry','med'];if(F.stew)pool.push('stew');if(F.stew&&G.round>=5)pool.push('stew');if(F.broth)pool.push('broth');
+  const a=['med'];while(a.length<n){let k=pick(pool);if(k===a[a.length-1])k=pick(pool.filter(x=>x!==k));a.push(k)}
+  if(F.weapon)a.push('weapon');
   return a;
 }
 function slotsFor(ti){return G.cas.filter(c=>c.tunnel===ti&&(c.state==='emerge'||c.state==='wait')).map(c=>c.slot)}
@@ -1268,10 +1329,12 @@ function resetLimbs(g){const P_=g.userData.P;for(const k of['armL','armR','legL'
 function placeInBed(f){
   const h=P.held,c=h.pat;h.pat=null;if(c.g.parent)c.g.parent.remove(c.g);f.g.add(c.g);
   if(c.kind==='human'){c.g.rotation.set(-PI/2,0,0);c.g.position.set(0,FDEF.bed.top+.24,.72)}
-  else{c.g.rotation.set(0,0,0);c.g.position.set(.1,.16,.15)}
+  else{c.g.rotation.set(-PI/2,0,0);c.g.position.set(0,FDEF.bed.top+.3,.55)}
+  if(c.kind==='human'&&feat().weapon){c.gun=true;const gm=gunMesh(false);gm.scale.setScalar(1.35);gm.position.set(.22,FDEF.bed.top+.3,.98);gm.rotation.set(0,1.1,0);f.g.add(gm);c.gunM=gm}
   resetLimbs(c.g);f.pat=c;c.bed=f;c.state='bed';c.rest=1.0;c.need=null;
   if(G.time-c.waitStart<8) unlock('quick');
   takeHeld();SFX.drop();
+  if(c.kind==='droid')learn('droid');
   if(G.furn.filter(x=>x.type==='bed'&&x.pat).length>=4) unlock('full');
 }
 function nextNeed(c){
@@ -1281,12 +1344,14 @@ function nextNeed(c){
   else{c.needMax=RCFG().need*G.diffMul*(G.up.mattress?1.25:1);c.needT=c.needMax}
 }
 function fulfil(c){
-  const it=takeHeld();c.need=null;c.rest=1.4;SFX.heal();
+  learn(c.need);const it=takeHeld();if(it.kind==='blaster'){SAVE.stats.repairs=(SAVE.stats.repairs||0)+1;if(SAVE.stats.repairs>=20)unlock('armourer')}c.need=null;c.rest=1.4;SFX.heal();
   for(let i=0;i<8;i++) part({x:c.bed.x+rand(-.4,.4),y:1.1,z:c.bed.z+rand(-.4,.4),vy:rand(.8,1.6),c:c.kind==='droid'?'#ffd23a':'#6ee07a',life:.8,s0:.25,s1:.05});
   floatText(c.bed.x,1.6,c.bed.z,'+ '+ITEM_NAME[it.kind],'heal');
 }
+function takeGun(c){c.gun=false;if(c.gunM&&c.gunM.parent)c.gunM.parent.remove(c.gunM);c.gunM=null;setHeld(mkItem('broken'));SFX.pick()}
 function finishPatient(c){
-  const f=c.bed; f.pat=null; c.bed=null;
+  const f=c.bed; f.pat=null; c.bed=null;if(c.gunM&&c.gunM.parent)c.gunM.parent.remove(c.gunM);
+  if(feat().dirty)setDirty(f,true);
   const wp=f.g.localToWorld(c.g.position.clone()); f.g.remove(c.g); scene.add(c.g);
   c.g.rotation.set(0,0,0); c.g.position.set(f.x,0,f.z); resetLimbs(c.g);
   const frac=c.minFrac==null?1:c.minFrac;
@@ -1302,6 +1367,8 @@ function finishPatient(c){
   c.path=path; c.state='walk'; c.t=0;
   for(let i=0;i<12;i++) part({x:f.x+rand(-.5,.5),y:rand(.6,1.6),z:f.z+rand(-.5,.5),vy:rand(.5,1.5),c:'#ffe58a',life:1,s0:.3,s1:.05});
 }
+function setDirty(f,d){f.dirty=d;const U=f.g.userData;if(U.dirt)U.dirt.visible=d;if(U.blanket)U.blanket.material=d?mat('#9a8a6a'):mat(CT.blanket)}
+function updatePiles(){}
 function pathToDoor(i0,j0){
   const key=(i,j)=>i+','+j,occ=new Set(G.furn.map(f=>key(f.i,f.j))),prev=new Map(),q=[[i0,j0]];prev.set(key(i0,j0),null);
   while(q.length){const [i,j]=q.shift();
@@ -1324,14 +1391,22 @@ function furnAct(f){
   const hold=(prep&&!h&&furnEmpty(f))?{label:'Move '+FDEF[f.type].n,t:.45,fn:()=>{removeFurn(f);setHeld(mkItem('flat',f.type))}}:null;
   switch(f.type){
     case 'bed': case 'power':{
-      const fits=f.type==='bed'?'human':'droid';
-      if(f.pat){const c=f.pat;if(c.need&&c.need!=='charge'){if(h&&h.kind===c.need)tap={label:'Give '+ITEM_NAME[h.kind],fn:()=>fulfil(c)};else hint='Needs '+ITEM_NAME[c.need]}}
-      else if(h&&h.pat){ if(h.pat.kind===fits) tap={label:f.type==='bed'?'Lay patient in bed':'Plug droid in',fn:()=>placeInBed(f)}; else hint=h.pat.kind==='human'?'Humans go on a bed frame':'Droids go on a power station'; }
+      if(f.pat){const c=f.pat;if(c.need&&c.need!=='charge'&&h&&h.kind===needItem(c.need))tap={label:'Give '+ITEM_NAME[h.kind],fn:()=>fulfil(c)};
+        else if(c.gun&&!h)tap={label:'Take their damaged blaster',fn:()=>takeGun(c)};
+        else if(h&&h.kind==='broken')hint='Repair it at the Armoury Bench first';
+        else if(c.need&&c.need!=='charge')hint='Needs '+ITEM_NAME[c.need]}
+      else if(f.dirty){if(!h)return {hold:{label:'Change the sheets',t:1.1,fn:()=>{setDirty(f,false);learn('sheets');SFX.good();for(let i=0;i<8;i++)part({x:f.x+rand(-.5,.5),y:.8,z:f.z+rand(-.5,.5),vy:rand(.5,1.2),c:'#ffffff',life:.6,s0:.25,s1:.05})}},hint:null,tap:null};hint=h.pat?'Change the dirty sheets first (free your hands)':'Free your hands to change the sheets'}
+      else if(h&&h.pat) tap={label:h.pat.kind==='droid'?'Lay the droid in bed':'Lay patient in bed',fn:()=>placeInBed(f)};
       break;}
+    case 'bench':
+      if(h&&h.kind==='broken')return {hold:{label:'Repair the blaster',t:1.4,fn:()=>{takeHeld();setHeld(mkItem('blaster'));SFX.zap();for(let i=0;i<10;i++)part({x:f.x+.3,y:1.05,z:f.z+.3,vx:rand(-2,2),vy:rand(1,3),vz:rand(-2,2),g:-7,c:'#ffd25a',life:.4,s0:.14})}},tap:null,hint:null};
+      if(!h)hint='Bring a damaged blaster from a patient\'s bed';
+      else if(h.kind==='blaster')hint='Hand it back to a patient who needs it, or park it on a table';
+      break;
     case 'stove':
       if(f.item){if(!h)tap={label:'Take '+ITEM_NAME[f.item.kind],fn:()=>takeFrom(f)}}
       else if(h&&(h.kind==='protein'||h.kind==='shroom'))tap={label:'Cook '+ITEM_NAME[h.kind],fn:()=>{putOn(f,takeHeld());f.cook={t:0};SFX.sizzle()}};
-      else if(h&&SMALL.has(h.kind))hint='Only raw ingredients go on the stove';
+      else if(h&&SMALL.has(h.kind))hint='Only Protein Packs and Glowshrooms go in the oven';
       break;
     case 'table':
       if(f.item&&!h)tap={label:'Take '+ITEM_NAME[f.item.kind],fn:()=>takeFrom(f)};
@@ -1344,7 +1419,8 @@ function furnAct(f){
       if(!h)tap={label:'Take Protein Pack',fn:()=>setHeld(mkItem('protein'))};else if(h.kind==='protein')tap={label:'Put it back',fn:()=>{takeHeld();SFX.drop()}};
       break;
     case 'bin':
-      if(h&&SMALL.has(h.kind))tap={label:'Recycle '+ITEM_NAME[h.kind],fn:()=>{takeHeld();SFX.drop()}};
+      if(h&&(h.kind==='broken'||h.kind==='blaster'))hint='A soldier needs that blaster back';
+      else if(h&&SMALL.has(h.kind))tap={label:'Recycle '+ITEM_NAME[h.kind],fn:()=>{takeHeld();SFX.drop()}};
       break;
     case 'stretchers':
       if(!h)tap={label:'Grab a stretcher',fn:()=>setHeld(mkItem('stretcher'))};else if(h.kind==='stretcher'&&!h.pat)tap={label:'Return stretcher',fn:()=>{takeHeld();SFX.drop()}};
@@ -1370,8 +1446,8 @@ function updateTarget(){
   for(const c of G.cas) if(c.state==='wait') cand(c,c.x,c.z,.75,()=>casAct(c));
   const h=P.held;
   for(const b of G.bushes) cand(b,b.x,b.z,.55,()=>b.n>0?(!h?{tap:{label:'Pick Starberries',fn:()=>{b.n--;b.berries[b.n].visible=false;setHeld(mkItem('berry'));SAVE.stats.berries++;if(SAVE.stats.berries>=40)unlock('forager')}}}:{hint:'Hands full'}):{hint:'Regrowing...'});
-  for(const s of G.shrooms) cand(s,s.x,s.z,.45,()=>s.n>0?(!h?{tap:{label:'Pick Glowshroom',fn:()=>{s.n--;s.caps[s.n].visible=false;setHeld(mkItem('shroom'))}}}:{hint:'Hands full'}):{hint:'Regrowing...'});
-  for(const s of G.scraps) cand(s,s.x,s.z,.6,()=>s.n>0?(!h?{hold:{label:'Salvage '+ITEM_NAME[s.kind],t:.9,fn:()=>{s.n--;setHeld(mkItem(s.kind));for(let i=0;i<6;i++)part({x:s.x,y:.5,z:s.z,vx:rand(-2,2),vy:rand(1,3),vz:rand(-2,2),g:-6,c:'#ffd25a',life:.4,s0:.15})}}}:{hint:'Hands full'}):{hint:'Picked clean, wait a moment'});
+  for(const s of G.shrooms) if(s.g.visible) cand(s,s.x,s.z,.45,()=>s.n>0?(!h?{tap:{label:'Pick Glowshroom',fn:()=>{s.n--;s.caps[s.n].visible=false;setHeld(mkItem('shroom'))}}}:{hint:'Hands full'}):{hint:'Regrowing...'});
+  for(const s of G.scraps) if(s.g.visible) cand(s,s.x,s.z,.6,()=>s.n>0?(!h?{hold:{label:'Salvage '+ITEM_NAME[s.kind],t:.9,fn:()=>{s.n--;learn(s.kind);setHeld(mkItem(s.kind));for(let i=0;i<6;i++)part({x:s.x,y:.5,z:s.z,vx:rand(-2,2),vy:rand(1,3),vz:rand(-2,2),g:-6,c:'#ffd25a',life:.4,s0:.15})}}}:{hint:'Hands full'}):{hint:'Picked clean, wait a moment'});
   for(const p of G.pads) if(p.offer) cand(p,p.x,p.z,.7,()=>{const o=p.offer,nm=o.t==='f'?FDEF[o.k].n:UPG[o.k].n;if(o.t==='f'&&h)return{hint:'Free your hands to carry it'};if(G.credits<o.cost)return{hint:`${nm} needs ${o.cost} credits`};return{tap:{label:`Buy ${nm} (${o.cost})`,fn:()=>buyOffer(p)}}});
   if(h&&h.pat&&(!best||!(best.a.tap||best.a.hold))){
     const tx=P.x+Math.sin(P.face)*1.15,tz=P.z+Math.cos(P.face)*1.15,[cx,cz]=collide(tx,tz,.55);
@@ -1438,17 +1514,89 @@ function updatePlayer(dt){
 }
 
 /* ================= UPDATE LOGIC ================= */
+/* ---- guide arrow: always points at the next useful step ---- */
+const TEACH=new Set(['weapon','stew','sheets','droid','plating','circuit','broth']);
+const gKey=n=>n==='weapon'||n==='stew'||n==='broth'||n==='plating'||n==='circuit'?n:'basic';
+function learn(k){}
+let GK='basic';
+const guideOn=()=>G.round<=1||SAVE.guideAlways;
+// after round 1: a job's arrow shows for the rest of the round in which it first appears, then never again
+function guideShow(){if(guideOn())return true;if(!TEACH.has(GK)||G.phase!=='round')return false;
+  G.intro=G.intro||{};if(G.intro[GK]===G.round)return true;
+  if(!SAVE.learned[GK]){G.intro[GK]=G.round;SAVE.learned[GK]=1;persist();return true}return false}
+function freeBed(){let best=null,bd=1e9;for(const f of G.furn)if(f.type==='bed'&&!f.pat&&!f.dirty){const d=dst(P.x,P.z,f.x,f.z);if(d<bd){bd=d;best=f}}return best}
+function nearest(list){let best=null,bd=1e9;for(const o of list){const d=dst(P.x,P.z,o.x,o.z);if(d<bd){bd=d;best=o}}return best}
+function guideTarget(){const r=guideTarget0();if(r&&r.dirty&&!r.pat)GK='sheets';return r}
+function guideTarget0(){
+  const h=P.held,F=feat();GK='basic';
+  if(G.phase==='prep'){
+    if(h&&h.kind==='flat')return null;
+    const beds=G.furn.filter(f=>f.type==='bed').length,bp=G.pads.find(p=>p.offer&&p.offer.t==='f'&&p.offer.k==='bed');
+    if(bp&&beds<G.round+1&&G.credits>=bp.offer.cost&&!h)return {x:bp.x,z:bp.z,y:1.7};
+    return null;
+  }
+  if(G.phase!=='round')return null;
+  if(h&&h.pat){GK=h.pat.kind==='droid'?'droid':'basic';const f=freeBed();if(f)return f;const d=G.furn.find(f=>f.type==='bed'&&f.dirty&&!f.pat);return d||null}
+  if(h&&h.kind==='broken'){GK='weapon';return G.furn.find(f=>f.type==='bench')||null}
+  // carrying something a patient needs? go straight to them
+  if(h&&SMALL.has(h.kind)){let bc=null,bf=9;for(const c of G.cas)if(c.state==='bed'&&c.need&&needItem(c.need)===h.kind){const fr=c.needT/c.needMax;if(fr<bf){bf=fr;bc=c}}if(bc){GK=gKey(bc.need);return bc.bed}}
+  const tasks=[];
+  for(const c of G.cas){
+    if(c.state==='wait')tasks.push({c,t:'fetch',u:c.wait/c.waitMax-.15});
+    else if(c.state==='bed'&&c.need&&c.need!=='charge')tasks.push({c,t:'need',u:c.needT/c.needMax});
+  }
+  tasks.sort((a,b)=>a.u-b.u);
+  const claimed=new Set();
+  for(const tk of tasks){const r=taskTarget(tk,h,F,claimed);if(r==='WAIT')continue;if(r){GK=tk.t==='fetch'?(tk.c.kind==='droid'?'droid':'basic'):gKey(tk.c.need);return r}}
+  if(!h){const d=G.furn.find(f=>f.dirty&&!f.pat);if(d)return d}
+  return null;
+}
+function taskTarget(tk,h,F,claimed){
+  const c=tk.c;
+  if(tk.t==='fetch'){
+    if(h&&h.kind==='stretcher'&&!h.pat)return {x:c.x,z:c.z,y:1.7};if(h)return null;
+    if(c.ground)return {x:c.x,z:c.z,y:1.7};
+    if(F.dirty&&!freeBed()){const d=G.furn.find(f=>f.type==='bed'&&f.dirty&&!f.pat);if(d)return d}
+    return G.furn.find(f=>f.type==='stretchers');
+  }
+  const it=needItem(c.need);
+  if(h&&h.kind===it)return c.bed;
+  const ready=G.furn.find(f=>f.item&&f.item.kind===it&&!claimed.has(f)&&(f.type!=='stove'||(f.cook&&f.cook.at!=null)));
+  if(ready){claimed.add(ready);return h?null:ready}
+  if(h){if((c.need==='stew'&&h.kind==='protein')||(c.need==='broth'&&h.kind==='shroom'))return G.furn.find(f=>f.type==='stove'&&!f.item)||null;return null}
+  const raw=c.need==='stew'?'protein':c.need==='broth'?'shroom':null;
+  if(raw){const ck=G.furn.find(f=>f.type==='stove'&&f.item&&f.item.kind===raw&&!claimed.has(f));if(ck){claimed.add(ck);return 'WAIT'}}
+  switch(c.need){
+    case 'med':return G.furn.find(f=>f.type==='medcab');
+    case 'berry':return nearest(G.bushes.filter(b=>b.n>0))||nearest(G.bushes);
+    case 'stew':return G.furn.some(f=>f.type==='stove'&&!f.item)?G.furn.find(f=>f.type==='pantry'):'WAIT';
+    case 'broth':return G.furn.some(f=>f.type==='stove'&&!f.item)?nearest(G.shrooms.filter(x=>x.g.visible&&x.n>0)):'WAIT';
+    case 'plating':case 'circuit':return G.scraps.find(x=>x.kind===c.need);
+    case 'weapon':{
+      const tb=G.furn.find(f=>f.item&&f.item.kind==='broken'&&!claimed.has(f));if(tb){claimed.add(tb);return tb}
+      if(c.gun)return c.bed;
+      const o=G.cas.find(x=>x.state==='bed'&&x.gun);return o?o.bed:null;}
+  }
+  return null;
+}
+function updateGuide(dt){
+  if(!guide)return;let t=(G.phase!=='capture'&&G.phase!=='over')?guideTarget():null;if(t&&!guideShow())t=null;
+  guide.visible=guide.ring.visible=!!t;if(!t)return;
+  const y=(t.y!=null?t.y:(t.type?(t.type==='medcab'?2.3:t.type==='stretchers'?2.2:1.85):1.5))+Math.abs(Math.sin(G.time*4))*.3;
+  guide.position.x=lerp(guide.position.x,t.x,.3);guide.position.z=lerp(guide.position.z,t.z,.3);guide.position.y=y;guide.rotation.y+=dt*2;
+  guide.ring.position.set(guide.position.x,.05,guide.position.z);const sc=1+Math.sin(G.time*5)*.08;guide.ring.scale.set(sc,sc,sc);
+}
 function updateFurniture(dt){
   for(const f of G.furn){
     if(f.type==='stove'){
       const it=f.item,bm=f.g.userData.burner;
       if(it&&f.cook){
-        f.cook.t+=dt;bm.emissiveIntensity=.9+Math.sin(G.time*12)*.15;
+        f.cook.t+=dt;bm.emissiveIntensity=.9+Math.sin(G.time*12)*.15;if(f.g.userData.win)f.g.userData.win.emissiveIntensity=.7+Math.sin(G.time*5)*.15;
         if(Math.random()<dt*4)part({x:f.x+rand(-.15,.15),y:1.1,z:f.z+rand(-.15,.15),smoke:true,c:it.kind==='burnt'?'#333':'#e8eef4',vy:.8,life:1.2,s0:.2,s1:.7,op:.5});
         if(it.kind==='protein'&&f.cook.t>=5){swapItemKind(f,'stew');f.cook.at=f.cook.t;SFX.sizzle();cooked()}
         else if(it.kind==='shroom'&&f.cook.t>=6){swapItemKind(f,'broth');f.cook.at=f.cook.t;SFX.sizzle();cooked()}
-        else if((it.kind==='stew'||it.kind==='broth')&&!G.up.smart&&f.cook.t>=f.cook.at+12){swapItemKind(f,'burnt');unlock('burnt');SFX.deny()}
-      }else bm.emissiveIntensity=lerp(bm.emissiveIntensity,.15,.1);
+        else if((it.kind==='stew'||it.kind==='broth')&&!G.up.smart&&f.cook.t>=f.cook.at+20){swapItemKind(f,'burnt');unlock('burnt');SFX.deny()}
+      }else{bm.emissiveIntensity=lerp(bm.emissiveIntensity,.15,.1);if(f.g.userData.win)f.g.userData.win.emissiveIntensity=lerp(f.g.userData.win.emissiveIntensity,.08,.1)}
     }
     if(f.type==='bed'&&f.g.userData.screen){const s=f.g.userData.screen;s.material=f.pat?(f.pat.need&&f.pat.needT/f.pat.needMax<.3?mat('#ff4d5e',{e:'#ff2a3a',ei:1.4}):mat('#6ee07a',{e:'#3fd060',ei:1.2})):mat('#2a3242');s.scale.x=f.pat?.6+Math.abs(Math.sin(G.time*4))*.4:1}
     if(f.type==='power'&&f.g.userData.pad){f.g.userData.pad.material.emissiveIntensity=f.pat?.6+Math.sin(G.time*6)*.3:.25}
@@ -1506,13 +1654,13 @@ function updateRound(dt){
   const cfg=RCFG();
   if(G.spawned<cfg.count){
     G.spawnT-=dt;
-    const waiting=G.cas.filter(c=>c.state==='wait'||c.state==='emerge').length;
-    if(G.spawnT<=0&&waiting<6){
+    const active=G.cas.filter(c=>c.state!=='walk'&&c.state!=='gone'&&c.state!=='dead').length+G.events.length;
+    if(G.spawnT<=0&&active<cfg.cap){
       const first=G.round===3&&G.spawned===0;
       triggerCasualty(first);
-      if(G.round>=4&&Math.random()<.25&&G.spawned<cfg.count) G.events.push({t:2.2,fn:()=>{if(G.phase==='round'&&G.spawned<cfg.count)triggerCasualty(false)}});
+      if(G.round>=5&&Math.random()<.25&&G.spawned<cfg.count) G.events.push({t:2.2,fn:()=>{if(G.phase==='round'&&G.spawned<cfg.count)triggerCasualty(false)}});
       G.spawnT=rand(cfg.gap[0],cfg.gap[1])*(G.diffMul>1?1.1:1);
-      if(first) banner('Droid down!','Stretcher it to the power station, then salvage parts to fix it.');
+      if(first) banner('Droid down!','Stretcher it to a bed and salvage parts from the wrecks outside.');
     }
   } else if(!G.events.length&&!G.cas.length){
     G.phase='ending'; setTimeout(endRound,900);
@@ -1911,8 +2059,8 @@ function updateIndicators(){
       else if(c.state==='bed'&&c.bed){
         const top=c.bed.type==='bed'?1.7:2.0;
         if(c.need==='charge')bub('c'+c.id,'charge',c.needT/c.needMax,'chg',c.bed.x,top,c.bed.z);
-        else if(c.need)bub('c'+c.id,c.need,c.needT/c.needMax,'',c.bed.x,top,c.bed.z);
-        else bub('c'+c.id,'rest',1,'',c.bed.x,top,c.bed.z,true);
+        else if(c.need)bub('c'+c.id,c.need==='weapon'&&c.gun?'broken':c.need,c.needT/c.needMax,'',c.bed.x,top,c.bed.z);
+        else bub('c'+c.id,c.gun?'broken':'rest',1,'',c.bed.x,top,c.bed.z,true);
       }
       else if(c.state==='carried'&&P.held&&P.held.pat===c){bub('c'+c.id,c.kind==='human'?'cross':'wrench',c.wait/c.waitMax,'',P.x,2.2,P.z,true)}
     }
@@ -1921,10 +2069,11 @@ function updateIndicators(){
         const k=f.item.kind;
         if(k==='protein')bub('f'+f.id,'stew',f.cook.t/5,'cook',f.x,1.7,f.z,true);
         else if(k==='shroom')bub('f'+f.id,'broth',f.cook.t/6,'cook',f.x,1.7,f.z,true);
-        else if((k==='stew'||k==='broth')&&!G.up.smart){const r=1-(f.cook.t-f.cook.at)/12;if(r<.6)bub('f'+f.id,'burnt',r,'',f.x,1.7,f.z,true)}
+        else if((k==='stew'||k==='broth')&&!G.up.smart){const r=1-(f.cook.t-f.cook.at)/20;if(r<.6)bub('f'+f.id,'burnt',r,'',f.x,1.7,f.z,true)}
         else if(k==='burnt')bub('f'+f.id,'burnt',0,'',f.x,1.7,f.z,true);
       }
     }
+    for(const f of G.furn){if(f.dirty&&!f.pat)bub('d'+f.id,'sheets',1,'chg',f.x,1.5,f.z,true)}
     for(const p of G.pads){if(p.offer){const o=p.offer,nm=o.t==='f'?FDEF[o.k].n:UPG[o.k].n,ds=o.t==='f'?FDEF[o.k].desc:UPG[o.k].desc;const near=G.target&&G.target.o===p;const e=ind('p'+p.id,'tag'+(G.credits<o.cost?' no':''),near?`<b>${nm}</b><span>${o.cost}</span><em>${ds}</em>`:`<span>${o.cost}</span>`);placeEl(e,p.x,1.1,p.z,false)}}
   }
   for(const [k,e] of INDS){if(!e._u){e.remove();INDS.delete(k)}}
@@ -1945,40 +2094,51 @@ function updateIndicators(){
 function floatText(x,y,z,txt,cls){const e=document.createElement('div');e.className='float'+(cls?' '+cls:'');e.textContent=txt;const s=toScreen(x,y,z);e.style.transform=`translate(${s.x|0}px,${s.y|0}px) translate(-50%,-100%)`;indLayer.appendChild(e);setTimeout(()=>e.remove(),1250)}
 function toast(small,big){const e=document.createElement('div');e.className='toast';e.innerHTML=`<small>${small}</small><b>${big}</b>`;$('#toasts').appendChild(e);setTimeout(()=>e.remove(),3400)}
 let bannerTimer=0;
-function banner(t,p){$('#bnT').textContent=t;$('#bnP').textContent=p||'';$('#bnP').hidden=!p;$('#banner').classList.add('on');clearTimeout(bannerTimer);bannerTimer=setTimeout(()=>$('#banner').classList.remove('on'),2600)}
+function banner(t,p){$('#bnT').textContent=t;$('#bnP').textContent=p||'';$('#bnP').hidden=!p;$('#banner').classList.add('on');clearTimeout(bannerTimer);bannerTimer=setTimeout(()=>$('#banner').classList.remove('on'),isTouch?1900:2600)}
 function unlock(id){if(SAVE.ach[id])return;SAVE.ach[id]=Date.now();persist();const a=ACH.find(a=>a.id===id);if(a){toast('Achievement unlocked',a.n);SFX.good()}}
 
 /* ================= HUD ================= */
 let lastTip='';
 function currentTip(){
-  const h=P.held;
-  if(G.phase==='round'&&h&&h.pat){const t=h.pat.kind==='human'?'bed':'power';if(!G.furn.some(f=>f.type===t&&!f.pat))return h.pat.kind==='human'?'Every bed is taken. Set the stretcher down anywhere until a bed frees up.':'Every power station is taken. Set the stretcher down until one frees up.'}
-  if(G.phase==='prep')return G.round===1?'Prep phase. Hold the action button on furniture to move it, or buy items from the glowing pads outside. Start the round when ready.':'Prep phase. Spend credits on the pads outside and rearrange your clinic, then start the round.';
-  if(G.phase!=='round')return'';
-  if(h&&h.kind==='flat')return'Face an empty clinic tile and press the action button to place it.';
-  if(G.round<=2||SAVE.stats.saves<3){
-    if(h&&h.pat)return h.pat.kind==='human'?'Carry them into the clinic and lay them on an empty bed frame.':'Carry the droid to a power station and plug it in.';
-    if(h&&h.kind==='stretcher')return'Walk up to the casualty by the tunnels and load them.';
-    const w=G.cas.find(c=>c.state==='wait');
-    const b=G.cas.find(c=>c.state==='bed'&&c.need&&c.need!=='charge');
-    if(b){const n=b.need;if(h&&h.kind===n)return'Bring it to the patient\'s bed.';
-      if(n==='med')return'This patient needs Nanogel. Grab it from the white med cabinet.';
-      if(n==='stew')return(h&&h.kind==='protein')?'Put the Protein Pack on the stove, wait, then take the Hot Stew.':'Hot Stew: take a Protein Pack from the ration crate and cook it on the stove.';
-      if(n==='berry')return'Starberries grow on the bushes out on the battlefield.';
-      if(n==='broth')return'Glow Broth: pick a Glowshroom outside and cook it on the stove.';}
-    if(w&&!h)return w.kind==='human'?'A casualty crawled out of a tunnel! Grab a stretcher from the rack by the door.':'A droid is down! Grab a stretcher from the rack by the door.';
+  const h=P.held,F=feat();
+  if(G.phase==='prep'){
+    if(h&&h.kind==='flat')return'Face an empty clinic tile and tap to place it.';
+    if(G.round===1)return'Prep time. Follow the arrows when patients arrive. Tap Start when ready.';
+    const beds=G.furn.filter(f=>f.type==='bed').length;
+    if(beds<G.round+1)return'Tip: buy another Bed Frame from the glowing pads outside.';
+    return'Spend credits on the pads, rearrange your clinic, then start the round.';
   }
-  if(G.round>=3){const d=G.cas.find(c=>c.state==='bed'&&(c.need==='plating'||c.need==='circuit'));if(d&&SAVE.stats.droids<2)return d.need==='plating'?'Hold the action button on the scrap wreck outside to salvage Hull Plating.':'Hold the action button on the crashed probe outside to salvage a Circuit Board.'}
-  if(G.round===4&&G.rs&&G.rs.t<25)return'New this round: some patients want Glow Broth. Cook Glowshrooms from the battlefield.';
+  if(G.phase!=='round')return'';
+  if(h&&h.kind==='flat')return'Face an empty clinic tile and tap to place it.';
+  if(h&&h.pat&&guideOn()){if(!freeBed())return G.furn.some(f=>f.dirty&&!f.pat)?'Beds need fresh sheets. Set the stretcher down, then change a bed.':'Every bed is full. Set the stretcher down for now.';return'Lay them in a free bed.'}
+  const T=guideTarget();
+  if(!T){if(guideOn()&&!h&&G.cas.some(c=>c.state==='bed'&&c.gun))return'Quiet moment? Take a patient\'s damaged blaster and repair it early.';return''}
+  if(!guideShow())return'';
+  if(T.type==='stretchers')return'Casualty! Grab a stretcher from the rack.';
+  if(h&&h.kind==='stretcher')return'Load the casualty by the tunnels.';
+  if(T.dirty&&!T.pat)return'Hold on the dirty bed to change the sheets.';
+  if(T.pat&&h&&h.kind===needItem(T.pat.need))return h.kind==='blaster'?'Hand the repaired blaster back.':'Give it to the patient.';
+  if(T.pat&&T.pat.gun&&!h)return'Take their damaged blaster to the Armoury Bench.';
+  if(T.item)return'It is ready. Pick it up and take it to the patient.';
+  if(T.type==='medcab')return'Nanogel is in the white med cabinet.';
+  if(T.type==='pantry')return'Hot Stew: grab a Protein Pack from the ration crate.';
+  if(T.type==='stove')return h?'Put it in the oven.':'Cooking. Take it out when the bubble fills.';
+  if(T.type==='bench')return'Hold at the Armoury Bench to repair it.';
+  if(T.berries)return'Starberries grow on the bushes outside.';
+  if(T.caps)return'Pick a Glowshroom outside, then cook it in the oven.';
+  if(T.glow)return'Hold on the glowing wreck to salvage '+(T.kind==='plating'?'Hull Plating.':'a Circuit Board.');
   return'';
 }
+let tipShown=0;
+document.getElementById('tip').addEventListener('pointerdown',e=>{e.target.classList.add('gone')});
 function updateHUD(){
   const cfg=RCFG();
   $('#hRound').textContent=G.round+'/7';
   $('#hSaved').textContent=(G.rs?G.rs.saved:0)+'/'+cfg.count;
   $('#hCred').textContent=G.credits;
   $('#chRound').className='chip phase-'+(G.phase==='prep'?'prep':'round');
-  const t=currentTip();if(t!==lastTip){$('#tip').textContent=t;lastTip=t}
+  const t=currentTip();if(t!==lastTip){$('#tip').textContent=t;lastTip=t;tipShown=G.time;$('#tip').classList.remove('gone')}
+  if(t&&G.time-tipShown>(isTouch?5:9))$('#tip').classList.add('gone');
   const bs=$('#bStart');bs.hidden=G.phase!=='prep';
 }
 
@@ -1991,9 +2151,9 @@ function startCampaign(){
   if(L.hat&&L.top&&L.pants)unlock('fashion');
   SAVE.stats.battles[L.battle]=1;if(Object.keys(SAVE.stats.battles).length>=3)unlock('travel');persist();
   buildWorld();
-  Object.assign(G,{state:'game',phase:'prep',droidKit:false,round:1,credits:40,time:0,furn:[],cas:[],events:[],captors:[],up:{},bought:0,target:null,chan:null,paused:false,stars:[],totalSaved:0,shake:0,capT:0,overShown:false,rs:{saved:0,earned:0,minFrac:1,t:0},flyT:4,rocketT:14});
+  Object.assign(G,{state:'game',phase:'prep',droidKit:false,kitchen:false,oven2:false,intro:{},round:1,credits:50,time:0,furn:[],cas:[],events:[],captors:[],up:{},bought:0,target:null,chan:null,paused:false,stars:[],totalSaved:0,shake:0,capT:0,overShown:false,rs:{saved:0,earned:0,minFrac:1,t:0},flyT:4,rocketT:14});
   buildPlayer();buildField();
-  addFurn('pantry',0,0);addFurn('stove',1,0);addFurn('table',2,0);addFurn('table',3,0);addFurn('bin',5,0);
+  addFurn('table',2,0);addFurn('table',3,0);addFurn('bin',5,0);
   addFurn('medcab',0,3);addFurn('bed',1,6);addFurn('bed',3,6);addFurn('stretchers',6,1);
   bdInit();
   hideScreens();$('#hud').hidden=false;$('#touch').hidden=!isTouch;
@@ -2001,10 +2161,13 @@ function startCampaign(){
 }
 function enterPrep(){
   G.phase='prep';G.rs={saved:0,earned:0,minFrac:1,t:0};
-  if(G.round>=3&&!G.droidKit){G.droidKit=true;
-    const b=firstFreeTile([[5,5],[4,4],[5,6],[2,4]]);if(b)addFurn('power',b[0],b[1]);
-    setTimeout(()=>banner('Droids incoming','A power station has been delivered'),400);
-  }else banner('Round '+G.round,'Prep phase');
+  refreshField();
+  if(G.round>=2&&!G.kitchen){G.kitchen=true;
+    for(const [t,pref] of [['pantry',[[0,0],[1,0],[4,0]]],['stove',[[1,0],[4,0],[0,1]]],['bench',[[4,0],[0,1],[0,5],[0,2]]]]){const a=firstFreeTile(pref);if(a){const f=addFurn(t,a[0],a[1]);for(let i=0;i<10;i++)part({x:f.x+rand(-.6,.6),y:.2,z:f.z+rand(-.6,.6),smoke:true,c:'#d8d0c0',vy:.8,life:.9,s0:.4,s1:1,op:.6})}}
+    updatePiles();setTimeout(()=>banner('Kitchen and armoury delivered','Cook Hot Stew in the oven. Fix soldiers\' blasters at the bench.'),300);
+  }else if(G.round===3&&!G.droidKit){G.droidKit=true;setTimeout(()=>banner('Droids incoming','Scrap wrecks have appeared outside. Beds sheets now need changing.'),300)}
+  else if(G.round===4&&!G.oven2){G.oven2=true;const a=firstFreeTile([[4,0],[0,1],[0,2],[2,1]]);if(a)addFurn('stove',a[0],a[1]);setTimeout(()=>banner('Glowshrooms sprouted','A second oven has been delivered for Glow Broth'),300)}
+  else banner('Round '+G.round,'Prep phase');
   genOffers();
   $('#bStart').textContent='Start Round '+G.round;
   if(G.round>=5)unlock('r5');
@@ -2021,7 +2184,7 @@ function endRound(){
   $('#sumT').textContent=G.round===7?'Final round cleared':'Round '+G.round+' cleared';
   $('#sumStars').innerHTML=[0,1,2].map(i=>i<stars?ICON.star:ICON.star0).join('');
   $('#sumStats').innerHTML=`<dt>Soldiers sent back</dt><dd>${G.rs.saved}</dd><dt>Credits earned</dt><dd>+${G.rs.earned}</dd><dt>Closest call</dt><dd>${Math.round(mf*100)}% patience left</dd><dt>Round time</dt><dd>${fmtT(G.rs.t)}</dd>`;
-  $('#sumNext').textContent=G.round===7?'The front holds. One last report awaits.':G.round===2?'Next round: a droid goes down. Stretcher it to a power station and salvage parts to fix it.':G.round===3?'Next round: Glow Broth joins the menu. Glowshrooms grow out on the battlefield.':'Next round brings more casualties and less time. Spend wisely.';
+  $('#sumNext').textContent=G.round===7?'The front holds. One last report awaits.':G.round===1?'Next round: a kitchen and armoury arrive. Patients want Hot Stew and their blaster repaired. From now on the arrow only appears for new jobs.':G.round===2?'Next round: a droid goes down, and used bed sheets need changing.':G.round===3?'Next round: Glow Broth joins the menu. Glowshrooms grow out on the battlefield.':'Next round brings more casualties and less time. Spend wisely.';
   $('#sumGo').textContent=G.round===7?'See the report':'To the prep phase';
   show('scrSum');SFX.good();
 }
@@ -2138,8 +2301,10 @@ let howFrom='scrTitle';
 $('#howList').innerHTML=[
   ['stretcher','Casualties crawl out of the three tunnels. Grab a stretcher from the rack and carry them in before their timer runs out.'],
   ['cross','Lay humans on a bed frame. Their bubble shows what they need next, with a fresh timer for each need.'],
-  ['med','Nanogel comes from the med cabinet. Hot Stew is a Protein Pack cooked on the stove. Starberries grow outside. Take food off the stove before it burns.'],
-  ['charge','From round 3, droids go down too. Stretcher them to a power station, salvage Hull Plating and Circuit Boards from the wrecks, then let them recharge.'],
+  ['med','Nanogel comes from the white med cabinet. Starberries grow on the bushes outside. From round 2, Hot Stew is a Protein Pack cooked in the oven. Take it out before it burns. A bouncing arrow shows where to go next in round 1; after that it returns for the rest of any round that brings a new job (turn it on for good in Options).'],
+  ['weapon','From round 2, soldiers arrive with a damaged blaster. Take it from their bed, hold at the Armoury Bench to repair it, then hand it back before they leave. Do it early in quiet moments.'],
+  ['charge','From round 3, droids go down too. Lay them in a bed, salvage Hull Plating or Circuit Boards from the wrecks outside, then they recharge.'],
+  ['sheets','From round 3, used beds need fresh sheets. Hold the action button on a dirty bed to change them.'],
   ['rest','Healed troops march back into the tunnels and rejoin the fight in the background. Lose a single patient and the line breaks.'],
   ['protein','Between rounds, spend credits on the pads outside: more beds, stoves, tables, power stations and upgrades. Hold the action button on furniture to rearrange.'],
   ['wrench','Before each campaign, pick which army you serve and which army you face. Your patients wear your army\'s armour.']
@@ -2149,6 +2314,16 @@ $('#tHow').onclick=()=>{SFX.ui();howFrom='scrTitle';show('scrHow')};
 $('#hBack').onclick=()=>{SFX.ui();show(howFrom)};
 $('#pRes').onclick=()=>setPause(false);
 $('#pHow').onclick=()=>{howFrom='scrPause';show('scrHow')};
+let optFrom='scrTitle';
+function drawOpts(){const g=$('#oGuide');g.textContent=SAVE.guideAlways?'Always':'New jobs';g.classList.toggle('on',SAVE.guideAlways);
+  $('#oGuideD').textContent=SAVE.guideAlways?'Always points to your next step':'Round 1, then for the rest of any round a new job appears';
+  const m=$('#oSnd');m.textContent=SAVE.muted?'Off':'On';m.classList.toggle('on',!SAVE.muted)}
+$('#tOpt').onclick=()=>{SFX.ui();optFrom='scrTitle';drawOpts();show('scrOpt')};
+$('#pOpt').onclick=()=>{optFrom='scrPause';drawOpts();show('scrOpt')};
+$('#oGuide').onclick=()=>{SFX.ui();SAVE.guideAlways=!SAVE.guideAlways;persist();drawOpts()};
+$('#oSnd').onclick=()=>{audioInit();setMuted(!SAVE.muted);drawOpts()};
+$('#oReset').onclick=e=>{SAVE.learned={};persist();SFX.ui();e.target.textContent='Done';setTimeout(()=>e.target.textContent='Reset',1200)};
+$('#oBack').onclick=()=>{SFX.ui();show(optFrom)};
 $('#pQuit').onclick=()=>{persist();quitToTitle()};
 $('#sumGo').onclick=()=>{SFX.ui();afterSummary()};
 $('#oRetry').onclick=()=>{SFX.ui();startCampaign()};
@@ -2198,7 +2373,7 @@ function update(dt){
   G.time+=dt;
   updatePlayer(dt);updateTarget();updateChannel(dt);updateFurniture(dt);updateCasualties(dt);updateField(dt);
   updateBackdrop(dt);updateProjectiles(dt);updateThrown(dt);updateParts(dt);updateFlybys(dt);updateEvents(dt);updateRound(dt);updateCapture(dt);
-  updateCamera(dt);updateHUD();
+  updateGuide(dt);updateCamera(dt);updateHUD();
   targetRing.visible=!!(G.target&&G.target.o&&!G.target.o.tile&&!G.target.o.none&&(G.target.a.tap||G.target.a.hold));
   if(targetRing.visible){targetRing.position.set(G.target.x,.04,G.target.z);const s=1+Math.sin(G.time*6)*.05;targetRing.scale.set(s,s,s)}
 }
