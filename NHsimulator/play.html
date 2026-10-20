@@ -382,9 +382,10 @@ function drawPerson(c,p){
  const bg=c.createLinearGradient(-10.5,0,10.5,0);bg.addColorStop(0,shade(O.body,22));bg.addColorStop(.55,O.body);bg.addColorStop(1,shade(O.body,-28));c.fillStyle=bg;rr(c,-10.5,-37,21,25,4);c.fill();
  c.fillStyle=O.trim;c.fillRect(-10.5,-22,21,2.5);if(L.vest||O.name==='Hi-vis vest'){c.fillRect(-10.5,-30,21,2.5);}
  if(O.tee){c.fillStyle=L.skin;c.beginPath();c.arc(0,-37,3.2,0,Math.PI);c.fill();}
- if(O.under){c.fillStyle=O.under;c.beginPath();c.moveTo(-4.2,-37);c.lineTo(4.2,-37);c.lineTo(3.6,-12);c.lineTo(-3.6,-12);c.closePath();c.fill();c.fillStyle=L.skin;c.beginPath();c.arc(0,-37,2.8,0,Math.PI);c.fill();c.strokeStyle='rgba(0,0,0,.35)';c.lineWidth=.8;c.beginPath();c.moveTo(-4.2,-37);c.lineTo(-3.6,-12);c.moveTo(4.2,-37);c.lineTo(3.6,-12);c.stroke();}
+ const bk_=!!(p.dir&&p.dir.y<-.55);
+ if(O.under&&!bk_){c.fillStyle=O.under;c.beginPath();c.moveTo(-4.2,-37);c.lineTo(4.2,-37);c.lineTo(3.6,-12);c.lineTo(-3.6,-12);c.closePath();c.fill();c.fillStyle=L.skin;c.beginPath();c.arc(0,-37,2.8,0,Math.PI);c.fill();c.strokeStyle='rgba(0,0,0,.35)';c.lineWidth=.8;c.beginPath();c.moveTo(-4.2,-37);c.lineTo(-3.6,-12);c.moveTo(4.2,-37);c.lineTo(3.6,-12);c.stroke();}
  if(O.quilt){c.strokeStyle='rgba(255,255,255,.14)';c.lineWidth=.8;for(let y=-33;y<-13;y+=5){c.beginPath();c.moveTo(-10.5,y);c.lineTo(-4.4,y);c.moveTo(4.4,y);c.lineTo(10.5,y);c.stroke();}}
- if(O.chain){c.strokeStyle='#d8b43c';c.lineWidth=1.1;c.beginPath();c.arc(0,-37.5,3.5,.15,Math.PI-.15);c.stroke();c.fillStyle='#d8b43c';c.beginPath();c.arc(0,-33.4,1.2,0,7);c.fill();}
+ if(O.chain&&!bk_){c.strokeStyle='#d8b43c';c.lineWidth=1.1;c.beginPath();c.arc(0,-37.5,3.5,.15,Math.PI-.15);c.stroke();c.fillStyle='#d8b43c';c.beginPath();c.arc(0,-33.4,1.2,0,7);c.fill();}
  c.strokeStyle=OL;c.lineWidth=.9;rr(c,-10.5,-37,21,25,4);c.stroke();
  if(O.bag){c.strokeStyle=shade(O.bag,-20);c.lineWidth=1.6;c.beginPath();c.moveTo(-8,-36);c.lineTo(8,-17);c.stroke();c.fillStyle=O.bag;rr(c,4,-20,9,7,2);c.fill();c.fillStyle='#c9a227';c.fillRect(7.5,-17.5,2,1.5);c.strokeStyle=OL;c.lineWidth=.7;rr(c,4,-20,9,7,2);c.stroke();}
  if(p.food){c.fillStyle='#f7f1e3';c.fillRect(8,-22,10,7);c.fillStyle='#c0392b';c.fillRect(8,-19,10,1.5);}
