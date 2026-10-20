@@ -22,7 +22,12 @@ h1,h2,h3,.bebas{font-family:'Bebas Neue',Impact,sans-serif;letter-spacing:.06em;
 /* screens */
 .screen{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;z-index:40;padding:16px}
 #boot{background:#000;cursor:pointer}
-#boot p{font-family:'IBM Plex Mono',monospace;color:var(--dim);animation:pulse 1.6s infinite}
+.debrief{margin-top:12px;padding:10px 14px;border:1px solid rgba(63,208,255,.35);border-radius:8px;background:rgba(63,208,255,.06)}.debrief h3{margin:0 0 6px;color:var(--cyan)}.debrief ul{margin:0;padding-left:18px;font-size:13px;line-height:1.45}
+#boot p{font-family:'IBM Plex Mono',monospace;color:var(--dim);opacity:0;animation:bootIn .4s 1s forwards,pulse 1.6s 1.4s infinite}
+#boot h1{font-family:'Bebas Neue',Impact,sans-serif;font-size:clamp(40px,9vw,92px);line-height:.92;letter-spacing:3px;text-align:center;color:#fff;margin:0 0 22px;animation:bootT .9s ease-out both}
+#boot .bb{width:min(260px,60vw);height:3px;background:#222;border-radius:2px;overflow:hidden;margin-bottom:18px}
+#boot .bb i{display:block;height:100%;width:0;background:var(--amber,#ffb627);animation:bootBar 1s ease-out forwards}
+@keyframes bootBar{to{width:100%}}@keyframes bootIn{to{opacity:1}}@keyframes bootT{from{opacity:0;transform:scale(1.06);filter:blur(6px)}to{opacity:1;transform:none;filter:none}}
 @keyframes pulse{50%{opacity:.3}}
 #splash{background:radial-gradient(circle at 50% 50%,#1b0b2e,#000 70%)}
 #splash .logo{font-family:'Bebas Neue';font-size:clamp(40px,9vw,110px);letter-spacing:.12em;color:#fff;text-shadow:0 0 18px #c04bff,0 0 42px #ff3fa4;opacity:0;animation:spl 3s ease forwards}
@@ -80,7 +85,7 @@ h1,h2,h3,.bebas{font-family:'Bebas Neue',Impact,sans-serif;letter-spacing:.06em;
 .opts{display:flex;flex-direction:column;gap:6px}
 .opt{text-align:left;background:rgba(255,255,255,.05);border:1px solid var(--line);padding:9px 12px;border-radius:6px;font-size:14px}
 .opt:hover{border-color:var(--amber);background:rgba(255,182,39,.1)}
-.opt .k{display:inline-block;min-width:22px;color:var(--amber);font-family:'IBM Plex Mono';font-weight:600}
+.opt .k{display:inline-block;min-width:22px;margin-right:12px;white-space:nowrap;color:var(--amber);font-family:'IBM Plex Mono';font-weight:600}
 .opt.asked{opacity:.5}
 .opt.ev{border-left:3px solid var(--cyan)}
 .opt.agg{border-left:3px solid var(--red)}
@@ -174,6 +179,15 @@ h1,h2,h3,.bebas{font-family:'Bebas Neue',Impact,sans-serif;letter-spacing:.06em;
 #joy{position:absolute;left:24px;bottom:24px;width:130px;height:130px;border-radius:50%;border:2px solid rgba(255,255,255,.25);pointer-events:auto;background:rgba(255,255,255,.05)}
 #joy i{position:absolute;left:40px;top:40px;width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.35)}
 @media (max-width:760px),(max-height:500px){#modal:not(.hidden)~#toasts{display:none}}
+@media (max-width:760px),(max-height:500px){
+ #hud .tl{max-width:calc(100vw - 150px);padding:4px 10px 4px 4px;gap:7px}
+ #hud .tl b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:calc(100vw - 230px)}
+ #hud .tl small{font-size:9px;letter-spacing:.14em;white-space:nowrap}
+ #hud .tc{left:auto;right:10px;transform:none;padding:3px 10px}
+ #hud .tc .clk{font-size:16px}
+ #hud .tc .eta{font-size:10px}
+ #hud .tr{top:58px;width:min(230px,50vw);font-size:11px;padding:6px 8px}
+}
 @media (max-width:760px){
  #sting{grid-template-columns:1fr;height:62vh;padding-top:30px}
  #sting .c1{display:none}
@@ -224,9 +238,12 @@ addEventListener('resize',resize);resize();
 
 /* ================= AUDIO (synthesised) ================= */
 const AU={ctx:null,master:null,muted:false};
-function auInit(){if(AU.ctx)return;try{AU.ctx=new(window.AudioContext||window.webkitAudioContext)();AU.master=AU.ctx.createGain();AU.master.gain.value=.35;AU.master.connect(AU.ctx.destination);}catch(e){}}
-function tone(f,d,type='sine',v=.3,slide=0){if(!AU.ctx||AU.muted)return;const t=AU.ctx.currentTime,o=AU.ctx.createOscillator(),g=AU.ctx.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,f+slide),t+d);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(AU.master);o.start(t);o.stop(t+d+.02);}
-function noise(d,v=.2,f=1200){if(!AU.ctx||AU.muted)return;const n=Math.floor(AU.ctx.sampleRate*d),b=AU.ctx.createBuffer(1,n,AU.ctx.sampleRate),a=b.getChannelData(0);for(let i=0;i<n;i++)a[i]=Math.random()*2-1;const s=AU.ctx.createBufferSource();s.buffer=b;const fl=AU.ctx.createBiquadFilter();fl.type='bandpass';fl.frequency.value=f;const g=AU.ctx.createGain();g.gain.setValueAtTime(v,AU.ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,AU.ctx.currentTime+d);s.connect(fl);fl.connect(g);g.connect(AU.master);s.start();}
+function auBuild(c){AU.ctx=c;AU.master=c.createGain();AU.master.gain.value=.35;AU.master.connect(c.destination);AU.sfxBus=c.createGain();AU.sfxBus.connect(AU.master);AU.musBus=c.createGain();AU.musBus.connect(AU.master);applyVol();}
+function auInit(){if(AU.ctx)return;try{auBuild(new(window.AudioContext||window.webkitAudioContext)());}catch(e){}}
+function applyVol(){if(!AU.ctx)return;const v=(typeof P!=='undefined'&&P&&P.vol)||{music:.7,sfx:1};AU.sfxBus.gain.value=AU.muted?0:v.sfx;AU.musBus.gain.value=AU.muted?0:v.music*2.4;}
+function setMuted(m){AU.muted=m;applyVol();}
+function tone(f,d,type='sine',v=.3,slide=0){if(!AU.ctx||AU.muted)return;const t=AU.ctx.currentTime,o=AU.ctx.createOscillator(),g=AU.ctx.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(slide)o.frequency.exponentialRampToValueAtTime(Math.max(30,f+slide),t+d);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(AU.sfxBus);o.start(t);o.stop(t+d+.02);}
+function noise(d,v=.2,f=1200){if(!AU.ctx||AU.muted)return;const n=Math.floor(AU.ctx.sampleRate*d),b=AU.ctx.createBuffer(1,n,AU.ctx.sampleRate),a=b.getChannelData(0);for(let i=0;i<n;i++)a[i]=Math.random()*2-1;const s=AU.ctx.createBufferSource();s.buffer=b;const fl=AU.ctx.createBiquadFilter();fl.type='bandpass';fl.frequency.value=f;const g=AU.ctx.createGain();g.gain.setValueAtTime(v,AU.ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,AU.ctx.currentTime+d);s.connect(fl);fl.connect(g);g.connect(AU.sfxBus);s.start();}
 const SFX={blip:()=>tone(880,.05,'square',.06),select:()=>tone(520,.09,'triangle',.18,240),
  phase:()=>{tone(98,1.4,'sawtooth',.12,-30);tone(196,1.6,'sine',.1);setTimeout(()=>tone(392,.6,'triangle',.06),250);},
  tick:()=>tone(1500,.03,'square',.05),static:()=>noise(.22,.14,2200),word:()=>tone(260+Math.random()*180,.03,'square',.02),
@@ -244,27 +261,35 @@ let P=loadP();
 function saveP(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(P));}catch(e){}}
 
 /* ================= COSMETICS ================= */
-const HATS=['None','Flat cap','Beanie','Baseball cap','Bucket hat','Trilby','Hard hat','Headset','Deerstalker','Bobble hat'];
-const OUTFITS=[{name:'Hi-vis vest',body:'#d9e021',trim:'#c9ccd1',arms:'#30343f'},{name:'Black hoodie',body:'#1f1f24',trim:'#3d3d48',arms:'#1f1f24'},{name:'Navy parka',body:'#1e2f4d',trim:'#c78f3b',arms:'#1e2f4d'},{name:'Tracksuit',body:'#2a7f62',trim:'#ffffff',arms:'#2a7f62'},{name:'Denim jacket',body:'#4a6fa5',trim:'#2f4a73',arms:'#4a6fa5'},{name:'Bomber',body:'#4b5320',trim:'#c75b12',arms:'#4b5320'},{name:'Rain mac',body:'#e0b13a',trim:'#9b7a1f',arms:'#e0b13a'},{name:'White tee & man bag',body:'#f2f2f2',trim:'#f2f2f2',arms:'#f2f2f2',tee:true,bag:'#3a2a1a'},{name:'Puffer',body:'#c1272d',trim:'#7d1519',arms:'#c1272d'},{name:'Blazer',body:'#3b3b3b',trim:'#e6e6e6',arms:'#3b3b3b'}];
-const EMBLEMS=[['Shield','#1d3557','#f1faee'],['Star','#6a040f','#ffba08'],['Eye','#14213d','#fca311'],['Bolt','#222','#ffd60a'],['Crown','#3c096c','#e0aaff'],['Hex','#004b23','#70e000'],['Diamond','#03045e','#90e0ef'],['Target','#9d0208','#ffffff'],['Key','#5f0f40','#fb8b24'],['Chevrons','#283618','#dda15e'],['Cross','#0b525b','#e3f2fd'],['Moon','#10002b','#c8b6ff'],['Torch','#3d0c02','#ff7b00'],['Wings','#023047','#ffb703'],['Owl','#2b2d42','#edf2f4']];
+const HATS=['None','Flat cap','Beanie','Baseball cap','Bucket hat','Trilby','Hard hat','Headset','Balaclava','Bobble hat'];
+const OUTFITS=[{name:'Hi-vis vest',body:'#d9e021',trim:'#c9ccd1',arms:'#30343f'},{name:'Black hoodie',body:'#1f1f24',trim:'#3d3d48',arms:'#1f1f24'},{name:'Navy parka',body:'#1e2f4d',trim:'#c78f3b',arms:'#1e2f4d'},{name:'Tracksuit',body:'#2a7f62',trim:'#ffffff',arms:'#2a7f62'},{name:'Denim jacket',body:'#4a6fa5',trim:'#2f4a73',arms:'#4a6fa5'},{name:'Black tee',body:'#16161a',trim:'#16161a',arms:'#16161a',tee:true},{name:'Rain mac',body:'#e0b13a',trim:'#9b7a1f',arms:'#e0b13a'},{name:'White tee & man bag',body:'#f2f2f2',trim:'#f2f2f2',arms:'#f2f2f2',tee:true,bag:'#3a2a1a'},{name:'Black puffer',body:'#17181c',trim:'#2c2e35',arms:'#17181c',under:'#f4f4f4',quilt:true,chain:true},{name:'Grey jacket',body:'#868b94',trim:'#6a6f78',arms:'#868b94',under:'#3f6fb5'}];
+const EMBLEMS=[['Shield','#1d3557','#f1faee'],['Eye','#14213d','#fca311'],['Key','#5f0f40','#fb8b24'],['Moon','#10002b','#c8b6ff'],['Torch','#3d0c02','#ff7b00'],['Wings','#023047','#ffb703'],['Owl','#2b2d42','#edf2f4'],
+['Weed leaf','#0b2e13','#5ed43a'],['Umbrella','#0b2545','#ff6b6b'],['Red-eyed hood','#26262e','#050505','#c1121f'],['Hooded figure','#2d1b4e','#d9d9e3'],['Wolf head','#14161a','#aeb4bd'],['Wasp','#141414','#ffd60a'],['Stop','#1b1b1b','#d62828','#ffffff'],['Bear trap','#2f2f33','#c9ccd1'],['Hand','#003049','#f7b267']];
+const EMB_OLD=['Shield','Star','Eye','Bolt','Crown','Hex','Diamond','Target','Key','Chevrons','Cross','Moon','Torch','Wings','Owl'];
+if(!P.vol||typeof P.vol!=='object')P.vol={music:.7,sfx:1};P.vol=Object.assign({music:.7,sfx:1},P.vol);if(P.hints===undefined)P.hints=true;
+if(P.reg===undefined){P.reg=(P.stats.played>0||P.name!=='Rookie');}
+if(P.embV!==2){const nm=EMB_OLD[P.emblem];const ni=EMBLEMS.findIndex(e=>e[0]===nm);P.emblem=ni>=0?ni:0;P.embV=2;saveP();}
+const EMB_N=EMBLEMS.length;
 function starPath(c,n,ro,ri){for(let i=0;i<n*2;i++){const r=i%2?ri:ro,a=-Math.PI/2+i*Math.PI/n;c[i?'lineTo':'moveTo'](Math.cos(a)*r,Math.sin(a)*r);}c.closePath();}
-function drawEmblem(c,i,x,y,r){const[,bg,fg]=EMBLEMS[i%15];c.save();c.translate(x,y);c.fillStyle=bg;c.beginPath();c.arc(0,0,r,0,7);c.fill();c.lineWidth=r*.09;c.strokeStyle=fg;c.stroke();c.fillStyle=fg;c.strokeStyle=fg;c.lineWidth=r*.13;c.lineCap='round';c.lineJoin='round';const s=r*.55;c.beginPath();
- switch(i%15){
- case 0:c.moveTo(-s,-s*.8);c.lineTo(s,-s*.8);c.lineTo(s,0);c.quadraticCurveTo(s*.8,s*.9,0,s*1.1);c.quadraticCurveTo(-s*.8,s*.9,-s,0);c.closePath();c.fill();break;
- case 1:starPath(c,5,s*1.1,s*.45);c.fill();break;
- case 2:c.moveTo(-s*1.1,0);c.quadraticCurveTo(0,-s*1.1,s*1.1,0);c.quadraticCurveTo(0,s*1.1,-s*1.1,0);c.fill();c.fillStyle=bg;c.beginPath();c.arc(0,0,s*.35,0,7);c.fill();break;
- case 3:c.moveTo(s*.2,-s*1.1);c.lineTo(-s*.6,s*.15);c.lineTo(-s*.05,s*.15);c.lineTo(-s*.3,s*1.1);c.lineTo(s*.6,-s*.2);c.lineTo(s*.05,-s*.2);c.closePath();c.fill();break;
- case 4:c.moveTo(-s,s*.6);c.lineTo(-s,-s*.5);c.lineTo(-s*.5,0);c.lineTo(0,-s*.8);c.lineTo(s*.5,0);c.lineTo(s,-s*.5);c.lineTo(s,s*.6);c.closePath();c.fill();break;
- case 5:for(let k=0;k<6;k++){const a=k*Math.PI/3;c[k?'lineTo':'moveTo'](Math.cos(a)*s,Math.sin(a)*s);}c.closePath();c.fill();break;
- case 6:c.moveTo(0,-s*1.1);c.lineTo(s*.8,0);c.lineTo(0,s*1.1);c.lineTo(-s*.8,0);c.closePath();c.fill();break;
- case 7:c.arc(0,0,s,0,7);c.stroke();c.beginPath();c.arc(0,0,s*.5,0,7);c.stroke();c.beginPath();c.arc(0,0,s*.14,0,7);c.fill();break;
- case 8:c.arc(-s*.45,0,s*.4,0,7);c.stroke();c.beginPath();c.moveTo(-s*.05,0);c.lineTo(s,0);c.moveTo(s*.7,0);c.lineTo(s*.7,s*.4);c.moveTo(s*.95,0);c.lineTo(s*.95,s*.3);c.stroke();break;
- case 9:for(let k=0;k<2;k++){c.moveTo(-s*.8,s*(-.05+k*.6));c.lineTo(0,s*(-.6+k*.6));c.lineTo(s*.8,s*(-.05+k*.6));}c.stroke();break;
- case 10:c.fillRect(-s*.25,-s,s*.5,s*2);c.fillRect(-s,-s*.25,s*2,s*.5);break;
- case 11:c.arc(0,0,s,0,7);c.fill();c.fillStyle=bg;c.beginPath();c.arc(s*.42,-s*.2,s*.85,0,7);c.fill();break;
- case 12:c.moveTo(-s*.3,-s*.1);c.lineTo(s*.3,-s*.1);c.lineTo(s*.15,s*1.1);c.lineTo(-s*.15,s*1.1);c.closePath();c.fill();c.beginPath();c.moveTo(0,-s*1.15);c.quadraticCurveTo(s*.65,-s*.5,0,-s*.2);c.quadraticCurveTo(-s*.65,-s*.5,0,-s*1.15);c.fill();break;
- case 13:for(const d of[-1,1]){c.moveTo(0,s*.1);c.quadraticCurveTo(d*s*.5,-s*.9,d*s*1.15,-s*.55);c.quadraticCurveTo(d*s*.85,s*.2,0,s*.5);}c.fill();break;
- case 14:c.arc(-s*.42,0,s*.4,0,7);c.moveTo(s*.82,0);c.arc(s*.42,0,s*.4,0,7);c.fill();c.fillStyle=bg;c.beginPath();c.arc(-s*.42,0,s*.15,0,7);c.arc(s*.42,0,s*.15,0,7);c.fill();c.fillStyle=fg;c.beginPath();c.moveTo(-s*.12,s*.35);c.lineTo(s*.12,s*.35);c.lineTo(0,s*.65);c.fill();c.beginPath();c.moveTo(-s*.8,-s*.3);c.lineTo(-s*.6,-s*.95);c.lineTo(-s*.3,-s*.4);c.moveTo(s*.8,-s*.3);c.lineTo(s*.6,-s*.95);c.lineTo(s*.3,-s*.4);c.fill();break;
+function drawEmblem(c,i,x,y,r){i=((i%EMB_N)+EMB_N)%EMB_N;const[nm,bg,fg,ring]=EMBLEMS[i];c.save();c.translate(x,y);c.fillStyle=bg;c.beginPath();c.arc(0,0,r,0,7);c.fill();c.lineWidth=r*.09;c.strokeStyle=ring||fg;c.stroke();c.fillStyle=fg;c.strokeStyle=fg;c.lineWidth=r*.13;c.lineCap='round';c.lineJoin='round';const s=r*.55;c.beginPath();
+ switch(nm){
+ case 'Shield':c.moveTo(-s,-s*.8);c.lineTo(s,-s*.8);c.lineTo(s,0);c.quadraticCurveTo(s*.8,s*.9,0,s*1.1);c.quadraticCurveTo(-s*.8,s*.9,-s,0);c.closePath();c.fill();break;
+ case 'Eye':c.moveTo(-s*1.1,0);c.quadraticCurveTo(0,-s*1.1,s*1.1,0);c.quadraticCurveTo(0,s*1.1,-s*1.1,0);c.fill();c.fillStyle=bg;c.beginPath();c.arc(0,0,s*.35,0,7);c.fill();break;
+ case 'Key':c.arc(-s*.45,0,s*.4,0,7);c.stroke();c.beginPath();c.moveTo(-s*.05,0);c.lineTo(s,0);c.moveTo(s*.7,0);c.lineTo(s*.7,s*.4);c.moveTo(s*.95,0);c.lineTo(s*.95,s*.3);c.stroke();break;
+ case 'Moon':c.arc(0,0,s,0,7);c.fill();c.fillStyle=bg;c.beginPath();c.arc(s*.42,-s*.2,s*.85,0,7);c.fill();break;
+ case 'Torch':c.moveTo(-s*.3,-s*.1);c.lineTo(s*.3,-s*.1);c.lineTo(s*.15,s*1.1);c.lineTo(-s*.15,s*1.1);c.closePath();c.fill();c.beginPath();c.moveTo(0,-s*1.15);c.quadraticCurveTo(s*.65,-s*.5,0,-s*.2);c.quadraticCurveTo(-s*.65,-s*.5,0,-s*1.15);c.fill();break;
+ case 'Wings':for(const d of[-1,1]){c.moveTo(0,s*.1);c.quadraticCurveTo(d*s*.5,-s*.9,d*s*1.15,-s*.55);c.quadraticCurveTo(d*s*.85,s*.2,0,s*.5);}c.fill();break;
+ case 'Owl':c.arc(-s*.42,0,s*.4,0,7);c.moveTo(s*.82,0);c.arc(s*.42,0,s*.4,0,7);c.fill();c.fillStyle=bg;c.beginPath();c.arc(-s*.42,0,s*.15,0,7);c.arc(s*.42,0,s*.15,0,7);c.fill();c.fillStyle=fg;c.beginPath();c.moveTo(-s*.12,s*.35);c.lineTo(s*.12,s*.35);c.lineTo(0,s*.65);c.fill();c.beginPath();c.moveTo(-s*.8,-s*.3);c.lineTo(-s*.6,-s*.95);c.lineTo(-s*.3,-s*.4);c.moveTo(s*.8,-s*.3);c.lineTo(s*.6,-s*.95);c.lineTo(s*.3,-s*.4);c.fill();break;
+ case 'Weed leaf':{const by=s*.6;const lf=(a,L,w)=>{c.save();c.translate(0,by);c.rotate(a);c.beginPath();c.moveTo(0,0);c.quadraticCurveTo(w*s,-L*s*.5,0,-L*s);c.quadraticCurveTo(-w*s,-L*s*.5,0,0);c.fill();c.restore();};
+  lf(0,1.8,.5);for(const d of[-1,1]){lf(d*.5,1.55,.42);lf(d*1.0,1.2,.36);lf(d*1.45,.78,.28);}c.beginPath();c.lineWidth=r*.1;c.moveTo(0,by);c.lineTo(0,s*1.3);c.stroke();break;}
+ case 'Umbrella':{const cy=-s*.15,R=s*1.2;c.arc(0,cy,R,Math.PI,0);for(let q=0;q<3;q++){const x1=R-q*R*2/3,x2=x1-R*2/3;c.quadraticCurveTo((x1+x2)/2,cy+R*.28,x2,cy);}c.closePath();c.fill();c.beginPath();c.moveTo(0,cy-R);c.lineTo(0,cy-R-s*.18);c.stroke();c.beginPath();c.lineWidth=r*.11;c.moveTo(0,cy);c.lineTo(0,s*.85);c.arc(-s*.22,s*.85,s*.22,0,Math.PI);c.stroke();c.fillStyle=bg;c.globalAlpha=.4;for(const d of[-1,0,1]){c.beginPath();c.moveTo(d*R*.66,cy);c.quadraticCurveTo(d*R*.35,cy-R*.7,0,cy-R);c.lineWidth=1;c.strokeStyle=bg;c.stroke();}c.globalAlpha=1;break;}
+ case 'Red-eyed hood':{c.moveTo(0,-s*1.25);c.quadraticCurveTo(s*.85,-s*.55,s*.95,s*.3);c.quadraticCurveTo(s*1.05,s*.9,s*1.15,s*1.15);c.lineTo(-s*1.15,s*1.15);c.quadraticCurveTo(-s*1.05,s*.9,-s*.95,s*.3);c.quadraticCurveTo(-s*.85,-s*.55,0,-s*1.25);c.fill();c.strokeStyle='#4a4a56';c.lineWidth=r*.05;c.stroke();c.fillStyle='#000';c.beginPath();c.ellipse(0,-s*.1,s*.62,s*.72,0,0,7);c.fill();c.shadowColor='#ff0000';c.shadowBlur=r*.35;c.fillStyle='#ff1f1f';for(const d of[-1,1]){c.beginPath();c.ellipse(d*s*.28,-s*.12,s*.17,s*.09,d*-.25,0,7);c.fill();}c.shadowBlur=0;break;}
+ case 'Hooded figure':{c.moveTo(0,-s*1.25);c.quadraticCurveTo(s*.62,-s*.85,s*.52,-s*.1);c.lineTo(-s*.52,-s*.1);c.quadraticCurveTo(-s*.62,-s*.85,0,-s*1.25);c.fill();c.beginPath();c.moveTo(-s*.5,-s*.15);c.lineTo(s*.5,-s*.15);c.quadraticCurveTo(s*.78,s*.5,s*1.1,s*1.15);c.lineTo(-s*1.1,s*1.15);c.quadraticCurveTo(-s*.78,s*.5,-s*.5,-s*.15);c.fill();c.fillStyle=bg;c.beginPath();c.ellipse(0,-s*.5,s*.27,s*.36,0,0,7);c.fill();break;}
+ case 'Wolf head':{const P_=[[-.95,-1.2],[-.35,-.72],[.35,-.72],[.95,-1.2],[1.02,-.2],[.82,.4],[.3,.7],[.22,1.1],[-.22,1.1],[-.3,.7],[-.82,.4],[-1.02,-.2]];P_.forEach((p,i)=>c[i?'lineTo':'moveTo'](p[0]*s,p[1]*s));c.closePath();c.fill();c.fillStyle='#3b3f46';c.beginPath();c.moveTo(-.8*s,-.98*s);c.lineTo(-.46*s,-.7*s);c.lineTo(-.82*s,-.45*s);c.closePath();c.moveTo(.8*s,-.98*s);c.lineTo(.46*s,-.7*s);c.lineTo(.82*s,-.45*s);c.closePath();c.fill();c.fillStyle='#22252b';c.beginPath();c.moveTo(-.2*s,.55*s);c.lineTo(.2*s,.55*s);c.lineTo(.22*s,1.1*s);c.lineTo(-.22*s,1.1*s);c.closePath();c.fill();c.fillStyle=bg;c.beginPath();c.moveTo(-.72*s,-.2*s);c.lineTo(-.2*s,-.02*s);c.lineTo(-.55*s,.17*s);c.closePath();c.moveTo(.72*s,-.2*s);c.lineTo(.2*s,-.02*s);c.lineTo(.55*s,.17*s);c.closePath();c.fill();c.beginPath();c.ellipse(0,.62*s,.13*s,.09*s,0,0,7);c.fill();break;}
+ case 'Wasp':{c.save();c.fillStyle='rgba(235,245,255,.45)';for(const d of[-1,1]){c.beginPath();c.ellipse(d*s*.65,-s*.45,s*.22,s*.62,d*.7,0,7);c.fill();}c.restore();c.fillStyle=fg;c.beginPath();c.ellipse(0,s*.5,s*.4,s*.72,0,0,7);c.fill();c.beginPath();c.arc(0,-s*.3,s*.3,0,7);c.fill();c.beginPath();c.arc(0,-s*.78,s*.22,0,7);c.fill();c.beginPath();c.moveTo(-s*.12,s*1.18);c.lineTo(s*.12,s*1.18);c.lineTo(0,s*1.5);c.fill();c.fillStyle=bg;for(let q=0;q<3;q++)c.fillRect(-s*.45,s*.12+q*s*.33,s*.9,s*.12);c.strokeStyle=fg;c.lineWidth=r*.05;c.beginPath();c.moveTo(-s*.1,-s*.95);c.lineTo(-s*.3,-s*1.25);c.moveTo(s*.1,-s*.95);c.lineTo(s*.3,-s*1.25);c.stroke();break;}
+ case 'Stop':{for(let q=0;q<8;q++){const a=Math.PI/8+q*Math.PI/4;c[q?'lineTo':'moveTo'](Math.cos(a)*s*1.2,Math.sin(a)*s*1.2);}c.closePath();c.fill();c.strokeStyle='#fff';c.lineWidth=r*.05;c.beginPath();for(let q=0;q<8;q++){const a=Math.PI/8+q*Math.PI/4;c[q?'lineTo':'moveTo'](Math.cos(a)*s*1.03,Math.sin(a)*s*1.03);}c.closePath();c.stroke();c.fillStyle='#fff';c.font=`900 ${s*.62}px Arial,sans-serif`;c.textAlign='center';c.textBaseline='middle';c.fillText('STOP',0,s*.04);break;}
+ case 'Bear trap':{const cy=s*.75,R=s*1.05;c.lineWidth=r*.13;for(const[a0,a1]of[[Math.PI,Math.PI*1.4],[Math.PI*1.6,Math.PI*2]]){c.beginPath();c.arc(0,cy,R,a0,a1);c.stroke();for(let q=0;q<5;q++){const an=a0+(a1-a0)*(q+.5)/5,w=.085,ca=Math.cos(an),sa=Math.sin(an);c.beginPath();c.moveTo(Math.cos(an-w)*R,cy+Math.sin(an-w)*R);c.lineTo(Math.cos(an+w)*R,cy+Math.sin(an+w)*R);c.lineTo(ca*R*.62,cy+sa*R*.62);c.closePath();c.fill();}}c.fillRect(-s*1.25,cy-s*.02,s*2.5,s*.26);c.fillStyle=bg;c.fillRect(-s*.2,cy+s*.04,s*.4,s*.12);break;}
+ case 'Hand':{c.lineWidth=s*.3;const fing=[[-.6,-.1,-.55],[-.2,-.1,-1.0],[.2,-.1,-1.1],[.6,-.1,-.85]];for(const[fx,y0,y1]of fing){c.beginPath();c.moveTo(fx*s,y0*s);c.lineTo(fx*s,y1*s);c.stroke();}c.beginPath();c.moveTo(s*.62,s*.5);c.lineTo(s*1.12,-s*.08);c.stroke();c.beginPath();c.moveTo(-s*.76,-s*.1);c.lineTo(s*.76,-s*.1);c.lineTo(s*.76,s*.7);c.quadraticCurveTo(s*.6,s*1.1,0,s*1.1);c.quadraticCurveTo(-s*.6,s*1.1,-s*.76,s*.7);c.closePath();c.fill();break;}
  }c.restore();}
 function emblemCanvas(i,size=32){const k=document.createElement('canvas');k.width=k.height=size*2;const c=k.getContext('2d');drawEmblem(c,i,size,size,size-2);k.style.width=k.style.height=size+'px';k.style.borderRadius='50%';return k;}
 
@@ -274,7 +299,8 @@ const LOOK={
  founder:{outfit:{body:'#6b4a3a',trim:'#a07f5e',arms:'#6b4a3a'},hat:0,skin:'#b9805c',hair:'#c9c9c9',legs:'#2e2e33',glasses:true,beard:'#bdbdbd'},
  decoy:{outfit:{body:'#3a6ea5',trim:'#244a70',arms:'#3a6ea5'},hat:7,skin:'#8d5a3b',hair:'#141414',legs:'#1e1e22',longhair:true},
  stranger:{outfit:{body:'#a64b7a',trim:'#f2d0e0',arms:'#a64b7a'},hat:0,skin:'#f0c8a8',hair:'#e6dcc4',legs:'#4a4440',curly:true},
- mark:{outfit:{body:'#76787c',trim:'#5a5c60',arms:'#76787c'},hat:0,skin:'#e3b896',hair:'#8a7a6a',legs:'#33445f',bald:true,stubble:true},
+ vet:{outfit:{body:'#47553f',trim:'#c9b25a',arms:'#47553f'},hat:0,skin:'#d2a679',hair:'#9a9a9a',legs:'#2f3238',stubble:true},
+ mark:{outfit:{body:'#76787c',trim:'#5a5c60',arms:'#76787c'},hat:0,skin:'#e3b896',hair:'#bdbdbd',legs:'#33445f',bald:true,stubble:true},
  kev:{outfit:{body:'#f3f3f3',trim:'#d23b3b',arms:'#f3f3f3'},hat:'paper',skin:'#c99a74',hair:'#2b1d14',legs:'#222'},
  police1:{outfit:{body:'#141a26',trim:'#d7e84a',arms:'#141a26'},hat:'police',skin:'#7a4a2c',hair:'#111',legs:'#111',vest:true},
  police2:{outfit:{body:'#141a26',trim:'#d7e84a',arms:'#141a26'},hat:'police',skin:'#f0c4a4',hair:'#7a4d2a',legs:'#111',vest:true},
@@ -285,7 +311,7 @@ const LOOK={
  c5:{outfit:{body:'#1d3557',trim:'#e63946',arms:'#1d3557'},hat:9,skin:'#d4a373',hair:'#3d2b1f',legs:'#22223b'},
  c6:{outfit:{body:'#f77f00',trim:'#003049',arms:'#f77f00'},hat:0,skin:'#6f4518',hair:'#111',legs:'#003049'}
 };
-function drawHat(c,id,hr,dx,col){const u=hr/8;c.save();const C=(d)=>col||d,D=(d)=>shade(col||d,-35);
+function drawHat(c,id,hr,dx,col,bk){const u=hr/8;c.save();const C=(d)=>col||d,D=(d)=>shade(col||d,-35);
  if(id==='police'){c.fillStyle='#0f1726';rr(c,-8.5*u,-13*u,17*u,8*u,2*u);c.fill();for(let i=0;i<6;i++){c.fillStyle=i%2?'#e9eef5':'#1c3c8c';c.fillRect(-8.5*u+i*17/6*u,-6.5*u,17/6*u,2.5*u);}c.fillStyle='#05080f';c.beginPath();c.ellipse(dx*3*u,-4*u,9*u,2.4*u,0,0,7);c.fill();c.fillStyle='#d9c25a';c.fillRect(-1.2*u,-12*u,2.4*u,3*u);}
  else if(id==='paper'){c.fillStyle='#fafafa';c.beginPath();c.moveTo(-9*u,-5*u);c.lineTo(9*u,-5*u);c.lineTo(6*u,-12*u);c.lineTo(-6*u,-12*u);c.closePath();c.fill();c.fillStyle='#d23b3b';c.fillRect(-9*u,-6.5*u,18*u,1.6*u);}
  else switch(id){
@@ -296,9 +322,7 @@ function drawHat(c,id,hr,dx,col){const u=hr/8;c.save();const C=(d)=>col||d,D=(d)
  case 5:c.fillStyle=C('#2d2d2d');c.beginPath();c.ellipse(0,-5*u,12.5*u,3.2*u,0,0,7);c.fill();rr(c,-6.5*u,-13*u,13*u,8*u,2*u);c.fill();c.fillStyle=col?shade(col,-50):'#8b0000';c.fillRect(-6.5*u,-7.5*u,13*u,2*u);break;
  case 6:c.fillStyle=C('#f4c20d');c.beginPath();c.arc(0,-4*u,8.6*u,Math.PI,0);c.fill();c.fillRect(-10.5*u,-5.4*u,21*u,2.2*u);c.fillStyle=D('#f4c20d');c.fillRect(-1*u,-12.5*u,2*u,8*u);break;
  case 7:c.strokeStyle=C('#202020');c.lineWidth=2*u;c.beginPath();c.arc(0,-1*u,9*u,Math.PI,0);c.stroke();c.fillStyle=C('#202020');c.fillRect(-11*u,-3*u,4*u,6*u);c.fillRect(7*u,-3*u,4*u,6*u);c.strokeStyle=C('#202020');c.lineWidth=1.2*u;c.beginPath();c.moveTo(9*u,2*u);c.quadraticCurveTo(7*u,8*u,2*u,7*u);c.stroke();break;
- case 8:{const b=C('#8a6a3c');c.fillStyle=b;c.beginPath();c.arc(0,-4*u,8.4*u,Math.PI,0);c.fill();c.beginPath();c.ellipse(0,-4.2*u,10.5*u,2.6*u,0,0,7);c.fill();
-  c.strokeStyle=shade(b,-40);c.lineWidth=.7*u;for(let i=-6;i<=6;i+=3){c.beginPath();c.moveTo(i*u,-12*u);c.lineTo(i*u,-4*u);c.stroke();}for(let j=-10;j<=-5;j+=2.5){c.beginPath();c.moveTo(-8*u,j*u);c.lineTo(8*u,j*u);c.stroke();}
-  c.fillStyle=shade(b,-30);c.beginPath();c.arc(0,-12.4*u,1.4*u,0,7);c.fill();c.strokeStyle=shade(b,-30);c.lineWidth=.8*u;c.beginPath();c.moveTo(0,-12*u);c.lineTo(0,-8*u);c.stroke();break;}
+ case 8:{const b=C('#111214'),hh=8*u;c.fillStyle=b;c.beginPath();c.arc(0,0,hh*1.05,0,7);if(!bk)c.rect(-hh*.68,-hh*.34,hh*1.36,hh*.5);c.fill('evenodd');c.strokeStyle=shade(b,28);c.lineWidth=.5*u;for(let i=-5;i<=5;i+=2.5){c.beginPath();c.moveTo(i*u,-hh*1.0);c.lineTo(i*.9*u,-hh*.45);c.stroke();}if(!bk){c.strokeStyle=shade(b,22);c.lineWidth=.6*u;c.beginPath();c.rect(-hh*.68,-hh*.34,hh*1.36,hh*.5);c.stroke();}break;}
  case 9:c.fillStyle=C('#2e86de');c.beginPath();c.arc(0,-3*u,8.6*u,Math.PI,0);c.fill();c.fillStyle=D('#2e86de');c.fillRect(-8.6*u,-4.5*u,17.2*u,3*u);c.fillStyle='#fff';c.beginPath();c.arc(0,-12.5*u,3.2*u,0,7);c.fill();break;
  }c.restore();}
 function drawHair(c,L,hr,back){c.fillStyle=L.hair;const hs=L.hs;
@@ -336,7 +360,7 @@ function drawHead(c,L,hr,dir,mouth,blink){
   c.fillStyle='rgba(220,90,90,.18)';c.beginPath();c.arc(-hr*.6+ex,hr*.3,hr*.18,0,7);c.arc(hr*.6+ex,hr*.3,hr*.18,0,7);c.fill();
   if(mouth!=null){c.fillStyle='#4a1d1d';const mo=clamp(mouth,0,1);if(mo>.06){c.beginPath();c.ellipse(ex*.5,hr*.5,hr*.26,hr*.05+hr*.28*mo,0,0,7);c.fill();}else{c.fillRect(ex*.5-hr*.22,hr*.48,hr*.44,Math.max(1,hr*.07));}}
  }
- if(L.hat)drawHat(c,L.hat,hr,dx,L.hatCol);
+ if(L.hat)drawHat(c,L.hat,hr,dx,L.hatCol,back);
 }
 function drawPerson(c,p){
  const L=p.look,w=p.walk||0,sw=p.moving?Math.sin(w)*3:0,bob=p.moving?Math.abs(Math.sin(w))*1.2:Math.sin(perfNow*.003+(p.x||0))*.4;c.save();c.translate(p.x+(p.shake?Math.sin(perfNow*.06)*2:0),p.y);
@@ -358,11 +382,15 @@ function drawPerson(c,p){
  const bg=c.createLinearGradient(-10.5,0,10.5,0);bg.addColorStop(0,shade(O.body,22));bg.addColorStop(.55,O.body);bg.addColorStop(1,shade(O.body,-28));c.fillStyle=bg;rr(c,-10.5,-37,21,25,4);c.fill();
  c.fillStyle=O.trim;c.fillRect(-10.5,-22,21,2.5);if(L.vest||O.name==='Hi-vis vest'){c.fillRect(-10.5,-30,21,2.5);}
  if(O.tee){c.fillStyle=L.skin;c.beginPath();c.arc(0,-37,3.2,0,Math.PI);c.fill();}
+ if(O.under){c.fillStyle=O.under;c.beginPath();c.moveTo(-4.2,-37);c.lineTo(4.2,-37);c.lineTo(3.6,-12);c.lineTo(-3.6,-12);c.closePath();c.fill();c.fillStyle=L.skin;c.beginPath();c.arc(0,-37,2.8,0,Math.PI);c.fill();c.strokeStyle='rgba(0,0,0,.35)';c.lineWidth=.8;c.beginPath();c.moveTo(-4.2,-37);c.lineTo(-3.6,-12);c.moveTo(4.2,-37);c.lineTo(3.6,-12);c.stroke();}
+ if(O.quilt){c.strokeStyle='rgba(255,255,255,.14)';c.lineWidth=.8;for(let y=-33;y<-13;y+=5){c.beginPath();c.moveTo(-10.5,y);c.lineTo(-4.4,y);c.moveTo(4.4,y);c.lineTo(10.5,y);c.stroke();}}
+ if(O.chain){c.strokeStyle='#d8b43c';c.lineWidth=1.1;c.beginPath();c.arc(0,-37.5,3.5,.15,Math.PI-.15);c.stroke();c.fillStyle='#d8b43c';c.beginPath();c.arc(0,-33.4,1.2,0,7);c.fill();}
  c.strokeStyle=OL;c.lineWidth=.9;rr(c,-10.5,-37,21,25,4);c.stroke();
  if(O.bag){c.strokeStyle=shade(O.bag,-20);c.lineWidth=1.6;c.beginPath();c.moveTo(-8,-36);c.lineTo(8,-17);c.stroke();c.fillStyle=O.bag;rr(c,4,-20,9,7,2);c.fill();c.fillStyle='#c9a227';c.fillRect(7.5,-17.5,2,1.5);c.strokeStyle=OL;c.lineWidth=.7;rr(c,4,-20,9,7,2);c.stroke();}
  if(p.food){c.fillStyle='#f7f1e3';c.fillRect(8,-22,10,7);c.fillStyle='#c0392b';c.fillRect(8,-19,10,1.5);}
  c.fillStyle=L.skin;c.fillRect(-2.5,-39,5,3);
  c.save();c.translate(0,-45);drawHead(c,L,8,p.dir,null,p.blink);c.restore();
+ if(p.info&&!p.icon){const by=-68+Math.sin(perfNow*.006)*3;c.lineWidth=2.5;c.strokeStyle='rgba(0,0,0,.75)';c.fillStyle='#ffb627';c.beginPath();c.arc(0,by,8.5,0,7);c.fill();c.stroke();c.fillStyle='#1a1205';c.font='900 13px Inter';c.textAlign='center';c.textBaseline='middle';c.fillText('!',0,by+.5);c.textBaseline='alphabetic';}
  if(p.icon){c.font='bold 14px Inter';c.textAlign='center';c.lineWidth=3;c.strokeStyle='rgba(0,0,0,.7)';c.strokeText(p.icon,0,-62+Math.sin(perfNow*.01)*2);c.fillStyle=p.icon==='!'?'#ff4d5e':p.icon==='?'?'#ffb627':'#3fd0ff';c.fillText(p.icon,0,-62+Math.sin(perfNow*.01)*2);}
  c.restore();}
 function drawPortrait(c,L,S,mouth,blink,absent){
@@ -402,15 +430,17 @@ function drawPhoto(c,kind,S){c.save();c.clearRect(0,0,S,S);const u=S/100;
   c.strokeStyle='#5a1d1d';c.lineWidth=1.2*u;c.beginPath();c.arc(0,37*u,4*u,.2,Math.PI-.2);c.stroke();c.restore();
   c.fillStyle='#fff';c.font=`bold ${6.5*u}px Inter`;c.textAlign='left';c.lineWidth=2*u;c.strokeStyle='rgba(0,0,0,.5)';c.strokeText('Benidorm baby!! ☀️',4*u,94*u);c.fillText('Benidorm baby!! ☀️',4*u,94*u);}
  c.fillStyle='rgba(255,250,235,.06)';c.fillRect(0,0,S,S);c.restore();}
-const PHOTOS=[['profile','Profile picture — “Gary P”'],['car','“new motor” — silver estate, plate cropped'],['beach','Holiday post — tagged Benidorm. Del is sorry.']];
+const PHOTOS=[['profile','Profile picture — “Norman P”'],['car','“new motor” — silver estate, plate cropped'],['beach','Holiday post — tagged Benidorm. Del is sorry.']];
 function photoStrip(size=120){return `<div style="display:flex;gap:8px;flex-wrap:wrap;margin:6px 0">${PHOTOS.map(p=>`<figure style="margin:0;width:${size}px;background:#f4f1ea;padding:5px 5px 4px;border-radius:2px;box-shadow:0 4px 14px rgba(0,0,0,.5);transform:rotate(${p[0]==='beach'?2:p[0]==='car'?-1.5:-.5}deg)"><canvas data-photo="${p[0]}" width="240" height="240" style="width:100%;display:block"></canvas><figcaption style="font:10px/1.25 Inter;color:#333;margin-top:4px">${esc(p[1])}</figcaption></figure>`).join('')}</div>`;}
 function hydratePhotos(root){root.querySelectorAll('canvas[data-photo]').forEach(k=>drawPhoto(k.getContext('2d'),k.dataset.photo,240));}
-const SUSPECT_HTML=()=>`<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start"><div><div class="mono" style="font-size:11px;color:var(--dim)">NAME (ALLEGED)</div><div style="font-size:20px;font-weight:800">Gary P</div><div class="mono" style="font-size:11px;color:var(--dim);margin-top:6px">AGE (ALLEGED)</div><div style="font-size:20px;font-weight:800">52</div><div style="margin-top:6px">${tagHTML('UNCERTAIN')}</div><p style="font-size:11px;color:var(--dim);max-width:200px">Both come from his public profile. Nothing here is confirmed.</p></div>${photoStrip(118)}</div>`;
+const SUSPECT_HTML=()=>`<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start"><div><div class="mono" style="font-size:11px;color:var(--dim)">NAME (ALLEGED)</div><div style="font-size:20px;font-weight:800">Norman P</div><div class="mono" style="font-size:11px;color:var(--dim);margin-top:6px">AGE (ALLEGED)</div><div style="font-size:20px;font-weight:800">68</div><div style="margin-top:6px">${tagHTML('UNCERTAIN')}</div><p style="font-size:11px;color:var(--dim);max-width:200px">Both come from his public profile. Nothing here is confirmed.</p></div>${photoStrip(118)}</div>`;
 
 /* ================= INPUT ================= */
 const keys={};let joy={x:0,y:0,id:null};const IS_TOUCH=('ontouchstart' in window)||navigator.maxTouchPoints>0;
-addEventListener('keydown',e=>{auInit();if(e.target&&e.target.tagName==='INPUT')return;const k=e.key.toLowerCase();if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();if(keys[k])return;keys[k]=true;onKey(k);});
-addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});
+function keyName(e){let k=(e.key||'').toLowerCase();if(k.length===1&&!/[a-z0-9 ]/.test(k)&&/^Key[A-Z]$/.test(e.code||''))k=e.code[3].toLowerCase();return k;}
+addEventListener('keydown',e=>{auInit();if(e.target&&(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'))return;const k=keyName(e);if(e.code)keys['code:'+e.code]=true;if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k))e.preventDefault();if(keys[k])return;keys[k]=true;onKey(k);});
+addEventListener('keyup',e=>{keys[keyName(e)]=false;keys[(e.key||'').toLowerCase()]=false;if(e.code)keys['code:'+e.code]=false;});
+const clearKeys=()=>{for(const k in keys)keys[k]=false;};addEventListener('blur',clearKeys);document.addEventListener('visibilitychange',clearKeys);
 addEventListener('pointerdown',()=>auInit());
 document.addEventListener('DOMContentLoaded',()=>{});setTimeout(()=>{const b=$('stEvBtn');if(b)b.onclick=()=>{if(STATE==='STING'&&!UI.modal)openEvidence();};},0);
 (function touchSetup(){const j=$('joy'),knob=j.querySelector('i');
@@ -424,7 +454,7 @@ let inputLockUntil=0,lastPointer='mouse';addEventListener('pointerdown',e=>{last
 for(const ev of['click','pointerup'])document.addEventListener(ev,e=>{if(performance.now()<inputLockUntil&&!(e.target&&e.target.tagName==='INPUT')){e.stopPropagation();if(ev==='click')e.preventDefault();}},true);
 function onKey(k){
  if(k==='`'||k==='f2'){debugOn=!debugOn;$('debug').classList.toggle('hidden',!debugOn);return;}
- if(k==='m'){AU.muted=!AU.muted;toast('AUDIO',AU.muted?'Muted — visualiser still active':'Unmuted');return;}
+ if(k==='m'){setMuted(!AU.muted);toast('AUDIO',AU.muted?'Muted — visualiser still active':'Unmuted');return;}
  if(k==='escape'){if(UI.modal&&UI.modal.close){UI.modal.close();return;}if(['BRIEFING_ROOM','APPROACH','STING','POLICE_ARRIVAL','POLICE_CALL'].includes(STATE))togglePause();return;}
  if(paused)return;
  if(/^[1-9]$/.test(k)){const f=ACTIVE_CHOICES[parseInt(k)-1];if(f){f();}return;}
@@ -447,19 +477,19 @@ let cam={x:0,y:0,zoom:1,tx:0,ty:0,tz:1};
 const UI={modal:null};
 let M=null; // mission state persisted across phases
 if(debugOn)$('debug').classList.remove('hidden');
-function newMission(){M={clock:0,intel:{},read:new Set(),flags:new Set(),hist:{founder:[],decoy:[],stranger:[]},transcript:[],statements:[],claims:new Set(),contras:new Set(),asked:new Set(),excusesThis:[],
+function newMission(){M={clock:0,intel:{},read:new Set(),flags:new Set(),hist:{founder:[],decoy:[],stranger:[],vet:[]},transcript:[],statements:[],claims:new Set(),contras:new Set(),asked:new Set(),excusesThis:[],
  contact:false,contactStage:null,contacts:0,police:{requested:false,state:'NONE',at:null,arriveAt:null},escalation:0,aggression:0,conduct:0,overstate:0,accPts:0,reported:new Set(),markPeak:0,
- attendedTime:null,attendedSeen:false,timeline:[],result:null,fail:null,newAch:[],goodQs:0,seenMark:false};}
+ attendedTime:null,attendedSeen:false,hints:new Set(),timeline:[],result:null,fail:null,newAch:[],goodQs:0,seenMark:false};}
 
 /* ================= INTEL / EVIDENCE ================= */
 const INTEL={
- log_export:{title:'Chat export from account “gaz_drives77”',src:'Platform export, preserved by the team',conf:'VERIFIED'},
+ log_export:{title:'Chat export from account “BigNorm420”',src:'Platform export, preserved by the team',conf:'VERIFIED'},
  log_age:{title:'Profile stated age 14 (19:05); account acknowledged it (19:06)',src:'Chat export',conf:'VERIFIED'},
  log_flagged:{title:'Message flagged as sexual content — redacted, preserved unaltered',src:'Chat export',conf:'VERIFIED'},
  car_photo:{title:'Account sent photo of a silver estate, plate fragment “…K7…”',src:'Chat export',conf:'VERIFIED'},
  meet_arranged:{title:'Account proposed meeting: Golden Fryer, Thursday, about 18:35',src:'Chat export',conf:'VERIFIED'},
- suspect_profile:{title:'Alleged identity: “Gary P”, aged 52 — from his public profile',src:'Open social media (unconfirmed)',conf:'UNCERTAIN'},
- social_posts:{title:'Public profile “Gary P” checks in at the Golden Fryer on Thursdays',src:'Open social media',conf:'UNCERTAIN'},
+ suspect_profile:{title:'Alleged identity: “Norman P”, aged 68 — from his public profile',src:'Open social media (unconfirmed)',conf:'UNCERTAIN'},
+ social_posts:{title:'Public profile “Norman P” checks in at the Golden Fryer on Thursdays',src:'Open social media',conf:'UNCERTAIN'},
  hacked_note:{title:'Possible hacked-account explanation — platform login data not obtained',src:'Team notes',conf:'UNRESOLVED'},
  group_allegation:{title:'Estate group posts allege the car owner is “a predator”',src:'Local social media group',conf:'ALLEGATION'},
  stranger_seen:{title:'Maureen has seen a man in a grey coat with a silver estate here most Thursdays',src:'Maureen — firsthand',conf:'WITNESS'},
@@ -507,25 +537,31 @@ function buildLiving(){
  a({x:350,y:292,w:120,h:48,h3:14,col:'#7b5636',draw:(c,s)=>{drawSolidPlain(c,s);c.fillStyle='#ddd';c.fillRect(s.x+18,s.y-s.h3+10,24,16);c.fillStyle='#c0392b';c.beginPath();c.arc(s.x+86,s.y-s.h3+22,7,0,7);c.fill();c.fillStyle='#f5f5f5';c.beginPath();c.arc(s.x+86,s.y-s.h3+22,4,0,7);c.fill();}});
  a({x:300,y:74,w:200,h:34,h3:26,col:'#2a2a2e',draw:drawTV});
  a({x:600,y:74,w:170,h:56,h3:30,col:'#8a6a45',draw:drawDesk});
- a({x:30,y:74,w:60,h:150,h3:58,col:'#5c3b22',draw:drawShelf});
+ a({x:30,y:74,w:60,h:84,h3:34,col:'#5c3b22',draw:drawShelf});
  a({x:110,y:282,w:72,h:62,h3:30,col:'#4a5d3a',draw:(c,s)=>{drawSolidPlain(c,s);c.fillStyle=shade(s.col,15);rr(c,s.x+6,s.y-s.h3+6,s.w-12,s.h-14,6);c.fill();c.fillStyle=shade(s.col,-12);c.fillRect(s.x,s.y-s.h3-8,s.w,12);}});
  a({x:730,y:482,w:40,h:40,h3:44,col:'#2f5d3a',draw:drawPlant});
- a({x:722,y:196,w:50,h:84,h3:78,col:'#6e4a2c',draw:drawWardrobe});
+ a({x:690,y:300,w:52,h:48,h3:46,col:'#6e4a2c',draw:drawWardrobe});
  a({x:620,y:300,w:30,h:30,h3:46,col:'#3a3030',draw:(c,s)=>{c.fillStyle='rgba(0,0,0,.25)';c.beginPath();c.ellipse(s.x+15,s.y+s.h,14,5,0,0,7);c.fill();c.fillStyle='#2a2424';c.fillRect(s.x+13,s.y-s.h3+10,4,s.h3+s.h-12);c.fillStyle='#f3d9a4';c.beginPath();c.moveTo(s.x+3,s.y-s.h3+14);c.lineTo(s.x+27,s.y-s.h3+14);c.lineTo(s.x+22,s.y-s.h3-4);c.lineTo(s.x+8,s.y-s.h3-4);c.closePath();c.fill();}});
- return{name:'living',w:800,h:580,solids:S,floor:drawLivingFloor,ints:[{x:700,y:250,r:52,label:'Open the wardrobe — change your style',act:openWardrobe,hl:{x:747,y:180}},{x:686,y:148,r:62,label:'Use the case computer',act:openComputer,hl:{x:686,y:100}},{x:100,y:540,r:55,label:'Head out — start the mission',act:confirmStart}]};
+ return{name:'living',w:800,h:580,solids:S,floor:drawLivingFloor,ints:[{x:197,y:100,r:74,label:'Edit team banner — name, team, emblem',act:()=>openSignIn('edit'),hl:{x:197,y:36}},{x:716,y:324,r:64,label:'Open your wardrobe — change your clothes',act:openWardrobe,hl:{x:716,y:264}},{x:686,y:148,r:62,label:'Use the case computer',act:openComputer,hl:{x:686,y:100}},{x:100,y:540,r:55,label:'Head out — start the mission',act:confirmStart}]};
 }
 function drawWardrobe(c,s){drawSolidPlain(c,s);const t=s.y-s.h3;c.fillStyle=shade(s.col,10);c.fillRect(s.x+3,t+3,s.w/2-4,s.h-6);c.fillRect(s.x+s.w/2+1,t+3,s.w/2-4,s.h-6);
  c.fillStyle=shade(s.col,-45);c.fillRect(s.x+s.w/2-1,t,2,s.h);c.fillStyle='#d9b45a';c.fillRect(s.x+s.w/2-5,t+s.h/2-6,2,10);c.fillRect(s.x+s.w/2+3,t+s.h/2-6,2,10);
  const f=s.y+s.h-s.h3;c.fillStyle=shade(s.col,-20);c.fillRect(s.x+4,f+6,s.w/2-6,s.h3-12);c.fillRect(s.x+s.w/2+2,f+6,s.w/2-6,s.h3-12);c.fillStyle='rgba(180,220,255,.25)';c.fillRect(s.x+s.w/2+5,f+10,s.w/2-12,s.h3-24);
  c.fillStyle='#d9b45a';c.fillRect(s.x+s.w/2-4,f+s.h3/2,2,10);c.fillRect(s.x+s.w/2+2,f+s.h3/2,2,10);
- c.fillStyle='#c0392b';c.fillRect(s.x+10,t-6,14,7);c.fillStyle='#fff';c.beginPath();c.arc(s.x+17,t-7,3,0,7);c.fill();c.fillStyle='#1f4e9c';c.fillRect(s.x+28,t-5,14,6);}
+ c.fillStyle='#c0392b';c.fillRect(s.x+10,t-6,14,7);c.fillStyle='#fff';c.beginPath();c.arc(s.x+17,t-7,3,0,7);c.fill();c.fillStyle='#1f4e9c';c.fillRect(s.x+28,t-5,14,6);
+ const cx=s.x+s.w/2,cy=t-34+Math.sin(perfNow*.005)*2.5;c.save();c.translate(cx,cy);c.fillStyle='rgba(0,0,0,.6)';c.beginPath();c.arc(0,0,17,0,7);c.fill();c.strokeStyle='#ffb627';c.lineWidth=1.5;c.stroke();
+ c.beginPath();c.moveTo(-6,-9);c.lineTo(-11,-7);c.lineTo(-15,-1);c.lineTo(-10,2);c.lineTo(-8,0);c.lineTo(-8,10);c.lineTo(8,10);c.lineTo(8,0);c.lineTo(10,2);c.lineTo(15,-1);c.lineTo(11,-7);c.lineTo(6,-9);c.quadraticCurveTo(0,-4,-6,-9);c.closePath();c.fillStyle='#ffb627';c.fill();c.strokeStyle='rgba(0,0,0,.65)';c.lineWidth=1.2;c.stroke();c.restore();}
 function drawSolidPlain(c,s){const h3=s.h3||0;if(h3){c.fillStyle='rgba(0,0,0,.22)';c.fillRect(s.x+3,s.y+s.h-1,s.w,6);}const sg=c.createLinearGradient(0,s.y+s.h-h3,0,s.y+s.h);sg.addColorStop(0,shade(s.col,-25));sg.addColorStop(1,shade(s.col,-50));c.fillStyle=s.side||sg;c.fillRect(s.x,s.y+s.h-h3,s.w,h3);c.fillStyle=s.col;c.fillRect(s.x,s.y-h3,s.w,s.h);if(h3){c.fillStyle='rgba(255,255,255,.12)';c.fillRect(s.x,s.y-h3,s.w,1.5);}}
 function drawLivingFloor(c){c.save();c.beginPath();c.rect(0,0,800,580);c.clip();c.fillStyle='#6f5539';c.fillRect(0,0,800,580);
  for(let y=74,r=0;y<580;y+=22,r++){for(let x=(r%2)*60-60;x<800;x+=120){c.fillStyle=`hsl(28,${28+((x*7+y)%9)}%,${30+((x*13+y*3)%7)}%)`;c.fillRect(x+1,y+1,118,20);}}
  c.fillStyle='rgba(0,0,0,.25)';c.fillRect(240,186,350,200);
  c.fillStyle='#7c2f3a';rr(c,236,180,350,200,10);c.fill();c.strokeStyle='#d9a441';c.lineWidth=4;rr(c,248,192,326,176,6);c.stroke();c.strokeStyle='rgba(217,164,65,.4)';c.lineWidth=2;rr(c,276,216,270,128,4);c.stroke();
  for(let i=0;i<5;i++){c.fillStyle='rgba(217,164,65,.25)';c.beginPath();c.arc(300+i*55,280,6,0,7);c.fill();}
- const g=c.createRadialGradient(635,310,10,635,310,220);g.addColorStop(0,'rgba(255,214,150,.22)');g.addColorStop(1,'rgba(255,214,150,0)');c.fillStyle=g;c.fillRect(380,90,420,460);c.restore();}
+ const g=c.createRadialGradient(635,310,10,635,310,220);g.addColorStop(0,'rgba(255,214,150,.22)');g.addColorStop(1,'rgba(255,214,150,0)');c.fillStyle=g;c.fillRect(380,90,420,460);// exit door marker
+ {const bob=Math.sin((typeof perfNow!=='undefined'?perfNow:0)*.006)*4;c.fillStyle='rgba(69,224,138,.16)';c.fillRect(52,520,96,36);c.strokeStyle='rgba(69,224,138,.6)';c.lineWidth=2;c.setLineDash([6,4]);c.strokeRect(52,520,96,36);c.setLineDash([]);
+  c.fillStyle='#45e08a';c.strokeStyle='rgba(0,0,0,.7)';c.lineWidth=3;c.beginPath();c.moveTo(88,500+bob);c.lineTo(112,500+bob);c.lineTo(100,516+bob);c.closePath();c.stroke();c.fill();
+  c.lineJoin='round';c.font='700 13px Inter';c.textAlign='center';c.strokeText('EXIT — START MISSION',100,486+bob);c.fillText('EXIT — START MISSION',100,486+bob);}
+ c.restore();}
 function drawLivingWall(c,s){c.fillStyle='#46566a';c.fillRect(0,0,800,74);c.fillStyle='rgba(255,255,255,.04)';for(let x=0;x<800;x+=26)c.fillRect(x,0,12,74);c.fillStyle='#2c241f';c.fillRect(0,66,800,8);c.fillStyle='rgba(255,255,255,.08)';c.fillRect(0,66,800,1.5);
  c.fillStyle='#9fc3e6';c.fillRect(540,10,52,44);c.fillStyle='#0d1626';c.fillRect(544,14,44,36);c.fillStyle='#ffd27a';c.fillRect(550,40,3,6);c.fillRect(574,30,3,3);c.strokeStyle='#ddd';c.lineWidth=3;c.strokeRect(540,10,52,44);c.beginPath();c.moveTo(566,10);c.lineTo(566,54);c.stroke();
  // team banner — large, high contrast
@@ -539,8 +575,13 @@ function drawLivingWall(c,s){c.fillStyle='#46566a';c.fillRect(0,0,800,74);c.fill
  c.fillStyle='#d9c9a0';c.fillRect(630,16,40,30);c.fillStyle='#7a5a3a';c.fillRect(634,20,32,22);c.fillStyle='#e8d9b0';c.fillRect(690,20,30,24);c.fillStyle='#9c6644';c.fillRect(694,24,22,16);}
 function drawSofa(c,s){drawSolidPlain(c,s);c.fillStyle=shade(s.col,18);rr(c,s.x+6,s.y-s.h3+4,s.w-12,20,6);c.fill();c.fillStyle=shade(s.col,-10);c.fillRect(s.x,s.y-s.h3-10,14,s.h+10);c.fillRect(s.x+s.w-14,s.y-s.h3-10,14,s.h+10);c.fillStyle='#e9c46a';c.fillRect(s.x+40,s.y-s.h3+8,24,16);}
 function drawTV(c,s){drawSolidPlain(c,s);c.fillStyle='#050505';c.fillRect(s.x+30,s.y-s.h3-34,140,44);const t=perfNow*.001;c.fillStyle=`hsl(${200+Math.sin(t)*30},60%,${30+Math.sin(t*3)*6}%)`;c.fillRect(s.x+34,s.y-s.h3-30,132,36);c.fillStyle='rgba(255,255,255,.7)';c.font='8px IBM Plex Mono';c.fillText('BBC 1  CORRIE',s.x+40,s.y-s.h3-18);}
-function drawDesk(c,s){drawSolidPlain(c,s);const tx=s.x+60,ty=s.y-s.h3-22;c.fillStyle='#1b1b1f';c.fillRect(tx,ty,64,36);c.fillStyle=`rgba(69,224,138,${.7+Math.sin(perfNow*.004)*.15})`;c.fillRect(tx+4,ty+4,56,26);c.fillStyle='#062';for(let i=0;i<5;i++)c.fillRect(tx+8,ty+8+i*4,20+((i*13)%28),2);c.fillStyle='#333';c.fillRect(tx+26,ty+36,12,6);c.fillStyle='#2a2a2a';c.fillRect(tx+8,s.y-s.h3+20,48,10);c.fillStyle='#e0d6c0';c.fillRect(s.x+140,s.y-s.h3+10,22,28);}
-function drawShelf(c,s){drawSolidPlain(c,s);const cols=['#c0392b','#2980b9','#27ae60','#f1c40f','#8e44ad','#e67e22'];for(let r=0;r<4;r++)for(let i=0;i<6;i++){c.fillStyle=cols[(r*3+i)%6];c.fillRect(s.x+6+i*8,s.y-s.h3+8+r*34,6,24);}}
+function drawDesk(c,s){drawSolidPlain(c,s);const tx=s.x+60,ty=s.y-s.h3-22;c.fillStyle='#1b1b1f';c.fillRect(tx,ty,64,36);c.fillStyle=`rgba(69,224,138,${.7+Math.sin(perfNow*.004)*.15})`;c.fillRect(tx+4,ty+4,56,26);c.fillStyle='#062';for(let i=0;i<5;i++)c.fillRect(tx+8,ty+8+i*4,20+((i*13)%28),2);c.fillStyle='#333';c.fillRect(tx+26,ty+36,12,6);
+ const kx=tx+4,ky=s.y-s.h3+18;c.fillStyle='#1d1f24';rr(c,kx,ky,54,13,2);c.fill();c.fillStyle='#5b606a';for(let r=0;r<3;r++)for(let k=0;k<11;k++)c.fillRect(kx+2+k*4.7,ky+2+r*3.6,3.6,2.6);c.fillRect(kx+10,ky+10,32,1.8);
+ const mx=kx+68,my=ky+3;c.strokeStyle='#2a2d33';c.lineWidth=1;c.beginPath();c.moveTo(mx,my-2);c.quadraticCurveTo(mx-4,my-12,tx+40,ty+42);c.stroke();c.fillStyle='#22252b';c.beginPath();c.ellipse(mx,my+5,5,7,0,0,7);c.fill();c.strokeStyle='#5b606a';c.lineWidth=.8;c.beginPath();c.moveTo(mx,my-1.5);c.lineTo(mx,my+3);c.moveTo(mx-5,my+3);c.lineTo(mx+5,my+3);c.stroke();
+ const tw=s.x+138,tt=s.y-s.h3-20;c.fillStyle='#262a31';rr(c,tw,tt,24,44,2);c.fill();c.fillStyle='#343944';c.fillRect(tw+2,tt+2,20,3);c.fillStyle='#14161a';c.fillRect(tw+4,tt+9,16,3);c.fillRect(tw+4,tt+15,16,3);c.fillStyle='#45e08a';c.beginPath();c.arc(tw+12,tt+30,1.8,0,7);c.fill();c.fillStyle='#14161a';c.beginPath();c.arc(tw+12,tt+38,3,0,7);c.fill();c.strokeStyle='rgba(255,255,255,.14)';c.lineWidth=.8;rr(c,tw,tt,24,44,2);c.stroke();
+ if(typeof M!=='undefined'&&M&&STATE==='BRIEFING_ROOM'&&!M.introLock&&compUnread()){const by=s.y+s.h+14+Math.sin(perfNow*.006)*3,bx=tx+32;c.lineWidth=2.5;c.strokeStyle='rgba(0,0,0,.75)';c.fillStyle='#ffb627';c.beginPath();c.arc(bx,by,8.5,0,7);c.fill();c.stroke();c.fillStyle='#1a1205';c.font='900 13px Inter';c.textAlign='center';c.textBaseline='middle';c.fillText('!',bx,by+.5);c.textBaseline='alphabetic';}}
+function compUnread(){return['sp1','c1','c2','c3','c4','c5','c6','s1','s2','s3','m1','m2','n2','n3'].some(id=>!M.read.has(id));}
+function drawShelf(c,s){drawSolidPlain(c,s);const cols=['#c0392b','#2980b9','#27ae60','#f1c40f','#8e44ad','#e67e22'];for(let r=0;r<2;r++)for(let i=0;i<6;i++){c.fillStyle=cols[(r*3+i)%6];c.fillRect(s.x+6+i*8,s.y-s.h3+6+r*34,6,24);}}
 function drawPlant(c,s){c.fillStyle='#8a4b2a';c.fillRect(s.x+8,s.y,24,s.h);c.fillStyle='#2f7d46';for(let i=0;i<7;i++){c.beginPath();c.ellipse(s.x+20+Math.cos(i)*12,s.y-14+Math.sin(i*2)*10,10,5,i,0,7);c.fill();}}
 
 /* ---------- High street ---------- */
@@ -613,7 +654,7 @@ let queue=[],server={busy:null};
 function suspState(v){return v>=100?'FLEEING':v>=78?'FLIGHT_RISK':v>=50?'ALARMED':v>=25?'UNEASY':'CALM';}
 function stepPath(n,dt){n.moving=false;if(!n.path.length)return true;const t=n.path[0],dx=t.x-n.x,dy=t.y-n.y,d=Math.hypot(dx,dy),sp=n.speed*dt;if(d<=sp+.5){n.x=t.x;n.y=t.y;n.path.shift();return !n.path.length;}n.x+=dx/d*sp;n.y+=dy/d*sp;n.dir={x:dx/d,y:dy/d};n.moving=true;n.walk+=dt*n.speed/7;return false;}
 function bark(n,text,t=3.2){barks=barks.filter(b=>b.n!==n);barks.push({n,text,until:perfNow+t*1000});}
-function buildBriefingNPCs(){npcs=[mkNPC('founder','Del',LOOK.founder,400,166,{role:'The Founder'}),mkNPC('decoy','Jas',LOOK.decoy,150,384,{role:'The Decoy'}),mkNPC('stranger','Maureen',LOOK.stranger,580,440,{role:'The Concerned Stranger'})];}
+function buildBriefingNPCs(){npcs=[mkNPC('founder','Del',LOOK.founder,400,166,{role:'The Founder'}),mkNPC('decoy','Jas',LOOK.decoy,150,384,{role:'The Decoy'}),mkNPC('stranger','Maureen',LOOK.stranger,580,440,{role:'The Concerned Stranger'}),mkNPC('vet','Ray',LOOK.vet,235,205,{role:'The Team Veteran'})];}
 let mark=null,kev=null;
 function buildStreetNPCs(){
  queue=[];server={busy:null};
@@ -702,6 +743,7 @@ const BRIEF={
   {id:'rules',q:'Any rules I need to know?',a:'No hands. No blocking doorways. No threats. If he wants to walk, he walks. Grab anyone and I pull the plug, full stop.',sets:['rules']},
   {id:'redact',q:'Why is that message redacted?',req:['r_flagged'],a:'Because it\'s evidence, not content. The export is preserved untouched for the police. Nobody needs to read it out on a high street.'},
   {id:'hack',q:'What if he says the account was hacked?',req:['r_hacked'],a:'Then ask sensible questions. When? Did he report it? Who else uses his phone? It might even be true. We don\'t know — so we don\'t pretend we do.'},
+  {id:'link',q:'How sure are we the page is his?',a:'Not sure at all. Jas matched it from the car and the Thursday check-ins. It fits, but plenty of people drive silver estates and get chips on a Thursday. Treat it as a lead. Tonight is about seeing whether the man who turns up matches it.'},
   {id:'unk',q:'What don\'t we know yet?',a:'Who typed the messages. Whether the Facebook page is even him. The full plate. Write down what you see, not what you assume.'}]},
  decoy:{name:'Jas',role:'The Decoy',bio:'Runs the profile from here. Sharp, tired, meticulous with timestamps.',topics:[
   {id:'start',q:'How did the chat start?',a:'He messaged first — 14th of September, just after seven. Small talk. Was I local, that kind of thing.'},
@@ -709,14 +751,29 @@ const BRIEF={
   {id:'meet',q:'How did the meeting get arranged?',a:'He suggested it. Golden Fryer, Thursday, about 6:35. I never pushed for it — check the timestamps if you don\'t believe me.',intel:['meet_arranged']},
   {id:'face',q:'Did you ever see his face?',a:'No. No calls, no video. The only picture is the car. So I can\'t tell you it\'s him. That\'s your job tonight.'},
   {id:'carp',q:'Tell me about the car photo.',req:['r_car'],a:'Sent it on the 16th, showing off. Silver estate. You can make out “K7” in the middle of the plate. The rest is cropped.'},
+  {id:'found',q:'How did we find his Facebook page?',a:'The car, mostly. He sent the photo on the 16th — silver estate, “K7” on the plate. I searched for pages with a matching car and found one with a “new motor” post and Thursday check-ins at the Golden Fryer. That\'s the place he suggested. It\'s a lead. It isn\'t proof it\'s him.'},
   {id:'where',q:'Where will you be tonight?',a:'Right here, on the team channel. I\'m not going anywhere near him. That\'s the point.'}]},
  stranger:{name:'Maureen',role:'The Concerned Stranger',bio:'Lives on the estate. Chatty, kind, careful to say what she actually saw.',topics:[
   {id:'saw',q:'What have you seen yourself?',a:'With my own eyes? A fella in a grey coat. Silver estate, parks right outside the Golden Fryer. Thursdays, half six-ish, regular as clockwork.',intel:['stranger_seen']},
   {id:'why',q:'Why did you come to us?',a:'Screenshots were going round the estate group, people calling him all sorts. I recognised the car. Thought someone sensible should look at it properly, not a mob.',intel:['group_allegation']},
   {id:'else',q:'Heard anything else about him?',a:'Well — my cousin reckons he\'s “done this before”. But I\'ll be honest with you, love, I didn\'t see that. She heard it from someone at bingo.',intel:['stranger_hearsay']},
   {id:'fb',q:'Is this the man from the Facebook page?',req:['r_social'],a:'Could be. Same sort of coat. I wouldn\'t swear to it, not off that photo. I\'m not putting my name to a guess.'},
-  {id:'plate',q:'Did you ever see his number plate?',req:['r_car'],a:'His plate? No. Why would I look at a plate? I just know the car.'}]}
+  {id:'plate',q:'Did you ever see his number plate?',req:['r_car'],a:'His plate? No. Why would I look at a plate? I just know the car.'}]},
+ vet:{name:'Ray',role:'The Team Veteran',bio:'Ex-security, years on the team. Quiet, patient, never in a hurry. Gives straight advice.',topics:[
+  {id:'police',q:'When should I ring the police?',a:'Not too early and not too late. They need twenty seconds once you call, so ringing the second you see him leaves you waiting with nothing to show. Get your own eyes on him first — see him arrive, check the car. Then ring while he\'s waiting for his food, just before you walk over. They turn up as you\'re finishing. Don\'t tell him they\'re coming unless he asks.'},
+  {id:'moment',q:'When is the best time to speak to him?',a:'When he\'s ordered and is waiting for his food. He\'s stuck there, he\'s relaxed, and he\'ll put up with a few questions. In the queue, before he\'s ordered, he\'ll bolt after a couple of questions. Out on the street, away from the takeaway, he\'ll just say he\'s going for a walk. And once he\'s heading back to the car you get two answers before he panics. Pick your moment.'},
+  {id:'evidence',q:'What evidence should I be gathering?',a:'Three things. One: that he turned up, and when — watch him arrive, don\'t guess. Two: the car. Walk up to it while it\'s parked and look at the plate. Three: his own words, and what they match against the chat log. Add those to what\'s on the computer and you\'ve got something. Skip any one and your report gets thin.'},
+  {id:'weight',q:'How much does each bit of evidence count for?',a:'What you see yourself and what\'s verified counts most. What he tells you is a statement — useful, but only his word. Maureen\'s cousin\'s bingo story is hearsay, and a Facebook group is allegation. Log them, but don\'t lean on them. A partial plate, “K7”, is a lead, not a match.'},
+  {id:'calm',q:'How do I keep him calm?',a:'Slowly. Every question costs you some of his patience, so don\'t fire them off. Start easy — Thursdays, his food, what brings him here. Save the awkward ones for later. Never open with an accusation. If his suspicion is climbing, ease off, and let him answer without cutting in. The clock\'s on your side if you\'re calm.'},
+  {id:'discreet',q:'How do I stay discreet?',a:'Don\'t hover and don\'t stare. Keep a few metres back and look like you\'re waiting for a bus. Don\'t follow him round the shop or stand on his shoulder — people notice that, and so will he. Don\'t shout across the street. Use your phone to ring the police, quietly. If he\'s edgy, back off and come at it again in a minute.'},
+  {id:'run',q:'What if he tries to run?',a:'Let him. No hands, no blocking the door, no standing in front of the car. If he drives off, step clear — he\'ll be quicker leaving than he was arriving. Make a note of what you saw and say it straight. If you grab him, the night\'s over and you\'re the one in trouble.'},
+  {id:'confess',q:'If he admits it, is that enough?',a:'No. Nothing he says on a high street decides it on its own — neither a confession nor a slip-up. What counts is everything together: the chat log, the age that was stated, the meeting he arranged and turned up to, and whether the man in front of you is the same one behind the account. Police weigh that, not us.'},
+  {id:'report',q:'What do I say to the police at the end?',a:'Only what you know, and say how you know it. “I saw him arrive at half six, I checked the plate, he told me this.” Don\'t pad it. Calling hearsay fact, or saying something you only assumed, costs you more than leaving it out.'},
+  {id:'phone',q:'What can I do with my phone?',a:'It\'s your lifeline. You can call Del, ring the police, or ask me what I\'d do right now. You can also open the evidence file — the clock stops while you read it, so use it. Check what you\'ve actually got before you walk over.'},
+  {id:'mess',q:'What if it all goes wrong?',a:'It happens. Everything you do in this room is saved when you step out the door. If the approach falls apart you can go again from that point with the same notes, or start the whole night over. Learn what spooked him and try a different order.'}]}
 };
+function npcHasIntel(n){if(!n||n.id==='vet'||!M||M.introLock)return false;const C=BRIEF[n.id];if(!C)return false;
+ return C.topics.some(t=>(!t.req||t.req.every(r=>M.flags.has(r)))&&!M.flags.has('t_'+n.id+'_'+t.id)&&((t.req&&t.req.length)||(t.intel||[]).some(x=>!M.intel[x])));}
 function openTalk(id){
  const C=BRIEF[id],n=npcs.find(x=>x.id===id);n.dir={x:player.x-n.x,y:player.y-n.y};const d=Math.hypot(n.dir.x,n.dir.y)||1;n.dir.x/=d;n.dir.y/=d;
  const render=()=>{
@@ -736,21 +793,21 @@ function openTalk(id){
 
 /* ================= CASE COMPUTER ================= */
 const CHAT=[
- {ts:'14 Sep 19:02',from:'gaz_drives77',sum:'Opens the conversation. Asks whether the profile is local.',id:'c1',intel:['log_export']},
+ {ts:'14 Sep 19:02',from:'BigNorm420',sum:'Opens the conversation. Asks whether the profile is local.',id:'c1',intel:['log_export']},
  {ts:'14 Sep 19:05',from:'Decoy profile',sum:'States age: 14 (matches profile bio).',id:'c2',intel:['log_export','log_age']},
- {ts:'14 Sep 19:06',from:'gaz_drives77',sum:'Acknowledges the stated age and continues the conversation.',id:'c3',intel:['log_export','log_age']},
- {ts:'15 Sep 21:40',from:'gaz_drives77',sum:'<span class="red">CONTENT REDACTED</span> Flagged by the team as sexual content. Preserved unaltered in the export for police; not reproduced here.',id:'c4',intel:['log_export','log_flagged'],flag:'r_flagged'},
- {ts:'16 Sep 20:11',from:'gaz_drives77',sum:'Sends a photo of a silver estate car. Plate mostly cropped; “K7” visible.',id:'c5',intel:['log_export','car_photo'],flag:'r_car'},
- {ts:'17 Sep 18:02',from:'gaz_drives77',sum:'Proposes meeting at the Golden Fryer on Thursday, “about 6:35”.',id:'c6',intel:['log_export','meet_arranged']}];
+ {ts:'14 Sep 19:06',from:'BigNorm420',sum:'Acknowledges the stated age and continues the conversation.',id:'c3',intel:['log_export','log_age']},
+ {ts:'15 Sep 21:40',from:'BigNorm420',sum:'<span class="red">CONTENT REDACTED</span> Flagged by the team as sexual content. Preserved unaltered in the export for police; not reproduced here.',id:'c4',intel:['log_export','log_flagged'],flag:'r_flagged'},
+ {ts:'16 Sep 20:11',from:'BigNorm420',sum:'Sends a photo of a silver estate car. Plate mostly cropped; “K7” visible.',id:'c5',intel:['log_export','car_photo'],flag:'r_car'},
+ {ts:'17 Sep 18:02',from:'BigNorm420',sum:'Proposes meeting at the Golden Fryer on Thursday, “about 6:35”.',id:'c6',intel:['log_export','meet_arranged']}];
 const TABS={
  overview:()=>`<h3>Case NH-014 — The Takeaway</h3><p>Team: <b>${esc(P.team)}</b>. Lead: Del.</p><p><b>Objectives</b></p><ol><li>Review the evidence and know its limits.</li><li>Observe who arrives at the Golden Fryer, and when.</li><li>Establish identity and attendance from what you can see and hear.</li><li>Record his account accurately — every word.</li><li>Hand over to police with an accurate report.</li></ol><p><b>Conduct</b>: no physical contact, no blocking, no threats. He is free to leave. Police decide any outcome.</p><p style="color:#7fb59a">Tip: open each record to log it. Some records unlock new questions in the room.</p>`,
- suspect:()=>`<h3>Suspect file</h3>${SUSPECT_HTML()}`+row('sp1','<b>Name & age</b>','“Gary P”, 52 — taken from his public profile. Unconfirmed: profiles lie.',{intel:['suspect_profile'],flag:'r_social'}),
- chat:()=>`<h3>Chat log — gaz_drives77</h3><p style="color:#7fb59a;font-size:11px">Entries summarised by the team. The original export is hashed and unaltered.</p>`+CHAT.map(m=>row(m.id,`<span class="ts">${m.ts}</span> · <b>${esc(m.from)}</b>`,m.sum,m)).join(''),
- social:()=>`<h3>Social media</h3>`+row('s1','<b>Public profile “Gary P”</b> · 4 check-ins',`Checks in at the Golden Fryer on four Thursdays. Low-resolution profile photo of a man in a grey coat. <b>Similarity is not identity.</b>`,{intel:['social_posts'],flag:'r_social'})+row('s2','<b>“Gary P”</b> · post: “new motor”','Photo of a silver estate. Plate not visible.',{intel:['social_posts'],flag:'r_social'})+row('s3','<b>Estate community group</b> · 37 comments','Members share screenshots and allege the car owner is a predator. No source given for most claims.',{intel:['group_allegation']}),
- meet:()=>`<h3>Meeting & routine</h3>`+row('m1','<b>Arranged meeting</b>','Golden Fryer, high street. Thursday, about 18:35. Proposed by gaz_drives77 on 17 Sep.',{intel:['meet_arranged']})+row('m2','<b>Reported routine (Maureen)</b>','Arrives by silver estate around half six, parks outside, queues, waits for food, hangs about, drives off. <i>Witness account — times approximate.</i>',{intel:['stranger_seen']})+row('m3','<b>Team positions</b>','Jas stays at base on the team channel. You go alone on foot. Police on standby, roughly 20 seconds out once requested.',{}),
+ suspect:()=>`<h3>Suspect file</h3>${SUSPECT_HTML()}`+row('sp1','<b>Name & age</b>','“Norman P”, 68 — taken from his public profile. Found by matching the car in the chat photo and the Thursday check-ins: a lead, not a match. Unconfirmed: profiles lie.',{intel:['suspect_profile'],flag:'r_social'}),
+ chat:()=>`<h3>Chat log — BigNorm420</h3><p style="color:#7fb59a;font-size:11px">Entries summarised by the team. The original export is hashed and unaltered.</p>`+CHAT.map(m=>row(m.id,`<span class="ts">${m.ts}</span> · <b>${esc(m.from)}</b>`,m.sum,m)).join(''),
+ social:()=>`<h3>Social media</h3>`+row('s1','<b>Public profile “Norman P”</b> · 4 check-ins',`Checks in at the Golden Fryer on four Thursdays. Low-resolution profile photo of a man in a grey coat. <b>Similarity is not identity.</b>`,{intel:['social_posts'],flag:'r_social'})+row('s2','<b>“Norman P”</b> · post: “new motor”','Photo of a silver estate. Plate not visible.',{intel:['social_posts'],flag:'r_social'})+row('s3','<b>Estate community group</b> · 37 comments','Members share screenshots and allege the car owner is a predator. No source given for most claims.',{intel:['group_allegation']}),
+ meet:()=>`<h3>Meeting & routine</h3>`+row('m1','<b>Arranged meeting</b>','Golden Fryer, high street. Thursday, about 18:35. Proposed by BigNorm420 on 17 Sep.',{intel:['meet_arranged']})+row('m2','<b>Reported routine (Maureen)</b>','Arrives by silver estate around half six, parks outside, queues, waits for food, hangs about, drives off. <i>Witness account — times approximate.</i>',{intel:['stranger_seen']})+row('m3','<b>Team positions</b>','Jas stays at base on the team channel. You go alone on foot. Police on standby, roughly 20 seconds out once requested.',{}),
  timeline:()=>`<h3>Timeline</h3>`+[['14 Sep 19:02','Account opens chat'],['14 Sep 19:05–06','Age stated and acknowledged'],['15 Sep 21:40','Message flagged (redacted)'],['16 Sep 20:11','Car photo sent'],['17 Sep 18:02','Meeting proposed'],['Tonight 18:35','Meeting time']].map(t=>`<div class="row read"><span class="ts">${t[0]}</span> — ${t[1]}</div>`).join('')+(M.timeline.length?'<p><b>Logged tonight</b></p>'+M.timeline.map(t=>`<div class="row read"><span class="ts">${t.t}</span> — ${esc(t.text)}</div>`).join(''):''),
  board:()=>`<h3>Evidence board</h3><p style="font-size:11px;color:#7fb59a">Every item carries its source and confidence. Hearsay and allegations are recorded, not relied on.</p>`+(Object.values(M.intel).map(i=>`<div class="row read">${tagHTML(i.conf)} <b>${esc(i.title)}</b><div class="ts">${esc(i.src)} · logged ${esc(i.when)}</div></div>`).join('')||'<p>No items yet. Open records to log them.</p>'),
- notes:()=>`<h3>Team notes & unresolved questions</h3>`+row('n1','<b>Who typed the messages?</b>','Not established. Nothing we hold shows who was holding the phone.',{})+row('n2','<b>Possible hacked-account explanation</b>','A hacked account is an explanation to test, not proof either way. Platform login data has not been obtained.',{intel:['hacked_note'],flag:'r_hacked'})+row('n3','<b>Is “Gary P” the account holder?</b>','Uncertain. Similar coat and car type only.',{flag:'r_social'})+row('n4','<b>Plate</b>','Only “K7” is visible in the photo. A partial match is a lead, not a match.',{})
+ notes:()=>`<h3>Team notes & unresolved questions</h3>`+row('n1','<b>Who typed the messages?</b>','Not established. Nothing we hold shows who was holding the phone.',{})+row('n2','<b>Possible hacked-account explanation</b>','A hacked account is an explanation to test, not proof either way. Platform login data has not been obtained.',{intel:['hacked_note'],flag:'r_hacked'})+row('n3','<b>Is “Norman P” the account holder?</b>','Uncertain. Similar coat and car type only.',{flag:'r_social'})+row('n4','<b>Plate</b>','Only “K7” is visible in the photo. A partial match is a lead, not a match.',{})
 };
 let pcTab='overview';
 function row(id,head,det,m){const read=M.read.has(id);return `<div class="row ${read?'read':''}" data-row="${id}" data-intel="${(m.intel||[]).join(',')}" data-flag="${m.flag||''}">${head} ${read?'<span style="color:#45e08a">✓</span>':'<span style="color:#ffb627">●</span>'}<div class="det">${det}</div></div>`;}
@@ -769,9 +826,9 @@ function talkKev(){if(kev.state!=='CALM')return 'I\'m busy, mate. Order or don\'
 function talkNPC(n){if(n.isMark)return tryContact();let line=typeof n.talk==='function'?n.talk():'...';if(n.state==='ALARMED'||n.state==='FLIGHT_RISK')line='I\'m not talking to you.';else if(n.state==='UNEASY'&&n!==kev)line='Do I know you?';bark(n,line);n.dir={x:player.x-n.x,y:player.y-n.y};}
 
 /* ================= PHASE CONTROL ================= */
-function startBriefing(){newMission();officers=[];policeCar=null;cars=[];barks=[];S=null;CALL.queue=[];CALL.cur=null;$('stTrans').innerHTML='';$('sting').classList.add('hidden');$('call').classList.add('hidden');P.stats.played++;saveP();clearScreen();R=buildLiving();buildBriefingNPCs();player.x=200;player.y=500;player.dir={x:1,y:-1};STATE='BRIEFING_ROOM';
- cam.zoom=clamp(Math.min(W/820,H/600)*1.12,.8,1.9);cam.x=400;cam.y=290;$('hud').classList.remove('hidden');if(IS_TOUCH)$('touch').classList.remove('hidden');announce('01','THE BRIEFING');renderHUD();M.introLock=true;const mid=M;setTimeout(()=>{if(M===mid&&STATE==='BRIEFING_ROOM')showIntro();},3400);}
-const INTRO=[()=>`Alright, ${P.name}. Glad you made it. Tonight's the Golden Fryer job.`,()=>'If you\'ve got time before you head out, check the computer — the whole case is on there. And speak to Jas properly about the chats.',()=>'We\'ve also got a woman in from down t\'road, Maureen. Might be worth asking her any questions you\'ve got.',Object.assign(()=>'Here\'s our man. Goes by Gary, profile says he\'s 52 — none of that\'s confirmed. And... I\'m sorry about the third one.',{photos:true}),()=>'It\'s all on the computer and on your phone if you need it. Door\'s behind you when you\'re ready — he\'s not due till about half six.'];
+function startBriefing(){newMission();CHK=null;officers=[];policeCar=null;cars=[];barks=[];S=null;CALL.queue=[];CALL.cur=null;$('stTrans').innerHTML='';$('sting').classList.add('hidden');$('call').classList.add('hidden');P.stats.played++;saveP();clearScreen();R=buildLiving();buildBriefingNPCs();player.x=200;player.y=500;player.dir={x:1,y:-1};STATE='BRIEFING_ROOM';
+ cam.zt=clamp(Math.min(W/820,H/600)*1.12,.8,1.9);cam.zoom=cam.zt*.8;cam.x=400;cam.y=290;$('hud').classList.remove('hidden');if(IS_TOUCH)$('touch').classList.remove('hidden');announce('01','THE BRIEFING');renderHUD();M.introLock=true;const mid=M;setTimeout(()=>{if(M===mid&&STATE==='BRIEFING_ROOM')showIntro();},1500);}
+const INTRO=[()=>`Alright, ${P.name}. Glad you made it. Tonight's the Golden Fryer job.`,()=>'If you\'ve got time before you head out, check the computer — the whole case is on there. And speak to Jas properly about the chats.',()=>'We\'ve also got a woman in from down t\'road, Maureen. Might be worth asking her any questions you\'ve got.',()=>'And have a word with Ray before you go. He\'s been doing this longer than any of us — he\'ll tell you when to ring the police, what evidence to get, and how to keep things calm.',Object.assign(()=>'Here\'s who we think he is. Jas found the page from the car and the Thursday check-ins, so it\'s a lead, not a match. Goes by Norman, profile says he\'s 68 — none of it\'s confirmed. And... I\'m sorry about the third one.',{photos:true}),()=>'It\'s all on the computer and on your phone if you need it. Door\'s behind you when you\'re ready — he\'s not due till about half six.'];
 function showIntro(){let i=0,shown=0,timer=null;const C=BRIEF.founder;
  const done=()=>{clearInterval(timer);closeModal();M.introLock=false;INTRO.forEach(f=>M.hist.founder.push({t:f()}));toast('Controls',IS_TOUCH?'Joystick to move · USE to talk':'Move: WASD / arrows · Talk / use: E · Pause: Esc','#ffb627');};
  const page=()=>{const t=INTRO[i]();const ph=INTRO[i].photos;if(ph)addIntel('suspect_profile');shown=0;clearInterval(timer);
@@ -781,9 +838,34 @@ function showIntro(){let i=0,shown=0,timer=null;const C=BRIEF.founder;
   const next=()=>{if(shown<t.length){shown=t.length;return;}if(++i>=INTRO.length)done();else{lockInput();page();}};
   $('inN').onclick=next;ACTIVE_CHOICES=[next];UI.modal.next=next;};
  openModal('',{close:done,type:'intro'});page();}
-function startApproach(){closeModal();fadeTo(()=>{R=buildStreet();buildStreetNPCs();player.x=120;player.y=820;player.dir={x:1,y:0};STATE='APPROACH';M.clock=0;cam.x=player.x;cam.y=player.y;announce('02','THE APPROACH');addTimeline('Team member arrived on the high street');setTimeout(()=>STATE==='APPROACH'&&toast('Controls',IS_TOUCH?'Joystick to move · USE to talk · STING next to the subject · PHONE for Del, police & evidence':'Move: WASD · Talk: E · Sting: F (next to him) · Phone: C · Pause: Esc','#ffb627'),3600);});}
-function togglePause(){paused=!paused;if(paused){openModal(`<div class="panelbox" style="max-width:360px;text-align:center"><h2 style="font-size:40px">Paused</h2><p style="color:var(--dim);font-size:13px">Mission clock stopped at ${M?fmtClock(M.clock):'--'}</p><div style="display:flex;flex-direction:column;gap:8px"><button class="btn primary" id="pR">Resume</button><button class="btn" id="pD">Toggle debug overlay</button><button class="btn" id="pM">${AU.muted?'Unmute':'Mute'} audio</button><button class="btn" id="pQ">Abandon to title</button></div></div>`,{close:togglePause});
-  $('pR').onclick=togglePause;$('pD').onclick=()=>{debugOn=!debugOn;$('debug').classList.toggle('hidden',!debugOn);};$('pM').onclick=()=>{AU.muted=!AU.muted;togglePause();togglePause();};$('pQ').onclick=()=>{paused=false;closeModal();toTitle();};}
+let CHK=null;
+function resetRunState(){officers=[];policeCar=null;cars=[];barks=[];S=null;CALL.queue=[];CALL.cur=null;paused=false;$('stTrans').innerHTML='';$('sting').classList.add('hidden');$('call').classList.add('hidden');}
+function enterApproach(){R=buildStreet();buildStreetNPCs();player.x=120;player.y=820;player.dir={x:1,y:0};player.moving=false;STATE='APPROACH';M.clock=0;cam.x=player.x;cam.y=player.y;announce('02','THE APPROACH');addTimeline('Team member arrived on the high street');setTimeout(()=>STATE==='APPROACH'&&toast('Controls',IS_TOUCH?'Joystick to move · USE to talk · STING next to the subject · PHONE for Del, police & evidence':'Move: WASD · Talk: E · Sting: F (next to him) · Phone: C · Pause: Esc','#ffb627'),3600);}
+function startApproach(){closeModal();try{CHK=structuredClone(M);}catch(e){CHK=null;}fadeTo(enterApproach);}
+function restartCheckpoint(){if(!CHK)return fadeTo(startBriefing);closeModal();fadeTo(()=>{resetRunState();clearScreen();M=structuredClone(CHK);$('hud').classList.remove('hidden');if(IS_TOUCH)$('touch').classList.remove('hidden');enterApproach();renderHUD();toast('Checkpoint restored','Back at the start of the approach. Your briefing notes are intact.','#45e08a');});}
+
+function hint(id,title,body,col){if(P.hints===false||!M||!M.hints||M.hints.has(id))return;M.hints.add(id);toast(title,body,col||'#3fd0ff');}
+function approachHints(){if(STATE!=='APPROACH'||!mark)return;
+ if(M.clock>9)hint('go','Ray','Head for the Golden Fryer and watch for a silver estate. No need to rush.','#45e08a');
+ if(M.seenMark&&mark.present)hint('see','Tip','That\'s him. Don\'t stare or stand too close — watch what he does. Phone → Ask Ray for advice.');
+ if(mark.present&&dist(player,mark)<95&&!M.contact)hint('near','Tip',IS_TOUCH?'Tap USE to chat — easy questions first. Tap STING when you\'re ready to go formal. Sting answers are timed.':'E: chat — easy questions first. F: start the sting when you\'re ready. Sting answers are timed.');
+ if(mark.present&&mark.susp>=40)hint('uneasy','Tip','He\'s getting uneasy. Step back and give him space.','#ffb627');
+ if(mark.stage==='WAITING_FOOD'&&!M.police.requested&&!M.contact)hint('wait','Ray','He\'s waiting for his food — the best moment. Ring the police, then walk over and ask slowly.','#45e08a');
+ if(['HOLDING_FOOD','LEAVING'].includes(mark.stage)&&!M.contact)hint('leaving','Ray','He\'s heading out — you\'ll only get a couple of answers if you speak now.','#45e08a');}
+
+function openSettings(back){const v=P.vol;
+ openModal(`<div class="panelbox" style="max-width:420px"><h2 style="font-size:32px;color:var(--amber)">Settings</h2>
+ <label>MUSIC VOLUME</label><input type="range" id="stM" min="0" max="100" value="${Math.round(v.music*100)}" style="width:100%;accent-color:#ffb627">
+ <label>EFFECTS VOLUME</label><input type="range" id="stF" min="0" max="100" value="${Math.round(v.sfx*100)}" style="width:100%;accent-color:#ffb627">
+ <label style="display:flex;gap:8px;align-items:center;margin-top:12px;text-transform:none;letter-spacing:0"><input type="checkbox" id="stMu" ${AU.muted?'checked':''}> Mute all audio</label>
+ <label style="display:flex;gap:8px;align-items:center;margin-top:8px;text-transform:none;letter-spacing:0"><input type="checkbox" id="stH" ${P.hints!==false?'checked':''}> Show tips during the approach</label>
+ <div style="margin-top:14px"><button class="btn primary" id="stX">Done</button></div></div>`,{close:()=>{(back||closeModal)();}});
+ $('stM').oninput=e=>{P.vol.music=e.target.value/100;applyVol();saveP();};
+ $('stF').oninput=e=>{P.vol.sfx=e.target.value/100;applyVol();saveP();};$('stF').onchange=()=>SFX.select();
+ $('stMu').onchange=e=>{setMuted(e.target.checked);};$('stH').onchange=e=>{P.hints=e.target.checked;saveP();};
+ $('stX').onclick=()=>(back||closeModal)();ACTIVE_CHOICES=[()=>(back||closeModal)()];}
+function togglePause(){paused=!paused;if(paused){openModal(`<div class="panelbox" style="max-width:360px;text-align:center"><h2 style="font-size:40px">Paused</h2><p style="color:var(--dim);font-size:13px">Mission clock stopped at ${M?fmtClock(M.clock):'--'}</p><div style="display:flex;flex-direction:column;gap:8px"><button class="btn primary" id="pR">Resume</button><button class="btn" id="pD">Toggle debug overlay</button><button class="btn" id="pM">Settings — sound & hints</button>${CHK&&STATE!=='BRIEFING_ROOM'?'<button class="btn" id="pC">Restart from checkpoint</button><button class="btn" id="pRs">Restart mission</button>':''}<button class="btn" id="pQ">Abandon to title</button></div></div>`,{close:togglePause});
+  $('pR').onclick=togglePause;$('pD').onclick=()=>{debugOn=!debugOn;$('debug').classList.toggle('hidden',!debugOn);};$('pM').onclick=()=>openSettings(()=>{closeModal();paused=false;togglePause();});$('pQ').onclick=()=>{paused=false;closeModal();toTitle();};if($('pC'))$('pC').onclick=()=>{paused=false;restartCheckpoint();};if($('pRs'))$('pRs').onclick=()=>{paused=false;closeModal();fadeTo(startBriefing);};}
  else closeModal();}
 
 /* ================= CONTACT / STING ================= */
@@ -796,12 +878,14 @@ function tryContact(){const m=mark,st=m.stage;
  if(!WINDOWS[st])return;
  if(m.susp>=50&&Math.random()<(m.susp-40)/70){m.susp=Math.min(100,m.susp+15);bark(m,'Get away from me. I mean it.');addTimeline('Subject refused contact');return;}
  startSting(st);}
+function counterBusy(){toast('Not now','He\'s at the counter, talking to someone else right now. Wait until he\'s finished.','#ff8a3d');}
 function stingButton(){
  if(!mark||!mark.present||mark.stage==='DEPARTED'||mark.stage==='ABSENT'){toast('Del (radio)','No sign of him yet. Watch for a silver estate.','#45e08a');return;}
  if(dist(player,mark)>95){toast('Del (radio)','Get closer — you need to be next to him to start.','#45e08a');return;}
  if(UI.modal)closeModal();
  const st=mark.stage;
- if(!WINDOWS[st]){toast('Bad moment',st==='ORDERING'?'He\'s mid-order at the counter. Wait until he\'s done.':st==='COLLECT'?'He\'s collecting his food.':'He\'s heading off — too late for that.','#ff8a3d');}
+ if(st==='ORDERING'||st==='COLLECT'){counterBusy();return;}
+ if(!WINDOWS[st]){toast('Bad moment','He\'s heading off — too late for that.','#ff8a3d');}
  tryContact();}
 const MARK_CHAT=[
  {id:'busy',q:'"Is it always this busy in here?"',run:()=>insideShop(mark)?['Thursdays, yeah. Always is.',{claim:'thursdays',stmt:'In casual chat, said Thursdays are always busy here'}]:['Dunno, mate. Probably.',null]},
@@ -853,10 +937,10 @@ const EXCUSES={food:'I\'m just here for some food, mate',walk:'Just gone for a w
 function logExcuse(k){if(!M.excusesThis.includes(k))M.excusesThis.push(k);if(!P.excuses.includes(k)){P.excuses.push(k);saveP();const NX=Object.keys(EXCUSES).length;toast('Excuse logged · '+P.excuses.filter(x=>EXCUSES[x]).length+'/'+NX,EXCUSES[k],'#b48bff');if(Object.keys(EXCUSES).every(x=>P.excuses.includes(x)))unlock('bingo');}}
 const C=k=>M.claims.has(k);
 const TOPICS=[
- {id:'name',q:'"Can I ask your name?"',run(){if(mark.susp>60)return['Why would I tell you that? No.',{stmt:'Refused to give his name'}];return['...Gary. Why?',{claim:'name',stmt:'Gave his first name as Gary'}];}},
+ {id:'name',q:'"Can I ask your name?"',run(){if(mark.susp>60)return['Why would I tell you that? No.',{stmt:'Refused to give his name'}];return['...Norman. Why?',{claim:'name',stmt:'Gave his first name as Norman'}];}},
  {id:'why',q:'"What brings you down here tonight?"',run(){if(S&&S.far)return['I told you. I\'m out for a walk. Bit of fresh air.',{claim:'walk',excuse:'walk',stmt:'Repeated that he was just out for a walk'}];if(['HOLDING_FOOD','LEAVING'].includes(S&&S.stage))return['Just been getting my tea. First time I\'ve been in there, actually.',{claim:'first_time',excuse:'chips',stmt:'Said he was only getting his tea and that it was his first visit'}];return['I\'m just here for some food, mate. First time I\'ve been in here, actually.',{claim:'first_time',excuse:'food',stmt:'Said he was just here for some food and that it was his first visit'}];}},
  {id:'car',q:'"Is the silver estate outside yours?"',req:()=>hasIntel('car_scene')||hasIntel('obs_car_exit'),run(){if(mark.susp<55)return['Yeah, it\'s mine. So what?',{claim:'admit_car',stmt:'Confirmed the silver estate is his',intel:'admit_car'}];return['Never seen it before in my life.',{claim:'deny_car',stmt:'Denied owning the silver estate'}];}},
- {id:'account',q:'"Do you use an account called gaz_drives77?"',req:()=>hasIntel('log_export'),run(){return['That account got hacked weeks back. Nothing to do with me.',{claim:'hacked',excuse:'hacked',stmt:'Said the gaz_drives77 account was hacked weeks ago — implying it is his'}];}},
+ {id:'account',q:'"Do you use an account called BigNorm420?"',req:()=>hasIntel('log_export'),run(){return['That account got hacked weeks back. Nothing to do with me.',{claim:'hacked',excuse:'hacked',stmt:'Said the BigNorm420 account was hacked weeks ago — implying it is his'}];}},
  {id:'hackwhen',q:'"When did you notice it was hacked? Did you report it?"',good:true,req:()=>C('hacked'),run(){return['I dunno... few weeks? Didn\'t report it. Didn\'t think it mattered.',{stmt:'Could not say when the hack happened; did not report it'}];}},
  {id:'phone',q:'"Does anyone else use your phone?"',good:true,req:()=>C('hacked'),run(){return['My mate borrows it sometimes. Could\'ve been him, couldn\'t it?',{claim:'mate',excuse:'mate',stmt:'Suggested a friend who borrows his phone could have sent the messages'}];}},
  {id:'meet',q:'"Were you expecting to meet anyone here around 18:35?"',req:()=>hasIntel('meet_arranged'),run(){if(C('hacked')||C('thought18')||C('banter'))return['Alright — I came to warn her. Them chats are dangerous. A kid shouldn\'t be online like that.',{claim:'warn',excuse:'warn',stmt:'Said he came to the takeaway to warn the person he had been messaging'}];return['Meet someone? No. I told you, I\'m getting chips.',{claim:'no_meet',stmt:'Denied arranging to meet anyone'}];}},
@@ -866,7 +950,7 @@ const TOPICS=[
 const CONTRAS=[
  {id:'c_regular',when:()=>C('first_time')&&(hasIntel('kev_regular')||hasIntel('stranger_seen')),ev:()=>hasIntel('kev_regular')?'kev_regular':'stranger_seen',q:()=>hasIntel('kev_regular')?'Cite Kev: staff know a Thursday regular in a silver estate.':'Cite Maureen: she\'s seen a man in a grey coat here most Thursdays.',score:6,a:'...Lots of people have silver cars.',stmt:'Did not explain a firsthand account of a Thursday regular, after saying it was his first visit'},
  {id:'c_selfregular',when:()=>C('first_time')&&C('thursdays'),q:()=>'"Earlier you told me Thursdays are always this busy in here."',score:6,a:'...I meant generally. Everyone knows that.',stmt:'Had implied in casual chat that he comes on Thursdays, after saying it was his first visit'},
- {id:'c_social',when:()=>C('first_time')&&hasIntel('social_posts'),ev:()=>'social_posts',weak:true,q:()=>'Cite “Gary P” check-ins here (unverified).',score:1,a:'That\'s not even me. Loads of Garys about.',stmt:'Denied the social media check-ins'},
+ {id:'c_social',when:()=>C('first_time')&&hasIntel('social_posts'),ev:()=>'social_posts',weak:true,q:()=>'Cite “Norman P” check-ins here (unverified).',score:1,a:'That\'s not even me. Loads of Normans about.',stmt:'Denied the social media check-ins'},
  {id:'c_age',when:()=>C('thought18')&&hasIntel('log_age'),ev:()=>'log_age',q:()=>'Cite chat log 19:06: the account acknowledged the stated age.',score:8,a:'...I didn\'t read it properly. I was going to report it myself, honest.',stmt:'When shown the age acknowledgement, said he had been going to report it',claim:'report',excuse:'report'},
  {id:'c_hackmate',when:()=>C('hacked')&&C('mate'),q:()=>'"First it was hacked, now it was your mate. Which is it?"',score:6,a:'Could be either! I don\'t know, do I?',stmt:'Could not choose between the hacked-account and friend explanations'},
  {id:'c_banter',when:()=>C('hacked')&&C('banter'),q:()=>'"If the account was hacked, how do you know that message was just banter?"',score:8,a:'I— I\'m just saying, if it was me. Which it wasn\'t.',stmt:'Described the flagged message as banter despite saying the account was hacked'},
@@ -966,6 +1050,34 @@ function updatePoliceArrival(dt){
 
 /* ================= POLICE CALL (radio / video interface) ================= */
 const CALL={queue:[],cur:null,shown:0,hold:0,speaker:null,state:'CONNECTING',parts:[],ctx:{},prev:[],wave:new Array(48).fill(0)};
+
+const vary=a=>a[Math.floor(Math.random()*a.length)];
+const VAR={
+ open:['Right, we\'re on scene now. Tell me exactly what happened and show me what evidence you\'ve collected.','Okay, we\'re here. Start from the top — what happened, and what have you got?','We\'ve got it from here. Walk me through tonight, and don\'t skip the evidence.'],
+ evOpen:['Talk me through the evidence. Strongest first — and tell me how you know each bit.','Show me what you\'ve got. Best first, and tell me how you came by each piece.','Evidence next. Lead with what you\'re surest of, and say where it came from.'],
+ timeQ:['What time did he actually walk in?','When did he go into the takeaway? Be exact.','Give me his arrival time — and tell me if you didn\'t see it.'],
+ typedQ:['Did any of you see him type those messages yourselves?','Did anyone watch him use that account? Yes or no.','Were you there when those messages were sent?'],
+ lastQ:['Last thing. What aren\'t you sure about?','Final question. Where are the gaps?','Before we finish — what can\'t you stand behind?'],
+ clear:['Clear. That helps.','That\'s a straight account, thanks.','Okay. Facts in order — that\'s how we like it.','Good. Stick to that in your statement.','Fair summary. I can work with that.'],
+ admit:['Admitted what, exactly? I\'ll want to see that in your transcript.','“Bang to rights” isn\'t something I can write down. What did he actually say?','Hold on — what did he admit, in his own words?','I\'ll believe that when I\'ve read it in the transcript.'],
+ more:['I\'ll need more than that.','That doesn\'t give me much to write down.','Try again — facts, in order.','Complicated how? Be specific.'],
+ tlOk:['Matches what we\'ll pull off the CCTV, I expect.','That fits. We\'ll check it against the cameras.','Good — that\'s the time we\'ll verify.','Noted. CCTV will confirm or correct it.'],
+ tlBad:['That\'s not what the timeline shows. Be careful.','Hmm. That doesn\'t line up with what we have.','Be careful with times — that one\'s off.','That\'s not right. Check your notes before you say it again.'],
+ typedOk:['Good. Keep it exactly that straight.','That\'s a careful answer. Thank you.','Right — you saw the car, not the keyboard. Fair.','Good. That\'s the line between what you know and what you assume.'],
+ typedBad:['From where? That\'s not in anything you\'ve shown me.','Watched him how? Nothing you\'ve given me says that.','That\'s a big claim. Where\'s it from?','I haven\'t seen anything that supports that.'],
+ typedUnsure:['Not sure is better than guessing.','Honest. I\'d rather hear that.','Fine. Better than making something up.'],
+ lying:['That\'s for an interview to test, not you.','You don\'t get to decide that tonight. We\'ll test it.','Maybe. But that\'s our job, not yours.','Careful. “Lying” is a conclusion — we haven\'t got there.'],
+ unres:['That\'s the honest answer. Thank you.','Good. Knowing the gaps matters as much as knowing the facts.','Fair. We\'ll chase those.','That\'s the sort of honesty that helps us.'],
+ airtight:['Nothing\'s airtight at this stage.','Airtight? At this stage? No.','If it were airtight we wouldn\'t be asking questions.','That\'s optimistic. There are always gaps.'],
+ basically:['Basically? That word does a lot of work.','“Basically” isn\'t a statement. What did he say?','Confessed to what, exactly? Words, please.'],
+ react:{VERIFIED:['Good. We\'ll take a full copy.','That\'s the kind of record we can use. Copy it over.','Right, we\'ll secure that export properly.'],
+  OBSERVED:['You saw that yourself? Good — note the time.','First-hand. Good. When exactly?','Right. Put your time against that in your statement.'],
+  WITNESS:['We\'ll need to speak to them directly.','Get us a name and number for that person.','Witness account — we\'ll follow it up properly.'],
+  UNCERTAIN:['Possible. Not proof.','That\'s a lead. Nothing more yet.','Could be something. We\'ll treat it carefully.'],
+  HEARSAY:['That\'s secondhand. Logged, but it won\'t carry weight.','Hearsay. We\'ll note it and move on.','Someone told someone — that doesn\'t get us far.'],
+  ALLEGATION:['Internet comments aren\'t evidence. Noted.','An allegation isn\'t a fact. Noted.','Comments in a group chat? Noted, not relied on.'],
+  UNRESOLVED:['Thanks for flagging it. We\'ll look at that.','Good to know what\'s still open.','We\'ll add that to our list of questions.'],
+  STATEMENT:['Noted.','Okay. His words, logged.','Right. We\'ll compare that with the rest.']}};
 function cSay(who,text){return{type:'say',who,text};}
 function cChoice(prompt,opts){return{type:'choice',prompt,opts};}
 function cFn(fn){return{type:'fn',fn};}
@@ -979,13 +1091,13 @@ function startPoliceCall(){
  $('callPanels').innerHTML=CALL.parts.map(p=>`<div class="cp ${p.absent?'absent':''}" id="cp_${p.id}"><span class="live">● LIVE</span><canvas width="200" height="200"></canvas><div class="np"><b>${esc(p.name.toUpperCase())}</b><span>${esc(p.sign)}</span></div></div>`).join('');
  CALL.parts.forEach(p=>{p.cv=$('cp_'+p.id).querySelector('canvas').getContext('2d');p.blinkT=rnd(1,4);});
  $('radioTxt').innerHTML='';$('radioPrev').innerHTML='';$('callChoices').innerHTML='';CALL.prev=[];CALL.cur=null;
- CALL.queue=[cWait(1.4,'CONNECTING'),cSay('okafor','Right, we\'re on scene now. Tell me exactly what happened and show me what evidence you\'ve collected.'),cFn(stepSummary),
-  cSay('brennan','Talk me through the evidence. Strongest first — and tell me how you know each bit.'),cFn(()=>stepEvidence(0)),
-  cSay('brennan','What time did he actually walk in?'),cFn(stepTimeline),
-  cSay('okafor','Did any of you see him type those messages yourselves?'),cFn(stepTyped),
+ CALL.queue=[cWait(1.4,'CONNECTING'),cSay('okafor',vary(VAR.open)),cFn(stepSummary),
+  cSay('brennan',vary(VAR.evOpen)),cFn(()=>stepEvidence(0)),
+  cSay('brennan',vary(VAR.timeQ)),cFn(stepTimeline),
+  cSay('okafor',vary(VAR.typedQ)),cFn(stepTyped),
   cFn(stepExcuse),
   cSay('decoy','The full export\'s saved, untouched. I\'ll give a statement whenever you need it.'),
-  cSay('okafor','Last thing. What aren\'t you sure about?'),cFn(stepUnresolved),
+  cSay('okafor',vary(VAR.lastQ)),cFn(stepUnresolved),
   cFn(stepOutcome)];
 }
 function playerLine(text){cInsert([cSay('player',text)]);}
@@ -996,9 +1108,9 @@ function stepSummary(){
  parts.push(M.contact?'I spoke to him calmly':'we didn\'t approach him');if(ex)parts.push('he says '+ex);if(hasIntel('admit_car'))parts.push('he confirmed the silver estate is his');
  const acc=parts.join(', ')+'. The chat export is preserved untouched'+(hasIntel('admit_car')?'.':', and he hasn\'t admitted to the account.');
  cInsert([cChoice('Summarise the encounter',[
-  {text:acc,fn:()=>{M.accPts+=4;playerLine(acc);cInsert([cSay('okafor','Clear. That helps.')]);}},
-  {text:'He\'s admitted the lot. He\'s bang to rights.',fn:()=>{M.overstate++;playerLine('He\'s admitted the lot. He\'s bang to rights.');cInsert([cSay('okafor','Admitted what, exactly? I\'ll want to see that in your transcript.')]);}},
-  {text:'We... had a chat with him. It\'s complicated.',fallback:true,fn:()=>{playerLine('We... had a chat with him. It\'s complicated.');cInsert([cSay('okafor','I\'ll need more than that.')]);}}])]);}
+  {text:acc,fn:()=>{M.accPts+=4;playerLine(acc);cInsert([cSay('okafor',vary(VAR.clear))]);}},
+  {text:'He\'s admitted the lot. He\'s bang to rights.',fn:()=>{M.overstate++;playerLine('He\'s admitted the lot. He\'s bang to rights.');cInsert([cSay('okafor',vary(VAR.admit))]);}},
+  {text:'We... had a chat with him. It\'s complicated.',fallback:true,fn:()=>{playerLine('We... had a chat with him. It\'s complicated.');cInsert([cSay('okafor',vary(VAR.more))]);}}])]);}
 const EXCUSE_GIST={food:'he was just here for some food',walk:'he was just out for a walk',chips:'he was only getting his tea',hacked:'his account was hacked',mate:'a mate might have used his phone',thought18:'he thought the person was 18',warn:'he came to warn the person',report:'he was going to report it himself',setup:'it\'s a set-up',banter:'the flagged message was “just banter”'};
 const MARK_CALL={food:'I\'m just here for some food, mate. That\'s all.',walk:'I was out for a walk. Since when is that a crime?',chips:'I came for chips. That\'s all.',hacked:'My account got hacked. I keep telling them.',mate:'My mate uses my phone. Ask him.',thought18:'I thought she was eighteen, alright?',warn:'I came to warn her. I was helping.',report:'I was going to report it myself!',setup:'This whole thing\'s a set-up.',banter:'It was banter. Nothing more.'};
 function stepEvidence(n){
@@ -1008,21 +1120,21 @@ function stepEvidence(n){
  opts.push({text:'That\'s everything for now.',fallback:true,fn:()=>{playerLine('That\'s everything for now.');cInsert([cSay('brennan','Right. Noted.')]);}});
  cInsert([cChoice(`Hand over evidence (${n+1}/6) — strongest first`,opts)]);}
 function reportLine(i){const pre={VERIFIED:'From the export: ',OBSERVED:'I saw this myself: ',WITNESS:'A witness told us: ',UNCERTAIN:'This is unconfirmed: ',HEARSAY:'This is secondhand: ',ALLEGATION:'This is only an allegation: ',UNRESOLVED:'Still open: ',STATEMENT:'He said: '}[i.conf]||'';return pre+i.title+'.';}
-function officerReact(i){return{VERIFIED:'Good. We\'ll take a full copy.',OBSERVED:'You saw that yourself? Good — note the time.',WITNESS:'We\'ll need to speak to them directly.',UNCERTAIN:'Possible. Not proof.',HEARSAY:'That\'s secondhand. Logged, but it won\'t carry weight.',ALLEGATION:'Internet comments aren\'t evidence. Noted.',UNRESOLVED:'Thanks for flagging it. We\'ll look at that.',STATEMENT:'Noted.'}[i.conf];}
-function stepTimeline(){const t=M.attendedTime;const opts=[];const mk=(txt,ok)=>({text:txt,fn:()=>{if(ok){M.accPts+=4;M.flags.add('tl_ok');}else if(!/didn.t see/.test(txt))M.overstate++;playerLine(txt);cInsert([cSay('brennan',ok?'Matches what we\'ll pull off the CCTV, I expect.':'That\'s not what the timeline shows. Be careful.')]);}});
+function officerReact(i){return vary(VAR.react[i.conf]||VAR.react.STATEMENT);}
+function stepTimeline(){const t=M.attendedTime;const opts=[];const mk=(txt,ok)=>({text:txt,fn:()=>{if(ok){M.accPts+=4;M.flags.add('tl_ok');}else if(!/didn.t see/.test(txt))M.overstate++;playerLine(txt);cInsert([cSay('brennan',ok?vary(VAR.tlOk):vary(VAR.tlBad))]);}});
  if(t){const[h,m]=t.split(':').map(Number);const alt=d=>pad(h)+':'+pad(m+d);opts.push(mk('About '+t+'.',true),mk('About '+alt(-4)+'.',false),mk('About '+alt(3)+'.',false),mk('I didn\'t see him arrive.',false));}
  else opts.push(mk('I didn\'t see him arrive myself.',true),mk('About 18:30, on the dot.',false),mk('He was here before me.',false));
  opts.sort(()=>Math.random()-.5);opts.push({text:'I\'d have to check my notes.',fallback:true,fn:()=>{playerLine('I\'d have to check my notes.');cInsert([cSay('brennan','Then check them before you give a statement.')]);}});
  cInsert([cChoice('Explain the timeline',opts)]);}
 function identityBasis(){if(hasIntel('admit_car')&&(hasIntel('obs_car_exit')||hasIntel('car_scene')))return 'he admits the car, and the car matches the plate fragment in the photo';if(hasIntel('obs_car_exit'))return 'we saw him get out of the car from the photo';if(hasIntel('car_scene'))return 'the car outside matches the plate fragment — partial match only';return 'not established yet';}
 function stepTyped(){const acc='No. We have the export from the profile side. The link to him is that '+identityBasis()+'.';
- cInsert([cChoice('Clarify what you saw directly',[{text:acc,fn:()=>{M.accPts+=4;playerLine(acc);cInsert([cSay('okafor','Good. Keep it exactly that straight.')]);}},
-  {text:'Yes — we watched him do it.',fn:()=>{M.overstate++;playerLine('Yes — we watched him do it.');cInsert([cSay('okafor','From where? That\'s not in anything you\'ve shown me.')]);}},
-  {text:'I\'m not sure.',fallback:true,fn:()=>{M.accPts+=1;playerLine('I\'m not sure.');cInsert([cSay('okafor','Not sure is better than guessing.')]);}}])]);}
+ cInsert([cChoice('Clarify what you saw directly',[{text:acc,fn:()=>{M.accPts+=4;playerLine(acc);cInsert([cSay('okafor',vary(VAR.typedOk))]);}},
+  {text:'Yes — we watched him do it.',fn:()=>{M.overstate++;playerLine('Yes — we watched him do it.');cInsert([cSay('okafor',vary(VAR.typedBad))]);}},
+  {text:'I\'m not sure.',fallback:true,fn:()=>{M.accPts+=1;playerLine('I\'m not sure.');cInsert([cSay('okafor',vary(VAR.typedUnsure))]);}}])]);}
 function stepExcuse(){
  if(!M.markHere){cInsert([cSay('okafor','And he\'s gone. We\'ll pull the CCTV and go through the platform.'),cChoice('Did he say anything before he left?',[
   {text:M.statements.length?'Yes — it\'s all in the transcript: '+M.statements.slice(0,2).map(s=>s.text.toLowerCase()).join('; ')+'.':'We never spoke to him.',fn:function(){M.accPts+=4;playerLine(this.text);}},
-  {text:'He basically confessed before he ran.',fn:()=>{M.overstate++;playerLine('He basically confessed before he ran.');cInsert([cSay('okafor','Basically? That word does a lot of work.')]);}},
+  {text:'He basically confessed before he ran.',fn:()=>{M.overstate++;playerLine('He basically confessed before he ran.');cInsert([cSay('okafor',vary(VAR.basically))]);}},
   {text:'Nothing useful.',fallback:true,fn:()=>playerLine('Nothing useful.')}])]);return;}
  const ex=M.excusesThis.find(e=>e!=='setup'&&e!=='chips')||M.excusesThis[0];
  const mline=ex?MARK_CALL[ex]:'I\'ve done nothing wrong. I came for my tea.';
@@ -1031,13 +1143,13 @@ function stepExcuse(){
  const acc='That\'s his explanation. We can\'t verify it either way'+(cs.length?' — but he gave conflicting accounts, it\'s in the transcript.':' tonight.');
  cInsert([cSay('mark',mline),cSay('okafor',`He\'s telling us ${gist}. Anything on that?`),cChoice('Answer the discrepancy',[
   {text:acc,fn:()=>{M.accPts+=4;playerLine(acc);}},
-  {text:'He\'s lying. Obviously.',fn:()=>{M.overstate++;playerLine('He\'s lying. Obviously.');cInsert([cSay('okafor','That\'s for an interview to test, not you.')]);}},
+  {text:'He\'s lying. Obviously.',fn:()=>{M.overstate++;playerLine('He\'s lying. Obviously.');cInsert([cSay('okafor',vary(VAR.lying))]);}},
   {text:'No comment on that.',fallback:true,fn:()=>playerLine('No comment on that.')}])]);}
 function stepUnresolved(){const u=unresolvedList();const acc=u.slice(0,2).join(' And ')+'.';
- cInsert([cChoice('Name what\'s still unresolved',[{text:acc,fn:()=>{M.accPts+=4;playerLine(acc);cInsert([cSay('okafor','That\'s the honest answer. Thank you.')]);}},
-  {text:'Nothing. It\'s airtight.',fn:()=>{M.overstate++;playerLine('Nothing. It\'s airtight.');cInsert([cSay('okafor','Nothing\'s airtight at this stage.')]);}},
+ cInsert([cChoice('Name what\'s still unresolved',[{text:acc,fn:()=>{M.accPts+=4;playerLine(acc);cInsert([cSay('okafor',vary(VAR.unres))]);}},
+  {text:'Nothing. It\'s airtight.',fn:()=>{M.overstate++;playerLine('Nothing. It\'s airtight.');cInsert([cSay('okafor',vary(VAR.airtight))]);}},
   {text:'Can\'t think of anything.',fallback:true,fn:()=>playerLine('Can\'t think of anything.')}])]);}
-function unresolvedList(){const u=['We never saw who typed the messages — that needs platform and device data'];if(C('hacked')||hasIntel('hacked_note'))u.push('His hacked-account claim hasn\'t been tested either way');if(!hasIntel('admit_car')&&!hasIntel('obs_car_exit'))u.push('We only have a partial plate match for the car');if(hasIntel('social_posts'))u.push('The “Gary P” page might not be him');if(hasIntel('stranger_hearsay'))u.push('The “done this before” claim is hearsay');return u;}
+function unresolvedList(){const u=['We never saw who typed the messages — that needs platform and device data'];if(C('hacked')||hasIntel('hacked_note'))u.push('His hacked-account claim hasn\'t been tested either way');if(!hasIntel('admit_car')&&!hasIntel('obs_car_exit'))u.push('We only have a partial plate match for the car');if(hasIntel('social_posts'))u.push('The “Norman P” page might not be him');if(hasIntel('stranger_hearsay'))u.push('The “done this before” claim is hearsay');return u;}
 const Rp=id=>M.reported.has(id);
 function computeOutcome(){
  const idStrong=hasIntel('admit_car')&&(Rp('car_scene')||Rp('obs_car_exit')),idMod=Rp('obs_car_exit')||(Rp('car_scene')&&Rp('car_photo'));
@@ -1049,7 +1161,7 @@ function computeOutcome(){
  else if(cnt>=2)o='FURTHER';else o='NOARREST';
  return{o,el,cnt};}
 function stepOutcome(){const r=computeOutcome();M.result=r;const L=[];
- if(r.o==='ARREST'){L.push(cSay('brennan','Right. The export, the stated age, the flagged message, the meeting, him turning up — and his own word on the car. That\'s grounds.'),cSay('brennan','Gary, I\'m arresting you on suspicion of offences relating to communication with a child. You don\'t have to say anything...'),cSay('mark','This is a joke. A joke!'),cSay('okafor','Charging decisions aren\'t ours or yours. But your part\'s done, and done properly.'));}
+ if(r.o==='ARREST'){L.push(cSay('brennan','Right. The export, the stated age, the flagged message, the meeting, him turning up — and his own word on the car. That\'s grounds.'),cSay('brennan','Norman, I\'m arresting you on suspicion of offences relating to communication with a child. You don\'t have to say anything...'),cSay('mark','This is a joke. A joke!'),cSay('okafor','Charging decisions aren\'t ours or yours. But your part\'s done, and done properly.'));}
  else if(r.o==='RELEASED'){L.push(cSay('brennan','There\'s enough to arrest on suspicion and interview him. We\'ll take him in.'),cSay('mark','I want a solicitor.'),cWait(1.2,'CHANNEL CLEAR'),cSay('okafor','Update from custody: he\'s been released under investigation. '+(r.el.identity<2?'The link between him and that account isn\'t strong enough yet.':'Parts of your account didn\'t match the evidence, and that hurt it.')));}
  else if(r.o==='FURTHER'){L.push(cSay('brennan','Not enough to arrest tonight. We\'ll take the export, request the platform data and CCTV, and invite him in for a voluntary interview.'),cSay('mark','Can I go now? My food\'s cold.'));}
  else if(r.o==='FURTHER_GONE'){L.push(cSay('brennan','He\'s gone, but what you\'ve given us is logged. We\'ll trace the vehicle and request the platform data.'));}
@@ -1114,6 +1226,23 @@ function failMission(reason){if(STATE==='MISSION_FAILED'||STATE==='MISSION_COMPL
 function finishMission(){STATE='MISSION_COMPLETE';const sc=computeScore();M.score=sc;P.stats.completed++;P.stats.best=Math.max(P.stats.best,sc.total);
  unlock('kingpin');if(!M.contact)unlock('notHim');if(M.contact&&M.markPeak<=10)unlock('calm');if(sc.total>=sc.max)unlock('bang');if(M.result.o==='RELEASED')unlock('notEnough');saveP();SFX.win();
  $('call').classList.add('hidden');const[t,d]=OUT_TEXT[M.result.o];showResults(false,t,d);}
+
+function debriefTips(failed){const t=[],r=M.result;
+ const talk=['founder','decoy','stranger','vet'].filter(c=>!M.hist[c].length).map(c=>BRIEF[c].name);
+ if(talk.length)t.push(`You didn't speak to ${talk.join(', ')} in the briefing. Jas and Maureen unlock evidence and questions; Ray explains how to time the night.`);
+ if(M.read.size<8)t.push(`You opened ${M.read.size} case-file records. Opening every record logs the evidence and unlocks new questions in the room.`);
+ if(!hasIntel('attended')&&!M.attendedTime)t.push('You never saw him arrive. Watch near the takeaway so his arrival time is observed, not guessed.');
+ if(!hasIntel('car_scene')&&!hasIntel('obs_car_exit'))t.push('You didn\'t check the car. Look at the plate while it\'s parked outside — “K7” is a partial match, not proof.');
+ if(!M.contact)t.push('You never spoke to him. Without his own words there is nothing to compare to the chat log.');
+ else{if(['WALKING','QUEUING','HOLDING_FOOD','LEAVING'].includes(M.contactStage))t.push(`You approached him while he was ${WINDOWS[M.contactStage]}. The best window is when he\'s waiting for his food.`);
+  if(M.statements.length<3)t.push(`You recorded ${M.statements.length} statement${M.statements.length===1?'':'s'}. Ask slowly, easy questions first, and let him answer.`);}
+ if(!M.police.requested&&(M.contact||failed))t.push('You never rang the police. Ring them while he\'s waiting for his food, just before you walk over — they need about twenty seconds.');
+ if(M.overstate>0)t.push(`${M.overstate} claim${M.overstate===1?'':'s'} in your report went further than the evidence. Say how you know each thing and leave out assumptions.`);
+ if(M.conduct>0)t.push('You crossed a conduct line. No blocking, no hands, no threats — he\'s free to leave.');
+ if(r&&r.el&&r.el.identity<2)t.push('The identity link could be stronger. The car, the plate and his own words all help.');
+ if(failed&&M.fail==='FLED')t.push('He ran because he was pushed too far for the window you picked. Ring the police first, or wait for a calmer moment.');
+ if(failed&&M.fail==='SPOOKED')t.push('He noticed you. Keep your distance, don\'t stare, and don\'t follow him around.');
+ return t.slice(0,6);}
 function showResults(failed,title,desc){$('hud').classList.add('hidden');$('touch').classList.add('hidden');$('sting').classList.add('hidden');$('call').classList.add('hidden');
  const sc=failed?computeScore():M.score;const r=M.result;
  const elRow=(k,label)=>{if(!r)return'';const v=r.el[k];const ok=k==='identity'?v===2:v;const txt=k==='identity'?['Weak','Moderate','Strong'][v]:(v?'Reported':'Missing');return `<li style="color:${ok?'var(--green)':v?'var(--amber)':'var(--red)'}">${label}: <b>${txt}</b></li>`;};
@@ -1129,9 +1258,10 @@ function showResults(failed,title,desc){$('hud').classList.add('hidden');$('touc
  <div><h3>Score ${sc.total}/${sc.max}</h3>${bars}${M.overstate?`<p style="color:var(--red);font-size:12px">Overstated or inaccurate claims in your report: ${M.overstate}</p>`:''}
  <h3 style="margin-top:8px">Recorded statements</h3><ul>${M.statements.map(s=>`<li><span class="mono" style="color:var(--dim)">${s.t}</span> ${esc(s.text)}</li>`).join('')||'<li>None</li>'}</ul>
  ${achs?`<h3 style="margin-top:8px">Achievements unlocked</h3>${achs}`:''}</div></div>
+ ${(()=>{const dt=debriefTips(failed);return `<div class="debrief"><h3>Debrief — ${failed?'what to try next':'what could be stronger'}</h3>${dt.length?'<ul>'+dt.map(x=>'<li>'+esc(x)+'</li>').join('')+'</ul><p style="font-size:11px;color:var(--dim);margin:6px 0 0">Not sure? Ray in the briefing room explains the timing and the evidence.</p>':'<p style="margin:4px 0 0">Nothing obvious missed — that was a clean run.</p>'}</div>`;})()}
  <p class="note">Outcomes reflect evidence thresholds in this fictional scenario. An admission, nervousness or a contradiction on its own never decides guilt — and the team never decides it at all.</p>
- <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px"><button class="btn primary" id="rAgain">Replay mission</button><button class="btn" id="rTitle">Back to title</button><button class="btn" id="rProf">Profile & achievements</button></div></div></div>`);
- hydrateEmblems($('screens'));$('rAgain').onclick=()=>fadeTo(startBriefing);$('rTitle').onclick=toTitle;$('rProf').onclick=showProfile;ACTIVE_CHOICES=[()=>fadeTo(startBriefing),toTitle];}
+ <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">${failed&&CHK?'<button class="btn primary" id="rChk">Restart from checkpoint</button>':''}<button class="btn ${failed&&CHK?'':'primary'}" id="rAgain">${failed?'Restart mission':'Replay mission'}</button><button class="btn" id="rTitle">Back to title</button><button class="btn" id="rProf">Profile & achievements</button></div></div></div>`);
+ hydrateEmblems($('screens'));$('rAgain').onclick=()=>fadeTo(startBriefing);$('rTitle').onclick=toTitle;$('rProf').onclick=showProfile;if($('rChk'))$('rChk').onclick=restartCheckpoint;ACTIVE_CHOICES=failed&&CHK?[restartCheckpoint,()=>fadeTo(startBriefing),toTitle]:[()=>fadeTo(startBriefing),toTitle];}
 
 /* ================= ACHIEVEMENTS ================= */
 const ACH=[{id:'bingo',name:'Nonce Bingo',desc:'Hear every distinct excuse in the game (10).'},{id:'kingpin',name:'Kingpin Hunter',desc:'Complete the campaign (currently one mission: The Takeaway).'},{id:'notHim',name:'It\'s Not Him, It\'s Not Him',desc:'Finish a mission without ever initiating contact with the mark.'},{id:'calm',name:'Everyone Just Calm Down',desc:'Complete a mission with contact made and the mark\'s suspicion never above 10%.'},{id:'runner',name:'We\'ve Got a Runner',desc:'Fail a mission because the mark actually flees the scene.'},{id:'bang',name:'Banged to Rights',desc:'Achieve the maximum evidence and dialogue score (120/120).'},{id:'notEnough',name:'Not Enough Evidence on Him',desc:'Reach the ending where an arrest is followed by release on insufficient evidence.'}];
@@ -1139,8 +1269,8 @@ function unlock(id){if(P.ach[id])return;P.ach[id]=Date.now();saveP();if(M)M.newA
 
 /* ================= TITLE / CUSTOMISE / PROFILE ================= */
 function toTitle(){STATE='TITLE';R=null;closeModal();$('hud').classList.add('hidden');$('sting').classList.add('hidden');$('call').classList.add('hidden');$('touch').classList.add('hidden');$('prompt').classList.add('hidden');
- showScreen(`<div class="screen" id="title"><h1>NONCE<br>HUNTER</h1><div class="sim">SIMULATOR</div><div class="tag">CASE NH-014 · THE TAKEAWAY</div><div class="menu"><button class="btn primary" id="tS">Start mission — The Takeaway</button><button class="btn" id="tP">Profile & achievements</button></div><div class="teamline">${teamBadge(28)}<span><b style="color:#fff">${esc(P.name)}</b> · ${esc(P.team)}</span></div><div style="position:absolute;bottom:12px;color:var(--dim);font-size:11px;text-align:center;padding:0 10px">WASD / arrows · E interact/chat · F start sting · C phone · 1–9 choose · Esc pause · M mute · \` debug</div></div>`);
- hydrateEmblems($('screens'));$('tS').onclick=openSignIn;$('tP').onclick=showProfile;ACTIVE_CHOICES=[openSignIn,showProfile];}
+ showScreen(`<div class="screen" id="title"><h1>NONCE<br>HUNTER</h1><div class="sim">SIMULATOR</div><div class="tag">CASE NH-014 · THE TAKEAWAY</div><div class="menu">${P.reg?'<button class="btn primary" id="tS">Start mission — The Takeaway</button><button class="btn" id="tProf">Profile & achievements</button><button class="btn" id="tE">Team name & emblem</button><button class="btn" id="tSet">Settings — sound & hints</button>':''}</div>${P.reg?`<div class="teamline">${teamBadge(28)}<span><b style="color:#fff">${esc(P.name)}</b> · ${esc(P.team)}</span></div>`:""}<div style="position:absolute;bottom:34px;max-width:640px;color:#8b93a1;font-size:11px;line-height:1.45;text-align:center;padding:0 14px"><b style="color:#c9ced8">Content note:</b> a work of fiction — every person, account and event is invented. Mature theme: an alleged adult contacting a child online. Nothing explicit is shown; records are summarised or redacted.</div><div style="position:absolute;bottom:12px;color:var(--dim);font-size:11px;text-align:center;padding:0 10px">WASD / arrows · E interact/chat · F start sting · C phone · 1–9 choose · Esc pause · M mute · \` debug</div></div>`);
+ hydrateEmblems($('screens'));if(!P.reg){openSignIn('register');return;}$('tS').onclick=()=>fadeTo(startBriefing);$('tProf').onclick=showProfile;$('tE').onclick=()=>openSignIn('edit');$('tSet').onclick=()=>openSettings();ACTIVE_CHOICES=[()=>fadeTo(startBriefing),showProfile,()=>openSignIn('edit')];}
 const HAT_COLS=[null,'#141414','#f2f2f2','#c0392b','#1f4e9c','#2a7f62','#e0b13a','#7a3fa0','#e67e22','#6b5b4a'];
 const HAT_COL_NAMES=['Original','Black','White','Red','Royal blue','Racing green','Mustard','Purple','Orange','Tweed brown'];
 const HAIRS=['Bald','Short','Buzz cut','Long','Curly','Quiff','Mohawk','Ponytail','Bun','Side parting'];
@@ -1157,21 +1287,22 @@ function openWardrobe(){custDraft={name:P.name,team:P.team,emblem:P.emblem};LOOK
  const upd=()=>CUST_ROWS.forEach(r=>$('cv_'+r[0]).textContent=r[2]()[custDraft[r[0]]]);
  $('modal').querySelectorAll('.sel .btn[data-k]').forEach(b=>b.onclick=()=>{const k=b.dataset.k,n=CUST_ROWS.find(r=>r[0]===k)[2]().length;custDraft[k]=(custDraft[k]+(+b.dataset.d)+n)%n;SFX.blip();upd();});
  $('wdS').onclick=()=>{LOOK_KEYS.forEach(k=>P[k]=custDraft[k]);saveP();SFX.select();closeModal();bark(player,'Looking sharp.',1.6);};$('wdB').onclick=closeModal;upd();}
-function openSignIn(){let emb=P.emblem;
- openModal(`<div class="panelbox" style="max-width:520px"><h2 style="font-size:34px;color:var(--amber)">Sign in for tonight</h2><p style="font-size:13px;color:var(--dim)">Del needs a name for the log. Change your look at the wardrobe in the briefing room.</p>
- <div class="cust" style="grid-template-columns:1fr"><div><label>YOUR NAME</label><input id="siN" maxlength="16" value="${esc(P.name)}"><label>TEAM NAME</label><input id="siT" maxlength="18" value="${esc(P.team)}"><label>TEAM EMBLEM (15)</label><div class="embs" id="siE"></div></div></div>
- <div style="display:flex;gap:10px;margin-top:14px"><button class="btn primary" id="siGo">Start the briefing</button><button class="btn" id="siB">Back</button></div></div>`,{close:closeModal,type:'signin'});
+function openSignIn(mode){mode=typeof mode==='string'?mode:'edit';let emb=P.emblem;const reg=mode==='register';
+ openModal(`<div class="panelbox" style="max-width:520px"><h2 style="font-size:34px;color:var(--amber)">${reg?'Join the team':'Team details'}</h2><p style="font-size:13px;color:var(--dim)">${reg?'Enter your name, team name and emblem. You can change them at any time from the banner in the briefing room.':'Changes are saved and carry over to every mission.'}</p>
+ <div class="cust" style="grid-template-columns:1fr"><div><label>YOUR NAME</label><input id="siN" maxlength="16" value="${esc(P.reg?P.name:'')}" placeholder="Your name"><label>TEAM NAME</label><input id="siT" maxlength="18" value="${esc(P.reg?P.team:'')}" placeholder="Team name"><label>TEAM EMBLEM</label><div class="embs" id="siE"></div></div></div>
+ <div style="display:flex;gap:10px;margin-top:14px"><button class="btn primary" id="siGo">${reg?'Continue':'Save'}</button>${reg?'':'<button class="btn" id="siB">Cancel</button>'}</div></div>`,{close:reg?()=>{}:closeModal,type:'signin'});
  const upd=()=>$('siE').querySelectorAll('canvas').forEach((c,i)=>c.classList.toggle('on',i===emb));
  EMBLEMS.forEach((e,i)=>{const k=emblemCanvas(i,44);k.style.width='';k.style.height='';k.title=e[0];k.onclick=()=>{emb=i;SFX.blip();upd();};$('siE').appendChild(k);});upd();
- const go=()=>{P.name=($('siN').value||'').trim()||'Rookie';P.team=($('siT').value||'').trim()||'Night Watch';P.emblem=emb;saveP();closeModal();fadeTo(startBriefing);};
- $('siGo').onclick=go;$('siB').onclick=closeModal;$('siN').addEventListener('keydown',e=>{if(e.key==='Enter')go();});$('siT').addEventListener('keydown',e=>{if(e.key==='Enter')go();});setTimeout(()=>{try{$('siN').focus();$('siN').select();}catch(e){}},50);}
+ const go=()=>{P.name=($('siN').value||'').trim()||'Rookie';P.team=($('siT').value||'').trim()||'Night Watch';P.emblem=emb;P.reg=true;saveP();SFX.select();closeModal();
+  if(reg||STATE==='TITLE')toTitle();else{renderHUD();bark(player,'Banner updated.',1.6);}};
+ $('siGo').onclick=go;if($('siB'))$('siB').onclick=closeModal;ACTIVE_CHOICES=[go];$('siN').addEventListener('keydown',e=>{if(e.key==='Enter')go();});$('siT').addEventListener('keydown',e=>{if(e.key==='Enter')go();});setTimeout(()=>{try{$('siN').focus();}catch(e){}},50);}
 const CUST_ROWS=[['hat','Hat',()=>HATS],['hatCol','Hat colour',()=>HAT_COL_NAMES],['hair','Hair',()=>HAIRS],['hairCol','Hair colour',()=>HAIR_COL_NAMES],['outfit','Top',()=>OUTFITS.map(o=>o.name)],['trousers','Trousers',()=>TROUSERS.map(t=>t.name)]];
 function showCustomise(){STATE='CUSTOMISE';custDraft={name:P.name,team:P.team,hat:P.hat,hatCol:P.hatCol||0,hair:P.hair??1,hairCol:P.hairCol??1,outfit:P.outfit,trousers:P.trousers||0,emblem:P.emblem};
  showScreen(`<div class="screen" style="background:rgba(4,6,10,.95);overflow:auto;display:block"><div class="panelbox" style="margin:3vh auto"><h2 style="font-size:40px;color:var(--amber)">Character & team</h2><div class="cust"><div><canvas id="cuP" width="480" height="560"></canvas><p style="font-size:11px;color:var(--dim)">Cosmetic only — no gameplay effect.</p></div><div>
  <label>PLAYER NAME</label><input id="cuN" maxlength="16" value="${esc(custDraft.name)}">
  <label>TEAM NAME</label><input id="cuT" maxlength="18" value="${esc(custDraft.team)}">
  ${CUST_ROWS.map(r=>`<label>${r[1].toUpperCase()} (${r[2]().length})</label><div class="sel"><button class="btn" data-k="${r[0]}" data-d="-1">◀</button><span id="cv_${r[0]}"></span><button class="btn" data-k="${r[0]}" data-d="1">▶</button></div>`).join('')}
- <label>TEAM EMBLEM (15)</label><div class="embs" id="cuE"></div>
+ <label>TEAM EMBLEM</label><div class="embs" id="cuE"></div>
  <div style="display:flex;gap:10px;margin-top:14px"><button class="btn primary" id="cuS">Save</button><button class="btn" id="cuB">Back</button></div></div></div></div></div>`);
  const upd=()=>{CUST_ROWS.forEach(r=>$('cv_'+r[0]).textContent=r[2]()[custDraft[r[0]]]);$('cuE').querySelectorAll('canvas').forEach((c,i)=>c.classList.toggle('on',i===custDraft.emblem));};
  EMBLEMS.forEach((e,i)=>{const k=emblemCanvas(i,44);k.style.width='';k.style.height='';k.title=e[0];k.onclick=()=>{custDraft.emblem=i;SFX.blip();upd();};$('cuE').appendChild(k);});
@@ -1189,11 +1320,22 @@ function openPhone(){
  <button class="opt radio" id="ph1"><span class="k">1</span>Call Del</button>
  <button class="opt ${pol.requested?'asked':'radio'}" id="ph2"><span class="k">2</span>${pol.requested?'Police already on their way':'Ring the police'}</button>
  <button class="opt ev" id="ph3"><span class="k">3</span>Review evidence <small style="color:var(--dim)">(pauses the clock)</small></button>
+ <button class="opt" id="ph5"><span class="k">4</span>Ask Ray for advice</button>
  <button class="opt" id="ph4"><span class="k">Esc</span>Put the phone away</button></div></div>`);
  const a=()=>{closeModal();toast('Del',mark.present?(M.seenMark?'He\'s '+(WINDOWS[mark.stage]||'about')+'. Best time\'s once he\'s ordered and waiting.':'No eyes on him yet. Watch the takeaway.'):'No sign of him yet. Watch for a silver estate.','#45e08a');};
  const b=()=>{if(pol.requested)return;closeModal();requestPolice(false);};
  const c3=()=>{closeModal();openEvidence();};
- ACTIVE_CHOICES=[a,b,c3];$('ph1').onclick=a;$('ph2').onclick=b;$('ph3').onclick=c3;$('ph4').onclick=closeModal;}
+ const d5=()=>{closeModal();toast('Ray',vetTip(),'#45e08a');};
+ ACTIVE_CHOICES=[a,b,c3,d5];$('ph1').onclick=a;$('ph2').onclick=b;$('ph3').onclick=c3;$('ph5').onclick=d5;$('ph4').onclick=closeModal;}
+function vetTip(){const pol=M.police,st=mark&&mark.stage;
+ if(pol.requested)return 'Police are on their way. Keep it slow and calm, ask the easy questions, and don\'t tell him unless he asks.';
+ if(!M.seenMark||!mark.present||st==='ABSENT')return 'Be patient. Stand near the takeaway and watch for a silver estate. Note the time he arrives, then check the plate once it\'s parked.';
+ if(mark.car&&mark.car.state==='PARKED'&&!hasIntel('car_scene'))return 'Have a look at the car while it\'s parked — the plate is evidence. Don\'t stand over it for long, though.';
+ if(['WALKING'].includes(st))return 'He\'s heading in. Don\'t rush him. If you speak out here he\'ll say he\'s just out for a walk. Wait until he\'s ordered.';
+ if(['QUEUING','ORDERING'].includes(st))return 'He hasn\'t ordered yet. Speak to him now and he\'ll bolt after a couple of questions. Hang back, or ring the police first if you can\'t wait.';
+ if(['WAITING_FOOD','COLLECT'].includes(st))return pol.requested?'This is the moment. Walk over calmly and ask slowly.':'This is the best moment. Ring the police now, then walk over calmly and ask slowly — easy questions first.';
+ if(['HOLDING_FOOD','LEAVING','AT_CAR'].includes(st))return pol.requested?'He\'s about to leave. You\'ll only get a couple of answers — make them count and don\'t block him.':'He\'s leaving. Ring the police now if you\'re going to speak to him. You only get a couple of answers before he runs.';
+ return 'Watch, don\'t hover. Check what you\'ve got in the evidence file before you decide.';}
 function openRadioMenu(){openPhone();}
 let evTab='suspect';
 function openEvidence(){const wasPaused=paused;paused=true;
@@ -1215,30 +1357,30 @@ function showProfile(){STATE='PROFILE';const got=ACH.filter(a=>P.ach[a.id]).leng
 function getInteractables(){const list=[];if(!R)return list;
  for(const i of R.ints)if(!i.cond||i.cond())list.push(i);
  if(STATE==='BRIEFING_ROOM')for(const n of npcs)list.push({x:n.x,y:n.y,r:56,label:`Talk to ${n.name} (${n.role})`,act:()=>openTalk(n.id),npc:n});
- if(STATE==='APPROACH'){for(const n of npcs){if(!n.present||n.stage==='DEPARTED')continue;if(n.isMark){if(!['FLEEING','AT_CAR'].includes(n.stage))list.push({x:n.x,y:n.y,r:70,label:'Chat to the man in the grey coat',act:openMarkChat,npc:n,mark:true});}else list.push({x:n.x,y:n.y,r:n===kev?78:50,label:'Talk to '+n.name,act:()=>talkNPC(n),npc:n});}
+ if(STATE==='APPROACH'){for(const n of npcs){if(!n.present||n.stage==='DEPARTED')continue;if(n.isMark){if(['ORDERING','COLLECT'].includes(n.stage))list.push({x:n.x,y:n.y,r:70,label:'He\'s talking to someone else right now',act:counterBusy,npc:n,mark:false});else if(!['FLEEING','AT_CAR'].includes(n.stage))list.push({x:n.x,y:n.y,r:70,label:'Chat to the man in the grey coat',act:openMarkChat,npc:n,mark:true});}else list.push({x:n.x,y:n.y,r:n===kev?78:50,label:'Talk to '+n.name,act:()=>talkNPC(n),npc:n});}
   if(mark.car.state==='PARKED')list.push({x:1208,y:604,r:60,label:'Inspect the silver estate',act:()=>{addIntel('car_scene');addTimeline('Checked the silver estate: plate contains “K7”');bark(player,'Mud on the plate, but “K7” is clear in the middle. Same as the photo.');}});}
  return list;}
 let nearInt=null;
 function updatePrompt(){nearInt=null;if(UI.modal||!(STATE==='BRIEFING_ROOM'||STATE==='APPROACH')){$('prompt').classList.add('hidden');return;}let best=1e9;for(const i of getInteractables()){const d=dist(player,i)-(i.mark?40:0);if(dist(player,i)<i.r&&d<best){best=d;nearInt=i;}}
  const p=$('prompt');if(nearInt){p.classList.remove('hidden');p.innerHTML=`<kbd>${IS_TOUCH?'USE':'E'}</kbd>${esc(nearInt.label)}`+(nearInt.mark?`&nbsp;&nbsp;<kbd style="background:var(--red);color:#fff">${IS_TOUCH?'STING':'F'}</kbd>Start the sting`:'');p.style.borderColor=nearInt.mark?'var(--red)':'var(--amber)';}else p.classList.add('hidden');}
 function interact(){if(nearInt){SFX.blip();nearInt.act();}}
-function renderHUD(){const h=$('hud');const sb=$('tSt');if(sb){sb.classList.toggle('hidden',STATE!=='APPROACH');sb.classList.toggle('off',!(mark&&STATE==='APPROACH'&&mark.present&&dist(player,mark)<95));}if(STATE!=='BRIEFING_ROOM'&&STATE!=='APPROACH'&&STATE!=='POLICE_ARRIVAL'&&STATE!=='STING'){return;}
+function renderHUD(){const h=$('hud');const sb=$('tSt');if(sb){sb.classList.toggle('hidden',STATE!=='APPROACH');sb.classList.toggle('off',!(mark&&STATE==='APPROACH'&&mark.present&&dist(player,mark)<95&&!['ORDERING','COLLECT'].includes(mark.stage)));}if(STATE!=='BRIEFING_ROOM'&&STATE!=='APPROACH'&&STATE!=='POLICE_ARRIVAL'&&STATE!=='STING'){return;}
  const phaseName={BRIEFING_ROOM:'Phase 01 · Briefing',APPROACH:'Phase 02 · Approach',STING:'Phase 03 · Sting',POLICE_ARRIVAL:'Phase 03 · Police arriving'}[STATE];
  const clk=STATE==='BRIEFING_ROOM'?'BRIEFING':fmtClock(M.clock);const pol=M.police;
  const eta=pol.requested&&pol.state==='EN_ROUTE'?`POLICE ETA ${Math.max(0,Math.ceil(pol.arriveAt-M.clock))}s`:pol.state==='ARRIVING'?'POLICE ON SCENE':STATE==='APPROACH'?'Meeting time 18:35':'';
  let obj='';
- if(STATE==='BRIEFING_ROOM'){obj=[['Talk to Del, Jas and Maureen',['founder','decoy','stranger'].every(c=>M.hist[c].length)],['Review the case computer',M.read.size>=6],['Head out when ready (door)',false]].map(o=>`<li class="${o[1]?'done':''}">${o[0]}</li>`).join('');}
+ if(STATE==='BRIEFING_ROOM'){obj=[['Talk to the team — Del, Jas, Maureen, Ray',['founder','decoy','stranger','vet'].every(c=>M.hist[c].length)],['Review the case computer',M.read.size>=6],['Head out via the door, bottom left',false]].map(o=>`<li class="${o[1]?'done':''}">${o[0]}</li>`).join('');}
  else{const sc=mark.susp>=78?'var(--red)':mark.susp>=50?'#ff8a3d':mark.susp>=25?'var(--amber)':'var(--green)';
   obj=[['Watch him arrive & note the time',!!M.attendedTime],['Check the vehicle',hasIntel('car_scene')],['Make contact — or call it in',M.contact||pol.requested],['Don\'t spook him',mark.susp<50]].map(o=>`<li class="${o[1]?'done':''}">${o[0]}</li>`).join('')+(M.seenMark&&mark.present?`<div style="margin-top:6px">Subject: <b style="color:${sc}">${mark.state.replace('_',' ')}</b> · ${esc(WINDOWS[mark.stage]||mark.stage.toLowerCase().replace('_',' '))}<div class="meter"><i style="width:${mark.susp}%;background:${sc}"></i></div></div>`:'');}
  h.innerHTML=`<div class="tl">${'<span class="emb" data-e="'+P.emblem+'" data-s="34"></span>'}<div><b>${esc(P.team)}</b><small>${phaseName.toUpperCase()}</small></div></div><div class="tc"><div class="clk">${clk}</div><div class="eta">${eta}</div></div><div class="tr"><h4>Objectives</h4><ul style="margin:0;padding:0">${obj}</ul></div>`;hydrateEmblems(h);}
 
 /* ================= UPDATE ================= */
-function updatePlayer(dt){if(player.dodge){const d=player.dodge;d.t+=dt;const q=clamp(d.t/d.dur,0,1),e=1-Math.pow(1-q,3);player.x=lerp(d.fx,d.tx,e);player.y=lerp(d.fy,d.ty,e)-Math.sin(q*Math.PI)*10;player.moving=true;player.walk+=dt*20;if(q>=1){player.y=d.ty;player.dodge=null;}return;}if(M&&M.introLock&&STATE==='BRIEFING_ROOM'){player.moving=false;return;}let ix=0,iy=0;if(keys.a||keys.arrowleft)ix--;if(keys.d||keys.arrowright)ix++;if(keys.w||keys.arrowup)iy--;if(keys.s||keys.arrowdown)iy++;ix+=joy.x;iy+=joy.y;const m=Math.hypot(ix,iy);
+function updatePlayer(dt){if(player.dodge){const d=player.dodge;d.t+=dt;const q=clamp(d.t/d.dur,0,1),e=1-Math.pow(1-q,3);player.x=lerp(d.fx,d.tx,e);player.y=lerp(d.fy,d.ty,e)-Math.sin(q*Math.PI)*10;player.moving=true;player.walk+=dt*20;if(q>=1){player.y=d.ty;player.dodge=null;}return;}if(M&&M.introLock&&STATE==='BRIEFING_ROOM'){player.moving=false;return;}let ix=0,iy=0;if(keys.a||keys.arrowleft||keys['code:KeyA'])ix--;if(keys.d||keys.arrowright||keys['code:KeyD'])ix++;if(keys.w||keys.arrowup||keys['code:KeyW'])iy--;if(keys.s||keys.arrowdown||keys['code:KeyS'])iy++;ix+=joy.x;iy+=joy.y;const m=Math.hypot(ix,iy);
  if(m>.15&&!UI.modal){ix/=Math.max(1,m);iy/=Math.max(1,m);const sp=(keys.shift?185:145)*dt;moveBy(player,ix*sp,iy*sp);player.dir={x:ix/Math.hypot(ix,iy),y:iy/Math.hypot(ix,iy)};player.walk+=dt*12;player.moving=true;player.still=0;}else{player.moving=false;player.still+=dt;}}
 let hudT=0;
 function update(dt){
  perfNow=performance.now();
- if(STATE==='BRIEFING_ROOM'){updatePlayer(dt);for(const n of npcs){const d=dist(player,n);if(d<160){const dx=player.x-n.x,dy=player.y-n.y;n.dir={x:dx/d,y:dy/d};}}cam.x=lerp(cam.x,clamp(player.x,W/2/cam.zoom,R.w-W/2/cam.zoom)||400,.1);cam.y=lerp(cam.y,clamp(player.y,H/2/cam.zoom,R.h-H/2/cam.zoom)||290,.1);if(R.w*cam.zoom<=W)cam.x=R.w/2;if(R.h*cam.zoom<=H)cam.y=R.h/2;}
+ if(STATE==='BRIEFING_ROOM'){if(cam.zt)cam.zoom=lerp(cam.zoom,cam.zt,.06);for(const n of npcs)n.info=npcHasIntel(n);updatePlayer(dt);for(const n of npcs){const d=dist(player,n);if(d<160){const dx=player.x-n.x,dy=player.y-n.y;n.dir={x:dx/d,y:dy/d};}}cam.x=lerp(cam.x,clamp(player.x,W/2/cam.zoom,R.w-W/2/cam.zoom)||400,.1);cam.y=lerp(cam.y,clamp(player.y,H/2/cam.zoom,R.h-H/2/cam.zoom)||290,.1);if(R.w*cam.zoom<=W)cam.x=R.w/2;if(R.h*cam.zoom<=H)cam.y=R.h/2;}
  if(['APPROACH','STING','POLICE_ARRIVAL'].includes(STATE)){
   M.clock+=dt;
   if(STATE==='APPROACH')updatePlayer(dt);else{player.moving=false;}
@@ -1248,10 +1390,12 @@ function update(dt){
    if(n.present&&n.state!=='CALM'&&!n.engaged&&n.state!=='FLEEING'){n.glanceT-=dt;if(n.glanceT<0){n.glanceT=n.state==='UNEASY'?3.5:1.8;const dx=player.x-n.x,dy=player.y-n.y,d=Math.hypot(dx,dy)||1;if(!n.moving)n.dir={x:dx/d,y:dy/d};}}
    n.icon=(n.state==='ALARMED'||n.state==='FLIGHT_RISK'||n.state==='FLEEING')?'!':n.state==='UNEASY'?'?':null;}
   if(!M.seenMark&&mark.present&&dist(player,mark)<420){M.seenMark=true;}
+  approachHints();
   if(!hasIntel('attended')&&mark.present&&insideShop(mark)&&(insideShop(player)||dist(player,mark)<260)&&M.clock>5){M.attendedSeen=true;addIntel('attended',{title:'Subject seen inside the Golden Fryer (arrival time not observed)'});}
   for(const k of cars){if(k.markCar){if(k.state==='LEAVING'){const ahead=(k.x-player.x)*(-k.dir);if(!player.dodge&&Math.abs(player.y-k.y)<36&&ahead>0&&ahead<130){player.dodge={t:0,dur:.32,fx:player.x,fy:player.y,tx:player.x,ty:player.y<=k.y?594:694};SFX.honk();bark(player,'Woah — nearly had me!',1.6);k.boost=true;addTimeline('Subject\'s car nearly hit the team member while driving off');}k.v=Math.min(k.boost?560:260,(k.v||0)+(k.boost?520:200)*dt);k.x+=k.v*dt*(k.dir);if(k.x<-200)k.state='GONE';}continue;}k.x+=k.v*k.dir*dt;if(k.dir>0&&k.x>2200)k.x=-200-rnd(0,600);if(k.dir<0&&k.x<-200)k.x=2200+rnd(0,600);
    if(Math.abs(player.x-k.x)<62&&Math.abs(player.y-k.y)<30){if(!k.honked){k.honked=true;SFX.honk();bark(player,'Whoa!',1);}k.v=40;}else{k.honked=false;k.v=lerp(k.v,k.dir>0?160:135,.02);}}
   if(UI.modal&&UI.modal.type==='markchat'&&(STATE!=='APPROACH'||!mark.present||dist(player,mark)>140)){closeModal();if(STATE==='APPROACH')toast('','He\'s moved off.');}
+  else if(UI.modal&&UI.modal.type==='markchat'&&['ORDERING','COLLECT'].includes(mark.stage)){closeModal();counterBusy();}
   if(STATE==='STING')updateSting(dt);
   if(M.police.requested&&M.police.state==='EN_ROUTE'&&M.clock>=M.police.arriveAt)startPoliceArrival();
   if(STATE==='POLICE_ARRIVAL')updatePoliceArrival(dt);
@@ -1295,14 +1439,59 @@ function render(){
  if(R.name==='street'){ctx.setTransform(DPR,0,0,DPR,0,0);ctx.strokeStyle='rgba(190,210,240,.18)';ctx.lineWidth=1;ctx.beginPath();for(let i=0;i<90;i++){const x=(i*137.3+perfNow*.05*((i%3)+2))%(W+40)-20,y=(i*91.7+perfNow*.55*((i%4)+3)/3)%(H+40)-20;ctx.moveTo(x,y);ctx.lineTo(x-2,y+9);}ctx.stroke();}
  {ctx.setTransform(DPR,0,0,DPR,0,0);const vg=ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*.35,W/2,H/2,Math.max(W,H)*.75);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.45)');ctx.fillStyle=vg;ctx.fillRect(0,0,W,H);}
  // offscreen hint toward takeaway
- if(STATE==='APPROACH'&&!M.seenMark&&player.x<500){ctx.setTransform(DPR,0,0,DPR,0,0);ctx.fillStyle='rgba(255,182,39,.85)';ctx.font='600 13px Inter';ctx.textAlign='right';ctx.fillText('Golden Fryer →',W-16,H/2);}
+ if(STATE==='APPROACH'&&!M.seenMark&&P.hints!==false&&dist(player,DOOR_OUT)>260){ctx.setTransform(DPR,0,0,DPR,0,0);const gx=W/2+(DOOR_OUT.x-cam.x)*cam.zoom,gy=H/2+(DOOR_OUT.y-70-cam.y)*cam.zoom,on=gx>50&&gx<W-50&&gy>140&&gy<H-60,bob=Math.sin(perfNow*.006)*5;
+  ctx.fillStyle='rgba(255,182,39,.95)';ctx.strokeStyle='rgba(0,0,0,.6)';ctx.lineWidth=3;ctx.font='700 13px Inter';
+  if(on){ctx.beginPath();ctx.moveTo(gx-10,gy-22+bob);ctx.lineTo(gx+10,gy-22+bob);ctx.lineTo(gx,gy-4+bob);ctx.closePath();ctx.stroke();ctx.fill();ctx.textAlign='center';ctx.strokeText('Golden Fryer',gx,gy-30+bob);ctx.fillText('Golden Fryer',gx,gy-30+bob);}
+  else{const ex=clamp(gx,60,W-60),ey=clamp(gy,140,H-70),a=Math.atan2(gy-H/2,gx-W/2);ctx.save();ctx.translate(ex,ey);ctx.rotate(a);ctx.beginPath();ctx.moveTo(14+bob*.4,0);ctx.lineTo(-8,-11);ctx.lineTo(-8,11);ctx.closePath();ctx.stroke();ctx.fill();ctx.restore();ctx.textAlign=ex>W/2?'right':'left';const lx=ex>W/2?ex-20:ex+20;ctx.strokeText('Golden Fryer',lx,ey+4);ctx.fillText('Golden Fryer',lx,ey+4);}}
 }
 function wrap(t,n){const w=t.split(' '),out=[];let l='';for(const x of w){if((l+' '+x).trim().length>n){out.push(l.trim());l=x;}else l+=' '+x;}if(l.trim())out.push(l.trim());return out;}
 
 /* ================= MAIN LOOP & BOOT ================= */
+
+/* ================= MUSIC (procedural, per phase) ================= */
+const MUS={tg:null,name:null,timer:null,step:0,nextT:0,nb:null};
+const mf=m=>440*Math.pow(2,(m-69)/12);
+function mN(m,t,d,o={}){const c=AU.ctx;if(!c||!MUS.tg)return;const g=c.createGain(),a=o.a||.01,v=o.v||.08;g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v,t+a);g.gain.exponentialRampToValueAtTime(.0001,t+Math.max(d,a+.02));
+ const os=c.createOscillator();os.type=o.type||'sine';os.frequency.value=mf(m);if(o.det)os.detune.value=o.det;let src=os;if(o.lp){const f=c.createBiquadFilter();f.type='lowpass';f.frequency.value=o.lp;f.Q.value=o.q||.7;os.connect(f);src=f;}
+ src.connect(g);g.connect(MUS.tg);os.start(t);os.stop(t+Math.max(d,a+.02)+.05);}
+function mH(t,v=.02,d=.04,f=7000){const c=AU.ctx;if(!c||!MUS.tg)return;if(!MUS.nb||MUS.nb.ctx!==c){const n=Math.floor(c.sampleRate*1),b=c.createBuffer(1,n,c.sampleRate),a=b.getChannelData(0);for(let i=0;i<n;i++)a[i]=Math.random()*2-1;MUS.nb={ctx:c,b};}
+ const s=c.createBufferSource();s.buffer=MUS.nb.b;const fl=c.createBiquadFilter();fl.type='highpass';fl.frequency.value=f;const g=c.createGain();g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);s.connect(fl);fl.connect(g);g.connect(MUS.tg);s.start(t,Math.random()*.8,d+.02);}
+function mK(t,v=.18){const c=AU.ctx;if(!c||!MUS.tg)return;const o=c.createOscillator(),g=c.createGain();o.frequency.setValueAtTime(130,t);o.frequency.exponentialRampToValueAtTime(42,t+.14);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+.22);o.connect(g);g.connect(MUS.tg);o.start(t);o.stop(t+.25);}
+function musI(){try{if(STATE==='APPROACH'&&mark&&mark.present)return clamp(mark.susp/100+(M.police.requested?.15:0),0,1);if(STATE==='STING'&&mark)return clamp(.35+mark.susp/100,0,1);}catch(e){}return 0;}
+// chord progressions: [notes], root
+const CH_MIN=[[[57,60,64],45],[[53,57,60],41],[[48,52,55],36],[[55,59,62],43]];
+const CH_MAJ=[[[48,52,55],36],[[55,59,62],43],[[57,60,64],45],[[53,57,60],41]];
+const CH_DARK=[[[57,60,64],33],[[50,53,57],38],[[53,57,60],41],[[52,56,59],40]];
+function padBar(ch,t,len,v,lp){for(const m of ch[0]){mN(m,t,len,{type:'sawtooth',lp:lp||700,v:v,a:len*.35,det:-7});mN(m,t,len,{type:'sawtooth',lp:lp||700,v:v,a:len*.35,det:7});}mN(ch[1],t,len*.9,{type:'sine',v:v*3,a:.04});}
+const MT={
+ title:{bpm:()=>62,gain:1,play(s,t,sp){const bar=Math.floor(s/16)%4,st=s%16,ch=CH_MIN[bar];if(st===0)padBar(ch,t,16*sp*1.05,.03,650);if(st===4||st===11)mN(ch[0][(bar+st)%3]+24,t,4*sp,{type:'triangle',v:.05,a:.005,lp:2600});}},
+ briefing:{bpm:()=>78,gain:.9,play(s,t,sp){const bar=Math.floor(s/16)%4,st=s%16;const ch=[[[57,60,64,67],45],[[53,57,60,64],41],[[48,52,55,59],36],[[55,59,62,64],43]][bar];
+  if(st===0||st===8)mN(ch[1],t,6*sp,{type:'sine',v:.1,a:.02});if([0,3,6,10,12].includes(st))mN(ch[0][(st+bar)%4]+12,t,5*sp,{type:'triangle',v:.05,a:.006,lp:1900});if(st%4===2)mH(t,.008,.03,9000);}},
+ approach:{bpm:()=>88,gain:.95,play(s,t,sp,I){const bar=Math.floor(s/16)%4,st=s%16;
+  if(st%2===0)mN(bar===3&&st>=8?36:33,t,1.7*sp,{type:'sawtooth',lp:240+I*600,v:.07+I*.04,a:.005});
+  if(st===0&&bar%2===0){mN(45,t,32*sp,{type:'sawtooth',lp:380,v:.025,a:2});mN(52,t,32*sp,{type:'sawtooth',lp:380,v:.02,a:2.4});}
+  if(st===0&&(bar===1||bar===3))mN([64,67,69,67][bar%4===1?0:2]+0,t,6*sp,{type:'triangle',v:.04,a:.01,lp:1800});
+  if(I>.3&&st%4===2)mH(t,.012+.02*I,.04,8000);if(I>.55)mH(t,.012,.025,9000);
+  if(I>.75&&(st===0||st===6)){mN(69,t,3*sp,{type:'square',lp:1600,v:.03});mN(70,t,3*sp,{type:'square',lp:1600,v:.025});}}},
+ sting:{bpm:(I)=>108+(I||0)*26,gain:1,play(s,t,sp,I){const bar=Math.floor(s/16)%2,st=s%16;
+  if(st===0||st===6||st===8)mK(t,.14+I*.05);mN(st%8===6?45:33,t,sp*.95,{type:'sawtooth',lp:480+I*500,v:.055});
+  if(st===0&&bar===0){mN(76,t,3*sp,{type:'square',lp:2000,v:.028});mN(77,t,3*sp,{type:'square',lp:2000,v:.022});}if(st===10)mN(69,t,2*sp,{type:'square',lp:1500,v:.02});if(st%2===1)mH(t,.012,.03,8500);}},
+ call:{bpm:()=>60,gain:.6,play(s,t,sp){const bar=Math.floor(s/16)%4,st=s%16;if(st===0){mN(36,t,16*sp,{type:'sine',v:.09,a:1.2});mN(43,t,16*sp,{type:'sine',v:.05,a:1.5});}if(st===8&&bar%2===1)mN(60+[0,3][bar>1?1:0],t,3*sp,{type:'triangle',lp:900,v:.025,a:.01});}},
+ win:{bpm:()=>72,gain:1,play(s,t,sp){const bar=Math.floor(s/16)%4,st=s%16,ch=CH_MAJ[bar];if(st===0)padBar(ch,t,16*sp*1.05,.03,900);if([0,3,6,9,12].includes(st))mN(ch[0][(st/3|0)%3]+24,t,4*sp,{type:'triangle',v:.05,a:.005,lp:3000});}},
+ fail:{bpm:()=>54,gain:.9,play(s,t,sp){const bar=Math.floor(s/16)%4,st=s%16,ch=CH_DARK[bar];if(st===0){padBar(ch,t,16*sp*1.05,.028,520);}if(st===8&&bar%2===0)mN(ch[0][0]+12,t,6*sp,{type:'sine',v:.05,a:.02});}}
+};
+function musTick(){const c=AU.ctx;if(!c||!MUS.name||!MT[MUS.name])return;const T=MT[MUS.name],I=musI();
+ if(MUS.nextT<c.currentTime-.4)MUS.nextT=c.currentTime+.05;
+ while(MUS.nextT<c.currentTime+.5){const sp=60/T.bpm(I)/4;try{T.play(MUS.step,MUS.nextT,sp,I);}catch(e){}MUS.step++;MUS.nextT+=sp;}}
+function setMusic(name){const c=AU.ctx;if(!c||MUS.name===name)return;const now=c.currentTime;
+ if(MUS.tg){const old=MUS.tg;try{old.gain.cancelScheduledValues(now);old.gain.setValueAtTime(old.gain.value,now);old.gain.linearRampToValueAtTime(0,now+.9);}catch(e){}setTimeout(()=>{try{old.disconnect();}catch(e){}},1200);}
+ MUS.tg=null;MUS.name=name;if(!name||!MT[name])return;const g=c.createGain();g.gain.setValueAtTime(0,now);g.gain.linearRampToValueAtTime(MT[name].gain,now+1.4);g.connect(AU.musBus);MUS.tg=g;MUS.step=0;MUS.nextT=now+.08;
+ if(!MUS.timer)MUS.timer=setInterval(musTick,100);}
+function musicFor(st){return({TITLE:'title',PROFILE:'title',CUSTOMISE:'title',BRIEFING_ROOM:'briefing',APPROACH:'approach',STING:'sting',POLICE_ARRIVAL:'call',POLICE_CALL:'call',MISSION_COMPLETE:'win',MISSION_FAILED:'fail'})[st]||null;}
+function musicUpdate(){if(!AU.ctx)return;setMusic(musicFor(STATE));}
 let last=performance.now();
-function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;perfNow=now;try{if(!paused)update(dt);render();if(STATE==='POLICE_CALL')renderCall();}catch(e){console.error(e);}requestAnimationFrame(frame);}
-function boot(){showScreen(`<div class="screen" id="boot"><p>CLICK OR TAP TO START</p></div>`);const go=()=>{auInit();splash();};$('boot').addEventListener('pointerdown',go,{once:true});addEventListener('keydown',function k(){removeEventListener('keydown',k);if(STATE==='BOOT')go();});}
+function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;perfNow=now;try{musicUpdate();if(!paused)update(dt);render();if(STATE==='POLICE_CALL')renderCall();}catch(e){console.error(e);}requestAnimationFrame(frame);}
+function boot(){showScreen(`<div class="screen" id="boot"><h1>NONCE HUNTER<br>SIMULATOR</h1><div class="bb"><i></i></div><p>CLICK OR TAP TO START</p></div>`);const go=()=>{auInit();try{window.focus();}catch(e){}splash();};$('boot').addEventListener('pointerdown',go,{once:true});addEventListener('keydown',function k(){removeEventListener('keydown',k);if(STATE==='BOOT')go();});}
 function splash(){if(STATE!=='BOOT')return;toTitle();}
 // test hooks for automated play-testing (not shown in UI)
 window.__NH={tick(n,dt=1/30){for(let i=0;i<n;i++){perfNow+=dt*1000;update(dt);}render();if(STATE==='POLICE_CALL')renderCall();},get npcs(){return npcs;},get P(){return P;},get kev(){return kev;},get nearInt(){return nearInt;},computeScore,getInteractables,get state(){return STATE;},get M(){return M;},get mark(){return mark;},get player(){return player;},get S(){return S;},get CALL(){return CALL;},startBriefing,startApproach,tryContact,openPhone,openEvidence,get paused(){return paused;},stingButton,openMarkChat,get nearIntLabel(){return nearInt&&nearInt.label;},requestPolice,pickSting,pickCall,interact,openTalk,openComputer,addIntel};
