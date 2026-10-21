@@ -227,6 +227,7 @@ const $=id=>document.getElementById(id);
 const clamp=(v,a,b)=>v<a?a:v>b?b:v, lerp=(a,b,t)=>a+(b-a)*t, rnd=(a,b)=>a+Math.random()*(b-a);
 const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
 const pad=n=>String(n).padStart(2,'0');
+let CASE='tk',cpCars=[];
 const BASE_CLOCK=18*3600+32*60; // mission clock starts 18:32:00
 function fmtClock(t,sec=true){const s=Math.floor(BASE_CLOCK+t),h=Math.floor(s/3600)%24,m=Math.floor(s/60)%60;return pad(h)+':'+pad(m)+(sec?':'+pad(s%60):'');}
 function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
@@ -250,19 +251,20 @@ const SFX={blip:()=>tone(880,.05,'square',.06),select:()=>tone(520,.09,'triangle
  alert:()=>{tone(660,.14,'square',.12);setTimeout(()=>tone(990,.18,'square',.12),140);},
  siren:()=>{for(let i=0;i<4;i++){setTimeout(()=>tone(720,.34,'sawtooth',.07,320),i*700);setTimeout(()=>tone(1040,.34,'sawtooth',.07,-320),i*700+350);}},
  fail:()=>tone(220,.9,'sawtooth',.18,-160),win:()=>[523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,.25,'triangle',.18),i*120)),
- door:()=>noise(.16,.18,500),
+ door:()=>noise(.16,.18,500),clack:()=>{tone(1900,.03,'square',.09);noise(.05,.1,3500);},
  detect:()=>{for(let i=0;i<7;i++)setTimeout(()=>tone(420+i*130,.07,'square',.08),i*50);setTimeout(()=>{tone(1250,.55,'sawtooth',.11,-260);tone(835,.55,'square',.09,-170);tone(70,.9,'sine',.35,-25);noise(.35,.16,2800);},380);[760,1060,1360].forEach(t=>setTimeout(()=>{tone(1180,.16,'square',.07);tone(590,.16,'square',.05);},t));},honk:()=>{tone(400,.25,'square',.1);tone(500,.25,'square',.08);},ach:()=>[784,988,1318].forEach((f,i)=>setTimeout(()=>tone(f,.18,'triangle',.16),i*90))};
 
 /* ================= PERSISTENCE ================= */
 const SAVE_KEY='nonceHunter.v1';
-const DEF={name:'Rookie',team:'Night Watch',hat:1,hatCol:0,hair:1,hairCol:1,trousers:0,outfit:0,emblem:0,ach:{},excuses:[],stats:{played:0,completed:0,failed:0,best:0}};
+const SKINS=['#f3d2b3','#e0b48f','#c68d5f','#a8703f','#7a4b2a','#4a2c1a'],SKIN_NAMES=['Fair','Light','Tan','Brown','Dark brown','Deep'];
+const DEF={skin:1,name:'Rookie',team:'Night Watch',hat:1,hatCol:0,hair:1,hairCol:1,trousers:0,outfit:0,emblem:0,ach:{},excuses:[],stats:{played:0,completed:0,failed:0,best:0}};
 function loadP(){let s=null;try{s=JSON.parse(localStorage.getItem(SAVE_KEY));}catch(e){}const p=JSON.parse(JSON.stringify(DEF));if(s){Object.assign(p,s);p.ach=Object.assign({},s.ach||{});p.stats=Object.assign({},DEF.stats,s.stats||{});p.excuses=Array.isArray(s.excuses)?s.excuses:[];}return p;}
 let P=loadP();
 function saveP(){try{localStorage.setItem(SAVE_KEY,JSON.stringify(P));}catch(e){}}
 
 /* ================= COSMETICS ================= */
-const HATS=['None','Flat cap','Beanie','Baseball cap','Bucket hat','Trilby','Hard hat','Headset','Balaclava','Bobble hat'];
-const OUTFITS=[{name:'Hi-vis vest',body:'#d9e021',trim:'#c9ccd1',arms:'#30343f'},{name:'Black hoodie',body:'#1f1f24',trim:'#3d3d48',arms:'#1f1f24'},{name:'Navy parka',body:'#1e2f4d',trim:'#c78f3b',arms:'#1e2f4d'},{name:'Tracksuit',body:'#2a7f62',trim:'#ffffff',arms:'#2a7f62'},{name:'Denim jacket',body:'#4a6fa5',trim:'#2f4a73',arms:'#4a6fa5'},{name:'Black tee',body:'#16161a',trim:'#16161a',arms:'#16161a',tee:true},{name:'Rain mac',body:'#e0b13a',trim:'#9b7a1f',arms:'#e0b13a'},{name:'White tee & man bag',body:'#f2f2f2',trim:'#f2f2f2',arms:'#f2f2f2',tee:true,bag:'#3a2a1a'},{name:'Black puffer',body:'#17181c',trim:'#2c2e35',arms:'#17181c',under:'#f4f4f4',quilt:true,chain:true},{name:'Grey jacket',body:'#868b94',trim:'#6a6f78',arms:'#868b94',under:'#3f6fb5'}];
+const HATS=['None','Flat cap','Beanie','Baseball cap','Bucket hat','Trilby','Hard hat','Headset','Balaclava','Bobble hat','Goggle hood','Head bandana','Face bandana','Shiesty (mouth out)','Trapper hat','Hood up'];
+const OUTFITS=[{name:'Hi-vis vest',body:'#d9e021',trim:'#c9ccd1',arms:'#30343f'},{name:'Black hoodie',body:'#1f1f24',trim:'#3d3d48',arms:'#1f1f24'},{name:'Navy parka',body:'#1e2f4d',trim:'#c78f3b',arms:'#1e2f4d'},{name:'Tracksuit',body:'#2a7f62',trim:'#ffffff',arms:'#2a7f62'},{name:'Denim jacket',body:'#4a6fa5',trim:'#2f4a73',arms:'#4a6fa5'},{name:'Black tee',body:'#16161a',trim:'#16161a',arms:'#16161a',tee:true},{name:'Rain mac',body:'#e0b13a',trim:'#9b7a1f',arms:'#e0b13a'},{name:'White tee & man bag',body:'#f2f2f2',trim:'#f2f2f2',arms:'#f2f2f2',tee:true,bag:'#3a2a1a'},{name:'Black puffer',body:'#17181c',trim:'#2c2e35',arms:'#17181c',under:'#f4f4f4',quilt:true,chain:true},{name:'Grey jacket',body:'#868b94',trim:'#6a6f78',arms:'#868b94',under:'#3f6fb5'},{name:'Navy puffer',body:'#1b2a4a',trim:'#2f4373',arms:'#1b2a4a',under:'#e8e8ea',quilt:true,chain:true,chainCol:'#7d838c'},{name:'Red puffer',body:'#a3202b',trim:'#7d1620',arms:'#a3202b',under:'#e8e8ea',quilt:true,chain:true,chainCol:'#0c0c0e'},{name:'Cream puffer',body:'#e6dfcf',trim:'#c9c0aa',arms:'#e6dfcf',under:'#2a2a30',quilt:true,chain:true,quiltCol:'rgba(0,0,0,.2)'},{name:'Olive puffer & bag',body:'#4b5a3a',trim:'#38442b',arms:'#4b5a3a',under:'#d9d9dc',quilt:true,chain:true,chainCol:'#7d838c',bag:'#17181c'},{name:'Grey tech tracksuit',body:'#6b7078',trim:'#2b2e34',arms:'#6b7078',under:'#17181c',zip:true,bag:'#17181c'},{name:'Black gilet',body:'#17181c',trim:'#2c2e35',arms:'#7a7f88',under:'#7a7f88',quilt:true,chain:true,chainCol:'#7d838c'}];
 const EMBLEMS=[['Shield','#1d3557','#f1faee'],['Eye','#14213d','#fca311'],['Key','#5f0f40','#fb8b24'],['Moon','#10002b','#c8b6ff'],['Torch','#3d0c02','#ff7b00'],['Wings','#023047','#ffb703'],['Owl','#2b2d42','#edf2f4'],
 ['Weed leaf','#0b2e13','#5ed43a'],['Umbrella','#0b2545','#ff6b6b'],['Red-eyed hood','#26262e','#050505','#c1121f'],['Hooded figure','#2d1b4e','#d9d9e3'],['Wolf head','#14161a','#aeb4bd'],['Wasp','#141414','#ffd60a'],['Stop','#1b1b1b','#d62828','#ffffff'],['Bear trap','#2f2f33','#c9ccd1'],['Hand','#003049','#f7b267']];
 const EMB_OLD=['Shield','Star','Eye','Bolt','Crown','Hex','Diamond','Target','Key','Chevrons','Cross','Moon','Torch','Wings','Owl'];
@@ -299,7 +301,7 @@ const LOOK={
  founder:{outfit:{body:'#6b4a3a',trim:'#a07f5e',arms:'#6b4a3a'},hat:0,skin:'#b9805c',hair:'#c9c9c9',legs:'#2e2e33',glasses:true,beard:'#bdbdbd'},
  decoy:{outfit:{body:'#3a6ea5',trim:'#244a70',arms:'#3a6ea5'},hat:7,skin:'#8d5a3b',hair:'#141414',legs:'#1e1e22',longhair:true},
  stranger:{outfit:{body:'#a64b7a',trim:'#f2d0e0',arms:'#a64b7a'},hat:0,skin:'#f0c8a8',hair:'#e6dcc4',legs:'#4a4440',curly:true},
- vet:{outfit:{body:'#47553f',trim:'#c9b25a',arms:'#47553f'},hat:0,skin:'#d2a679',hair:'#9a9a9a',legs:'#2f3238',stubble:true},
+ vet:{cig:true,outfit:{body:'#47553f',trim:'#c9b25a',arms:'#47553f'},hat:0,skin:'#d2a679',hair:'#9a9a9a',legs:'#2f3238',stubble:true},
  mark:{outfit:{body:'#76787c',trim:'#5a5c60',arms:'#76787c'},hat:0,skin:'#e3b896',hair:'#bdbdbd',legs:'#33445f',bald:true,stubble:true},
  kev:{outfit:{body:'#f3f3f3',trim:'#d23b3b',arms:'#f3f3f3'},hat:'paper',skin:'#c99a74',hair:'#2b1d14',legs:'#222'},
  police1:{outfit:{body:'#141a26',trim:'#d7e84a',arms:'#141a26'},hat:'police',skin:'#7a4a2c',hair:'#111',legs:'#111',vest:true},
@@ -309,6 +311,9 @@ const LOOK={
  c3:{outfit:{body:'#5e548e',trim:'#9f86c0',arms:'#5e548e'},hat:2,skin:'#e8b892',hair:'#333',legs:'#2b2d42'},
  c4:{outfit:{body:'#6c757d',trim:'#adb5bd',arms:'#6c757d'},hat:0,skin:'#f5d0b0',hair:'#d4d4d4',legs:'#495057',curly:true},
  c5:{outfit:{body:'#1d3557',trim:'#e63946',arms:'#1d3557'},hat:9,skin:'#d4a373',hair:'#3d2b1f',legs:'#22223b'},
+ buyer:{outfit:{body:'#f2f2f2',trim:'#d9d9d9',arms:'#f2f2f2'},hat:3,hatCol:'#f2f2f2',skin:'#e8b892',hair:'#333',legs:'#141414',trousers:{col:'#141414',name:'black'}},
+ brett:{outfit:{body:'#3a4a3f',trim:'#26332a',arms:'#3a4a3f'},hat:1,hatCol:'#6b5b4a',skin:'#e0b48f',hair:'#9a9a9a',legs:'#2b2f3a',glasses:true,stubble:true},
+ dealer:{outfit:OUTFITS[1],hat:15,mask:true,hatCol:null,skin:'#c68d5f',hair:'#111',hs:0,legs:'#1a1a1f',trousers:{col:'#1a1a1f',name:'dark'}},
  c6:{outfit:{body:'#f77f00',trim:'#003049',arms:'#f77f00'},hat:0,skin:'#6f4518',hair:'#111',legs:'#003049'}
 };
 function drawHat(c,id,hr,dx,col,bk){const u=hr/8;c.save();const C=(d)=>col||d,D=(d)=>shade(col||d,-35);
@@ -324,6 +329,13 @@ function drawHat(c,id,hr,dx,col,bk){const u=hr/8;c.save();const C=(d)=>col||d,D=
  case 7:c.strokeStyle=C('#202020');c.lineWidth=2*u;c.beginPath();c.arc(0,-1*u,9*u,Math.PI,0);c.stroke();c.fillStyle=C('#202020');c.fillRect(-11*u,-3*u,4*u,6*u);c.fillRect(7*u,-3*u,4*u,6*u);c.strokeStyle=C('#202020');c.lineWidth=1.2*u;c.beginPath();c.moveTo(9*u,2*u);c.quadraticCurveTo(7*u,8*u,2*u,7*u);c.stroke();break;
  case 8:{const b=C('#111214'),hh=8*u;c.fillStyle=b;c.beginPath();c.arc(0,0,hh*1.05,0,7);if(!bk)c.rect(-hh*.68,-hh*.34,hh*1.36,hh*.5);c.fill('evenodd');c.strokeStyle=shade(b,28);c.lineWidth=.5*u;for(let i=-5;i<=5;i+=2.5){c.beginPath();c.moveTo(i*u,-hh*1.0);c.lineTo(i*.9*u,-hh*.45);c.stroke();}if(!bk){c.strokeStyle=shade(b,22);c.lineWidth=.6*u;c.beginPath();c.rect(-hh*.68,-hh*.34,hh*1.36,hh*.5);c.stroke();}break;}
  case 9:c.fillStyle=C('#2e86de');c.beginPath();c.arc(0,-3*u,8.6*u,Math.PI,0);c.fill();c.fillStyle=D('#2e86de');c.fillRect(-8.6*u,-4.5*u,17.2*u,3*u);c.fillStyle='#fff';c.beginPath();c.arc(0,-12.5*u,3.2*u,0,7);c.fill();break;
+ case 10:{const b=C('#2b2f3a'),hh=8*u;c.fillStyle=b;c.beginPath();c.arc(0,0,hh*1.14,0,7);if(!bk)c.ellipse(dx*u,hh*.2,hh*.78,hh*.8,0,0,7);c.fill('evenodd');c.strokeStyle=shade(b,26);c.lineWidth=.6*u;c.beginPath();c.arc(0,0,hh*1.14,Math.PI*1.05,Math.PI*1.95);c.stroke();
+  if(!bk){c.fillStyle='#16181d';c.fillRect(-hh*1.12,-hh*.62,hh*2.24,hh*.34);for(const sx of[-1,1]){const lx=sx*hh*.42+dx*u,ly=-hh*.45;c.fillStyle='#16181d';c.beginPath();c.arc(lx,ly,hh*.34,0,7);c.fill();c.fillStyle='#ff9f1c';c.beginPath();c.arc(lx,ly,hh*.26,0,7);c.fill();c.fillStyle='rgba(255,255,255,.55)';c.beginPath();c.arc(lx-hh*.08,ly-hh*.09,hh*.07,0,7);c.fill();}}break;}
+ case 11:{const b=C('#c0392b'),hh=8*u;c.fillStyle=b;c.beginPath();c.arc(0,-hh*.1,hh*1.05,Math.PI*1.0,Math.PI*2.0);c.fill();c.fillRect(-hh*1.05,-hh*.32,hh*2.1,hh*.3);c.fillStyle='rgba(255,255,255,.75)';for(let i=-3;i<=3;i++){c.beginPath();c.arc(i*hh*.3,-hh*.62-Math.abs(i)*hh*.04,hh*.07,0,7);c.fill();}c.fillStyle=b;const kx=(dx>=0?-1:1)*hh*1.05;c.beginPath();c.moveTo(kx,-hh*.3);c.lineTo(kx+(kx<0?-1:1)*hh*.55,-hh*.1);c.lineTo(kx,hh*.05);c.closePath();c.fill();break;}
+ case 12:{const b=C('#1c2230'),hh=8*u;if(bk){c.fillStyle=b;c.beginPath();c.arc(0,hh*.5,hh*.5,0,Math.PI);c.fill();break;}c.save();c.beginPath();c.arc(0,0,hh*1.05,0,7);c.clip();c.fillStyle=b;c.beginPath();c.moveTo(-hh*1.1,hh*.12);c.lineTo(hh*1.1,hh*.12);c.lineTo(hh*1.1,hh*1.2);c.lineTo(-hh*1.1,hh*1.2);c.closePath();c.fill();c.fillStyle='rgba(255,255,255,.5)';for(let i=-2;i<=2;i++)for(let j=0;j<3;j++){c.beginPath();c.arc(i*hh*.38+(j%2)*hh*.15,hh*.4+j*hh*.28,hh*.06,0,7);c.fill();}c.strokeStyle=shade(b,25);c.lineWidth=.6*u;c.beginPath();c.moveTo(-hh*1.1,hh*.12);c.lineTo(hh*1.1,hh*.12);c.stroke();c.restore();break;}
+ case 14:{const b=C('#5b4636'),f='#e6dcc6',hh=8*u;c.fillStyle=b;c.beginPath();c.arc(0,-hh*.25,hh*1.08,Math.PI,0);c.fill();c.fillRect(-hh*1.08,-hh*.3,hh*2.16,hh*.2);c.fillStyle=f;if(!bk){c.beginPath();c.ellipse(dx*u,-hh*.42,hh*1.0,hh*.34,0,0,7);c.fill();}else{c.fillRect(-hh*1.05,-hh*.55,hh*2.1,hh*.4);}for(const sx of[-1,1]){c.fillStyle=shade(b,-10);rr(c,sx>0?hh*.85:-hh*1.3,-hh*.45,hh*.45,hh*1.3,hh*.2);c.fill();c.fillStyle=f;rr(c,sx>0?hh*.92:-hh*1.23,-hh*.35,hh*.31,hh*1.1,hh*.14);c.fill();}c.fillStyle=shade(b,-30);c.beginPath();c.arc(0,-hh*1.3,hh*.18,0,7);c.fill();break;}
+ case 15:{const b=C('#1b1c21'),hh=8*u;c.fillStyle=b;c.beginPath();c.arc(0,0,hh*1.15,0,7);if(!bk)c.ellipse(dx*u,hh*.18,hh*.74,hh*.78,0,0,7);c.fill('evenodd');c.strokeStyle=shade(b,28);c.lineWidth=.6*u;c.beginPath();c.arc(0,0,hh*1.15,Math.PI*1.05,Math.PI*1.95);c.stroke();break;}
+ case 13:{const b=C('#111214'),hh=8*u;c.fillStyle=b;c.beginPath();c.arc(0,0,hh*1.05,0,7);if(!bk){c.rect(-hh*.78,-hh*.3,hh*.6,hh*.34);c.rect(hh*.18,-hh*.3,hh*.6,hh*.34);c.rect(-hh*.34,hh*.34,hh*.68,hh*.38);}c.fill('evenodd');c.strokeStyle=shade(b,28);c.lineWidth=.5*u;for(let i=-5;i<=5;i+=2.5){c.beginPath();c.moveTo(i*u,-hh*1.0);c.lineTo(i*.9*u,-hh*.45);c.stroke();}break;}
  }c.restore();}
 function drawHair(c,L,hr,back){c.fillStyle=L.hair;const hs=L.hs;
  if(hs==null){ // legacy NPC flags
@@ -349,7 +361,7 @@ function drawHead(c,L,hr,dir,mouth,blink){
  c.fillStyle=L.skin;c.beginPath();c.arc(0,0,hr,0,7);c.fill();
  {const fg=c.createRadialGradient(-hr*.35,-hr*.35,hr*.1,0,0,hr*1.05);fg.addColorStop(0,'rgba(255,255,255,.12)');fg.addColorStop(.6,'rgba(0,0,0,0)');fg.addColorStop(1,'rgba(0,0,0,.18)');c.fillStyle=fg;c.beginPath();c.arc(0,0,hr,0,7);c.fill();}
  c.strokeStyle='rgba(0,0,0,.35)';c.lineWidth=Math.max(.8,hr*.08);c.beginPath();c.arc(0,0,hr,0,7);c.stroke();
- drawHair(c,L,hr,back);
+ {const H=L.hat;if(H===8||H===10||H===13||H===15){}else if(H&&H!==12){c.save();c.beginPath();c.arc(0,0,hr*1.04,0,7);c.rect(-hr*1.06,0,hr*2.12,hr*2);c.clip();drawHair(c,L,hr,back);c.restore();}else drawHair(c,L,hr,back);}
  if(!back){
   const ex=dx*hr*.35,ey=-hr*.05;c.fillStyle='#1a1410';
   if(blink){c.fillRect(-hr*.45+ex-hr*.12,ey,hr*.24,hr*.06+.5);c.fillRect(hr*.45+ex-hr*.12,ey,hr*.24,hr*.06+.5);}
@@ -361,6 +373,7 @@ function drawHead(c,L,hr,dir,mouth,blink){
   if(mouth!=null){c.fillStyle='#4a1d1d';const mo=clamp(mouth,0,1);if(mo>.06){c.beginPath();c.ellipse(ex*.5,hr*.5,hr*.26,hr*.05+hr*.28*mo,0,0,7);c.fill();}else{c.fillRect(ex*.5-hr*.22,hr*.48,hr*.44,Math.max(1,hr*.07));}}
  }
  if(L.hat)drawHat(c,L.hat,hr,dx,L.hatCol,back);
+ if(L.mask&&!back)drawHat(c,12,hr,dx,'#16181d',back);
 }
 function drawPerson(c,p){
  const L=p.look,w=p.walk||0,sw=p.moving?Math.sin(w)*3:0,bob=p.moving?Math.abs(Math.sin(w))*1.2:Math.sin(perfNow*.003+(p.x||0))*.4;c.save();c.translate(p.x+(p.shake?Math.sin(perfNow*.06)*2:0),p.y);
@@ -384,10 +397,12 @@ function drawPerson(c,p){
  if(O.tee){c.fillStyle=L.skin;c.beginPath();c.arc(0,-37,3.2,0,Math.PI);c.fill();}
  const bk_=!!(p.dir&&p.dir.y<-.55);
  if(O.under&&!bk_){c.fillStyle=O.under;c.beginPath();c.moveTo(-4.2,-37);c.lineTo(4.2,-37);c.lineTo(3.6,-12);c.lineTo(-3.6,-12);c.closePath();c.fill();c.fillStyle=L.skin;c.beginPath();c.arc(0,-37,2.8,0,Math.PI);c.fill();c.strokeStyle='rgba(0,0,0,.35)';c.lineWidth=.8;c.beginPath();c.moveTo(-4.2,-37);c.lineTo(-3.6,-12);c.moveTo(4.2,-37);c.lineTo(3.6,-12);c.stroke();}
- if(O.quilt){c.strokeStyle='rgba(255,255,255,.14)';c.lineWidth=.8;for(let y=-33;y<-13;y+=5){c.beginPath();c.moveTo(-10.5,y);c.lineTo(-4.4,y);c.moveTo(4.4,y);c.lineTo(10.5,y);c.stroke();}}
- if(O.chain&&!bk_){c.strokeStyle='#d8b43c';c.lineWidth=1.1;c.beginPath();c.arc(0,-37.5,3.5,.15,Math.PI-.15);c.stroke();c.fillStyle='#d8b43c';c.beginPath();c.arc(0,-33.4,1.2,0,7);c.fill();}
+ if(O.zip&&!bk_){c.strokeStyle='rgba(255,255,255,.35)';c.lineWidth=.9;c.beginPath();c.moveTo(0,-37);c.lineTo(0,-12);c.stroke();c.fillStyle='rgba(0,0,0,.25)';c.fillRect(4.5,-31,4,2.5);}
+ if(O.quilt){c.strokeStyle=O.quiltCol||'rgba(255,255,255,.14)';c.lineWidth=.8;for(let y=-33;y<-13;y+=5){c.beginPath();c.moveTo(-10.5,y);c.lineTo(-4.4,y);c.moveTo(4.4,y);c.lineTo(10.5,y);c.stroke();}}
+ if(O.chain&&!bk_){c.strokeStyle=O.chainCol||'#d8b43c';c.lineWidth=1.1;c.beginPath();c.arc(0,-37.5,3.5,.15,Math.PI-.15);c.stroke();c.fillStyle=O.chainCol||'#d8b43c';c.beginPath();c.arc(0,-33.4,1.2,0,7);c.fill();}
  c.strokeStyle=OL;c.lineWidth=.9;rr(c,-10.5,-37,21,25,4);c.stroke();
  if(O.bag){c.strokeStyle=shade(O.bag,-20);c.lineWidth=1.6;c.beginPath();c.moveTo(-8,-36);c.lineTo(8,-17);c.stroke();c.fillStyle=O.bag;rr(c,4,-20,9,7,2);c.fill();c.fillStyle='#c9a227';c.fillRect(7.5,-17.5,2,1.5);c.strokeStyle=OL;c.lineWidth=.7;rr(c,4,-20,9,7,2);c.stroke();}
+ if(p.cig&&!bk_){const fx=(p.dir&&p.dir.x<-.4)?-1:1,sx=(p.dir&&Math.abs(p.dir.x)>.4)?fx*5:2.5,t=perfNow*.001;c.save();c.translate(0,-bob);c.fillStyle='#f4f1e8';c.fillRect(Math.min(sx,sx+fx*4),-42.6,4,1.3);c.fillStyle='#ff6a1a';c.fillRect(sx+fx*4-(fx<0?0:0),-42.6,1.1,1.3);for(let i=0;i<4;i++){const k=(t*.7+i*.25)%1;c.fillStyle=`rgba(210,210,215,${.5*(1-k)})`;c.beginPath();c.arc(sx+fx*4+Math.sin(k*6+i)*2.5,-44-k*16,1.2+k*2.2,0,7);c.fill();}c.restore();}
  if(p.food){c.fillStyle='#f7f1e3';c.fillRect(8,-22,10,7);c.fillStyle='#c0392b';c.fillRect(8,-19,10,1.5);}
  c.fillStyle=L.skin;c.fillRect(-2.5,-39,5,3);
  c.save();c.translate(0,-45);drawHead(c,L,8,p.dir,null,p.blink);c.restore();
@@ -401,11 +416,15 @@ function drawPortrait(c,L,S,mouth,blink,absent){
  const bg=c.createLinearGradient(-17,0,17,0);bg.addColorStop(0,shade(L.outfit.body,20));bg.addColorStop(1,shade(L.outfit.body,-25));c.fillStyle=bg;rr(c,-17,9,34,20,6);c.fill();c.fillStyle=L.outfit.trim;c.fillRect(-17,18,34,2.5);if(L.vest)c.fillRect(-17,13,34,2);
  if(L.outfit.bag){c.strokeStyle=L.outfit.bag;c.lineWidth=2;c.beginPath();c.moveTo(-12,9);c.lineTo(12,29);c.stroke();}
  c.fillStyle=L.skin;c.fillRect(-3.5,5,7,6);
- drawHead(c,L,11,{x:0,y:1},mouth,blink);c.restore();
+ drawHead(c,L,11,{x:0,y:1},mouth,blink);
+ if(L.cig){const t=perfNow*.001;c.fillStyle='#f4f1e8';c.fillRect(2.5,5.6,8,1.8);c.fillStyle='#d9a441';c.fillRect(2.5,5.6,2,1.8);c.fillStyle='#ff6a1a';c.fillRect(10.5,5.6,1.6,1.8);for(let i=0;i<5;i++){const k=(t*.6+i*.2)%1;c.fillStyle=`rgba(215,215,220,${.55*(1-k)})`;c.beginPath();c.arc(12+Math.sin(k*6+i)*3,5-k*22,1.5+k*3,0,7);c.fill();}}
+ c.restore();
  c.fillStyle='rgba(63,208,255,.05)';for(let y=0;y<S;y+=3)c.fillRect(0,y,S,1);
 }
 /* ---------- suspect photos (procedural) ---------- */
 function drawPhoto(c,kind,S){c.save();c.clearRect(0,0,S,S);const u=S/100;
+ if(kind==='van'){c.fillStyle='#a9bdd6';c.fillRect(0,0,S,S*.62);c.fillStyle='#6b6f76';c.fillRect(0,S*.62,S,S*.38);c.fillStyle='#2f5fa8';rr(c,S*.1,S*.28,S*.78,S*.36,S*.04);c.fill();c.fillStyle='#244b86';rr(c,S*.6,S*.33,S*.28,S*.22,S*.03);c.fill();c.fillStyle='#bcd6f2';c.fillRect(S*.66,S*.37,S*.18,S*.12);c.fillStyle='#161616';for(const x of[.28,.72]){c.beginPath();c.arc(S*x,S*.66,S*.075,0,7);c.fill();}c.fillStyle='#f4e24a';c.fillRect(S*.1,S*.52,S*.12,S*.06);c.fillStyle='#222';c.font=(S*.045)+'px IBM Plex Mono';c.fillText('..D4',S*.11,S*.565);c.fillStyle='#a9bdd6';c.fillRect(S*.105,S*.5,S*.04,S*.1);c.fillStyle='rgba(0,0,0,.12)';c.fillRect(0,0,S,S);c.restore();return;}
+ if(kind==='fish'){c.fillStyle='#7ec8e3';c.fillRect(0,0,S,S*.5);c.fillStyle='#e9c46a';c.fillRect(0,S*.5,S,S*.5);c.fillStyle='#ffe066';c.beginPath();c.arc(S*.85,S*.15,S*.08,0,7);c.fill();c.fillStyle='#e07a2f';c.beginPath();c.ellipse(S*.5,S*.7,S*.36,S*.11,-.15,0,7);c.fill();c.beginPath();c.moveTo(S*.84,S*.64);c.lineTo(S*.98,S*.52);c.lineTo(S*.96,S*.8);c.closePath();c.fill();c.fillStyle='#fff';c.beginPath();c.arc(S*.24,S*.67,S*.025,0,7);c.fill();c.fillStyle='#111';c.beginPath();c.arc(S*.24,S*.67,S*.012,0,7);c.fill();c.fillStyle='#e8504a';rr(c,S*.3,S*.4,S*.4,S*.26,S*.04);c.fill();c.fillStyle='#ffd166';for(let i=0;i<6;i++)c.fillRect(S*.34+i*S*.06,S*.46+(i%2)*S*.07,S*.03,S*.03);c.save();c.translate(S*.5,S*.3);drawHead(c,LOOK.brett,S*.1,{x:0,y:1},0.3,false);c.restore();c.strokeStyle='#e0b48f';c.lineWidth=S*.03;c.beginPath();c.moveTo(S*.32,S*.5);c.lineTo(S*.3,S*.66);c.moveTo(S*.68,S*.5);c.lineTo(S*.7,S*.66);c.stroke();c.restore();return;}
  if(kind==='profile'){const g=c.createLinearGradient(0,0,0,S);g.addColorStop(0,'#6b4a33');g.addColorStop(1,'#2a1a10');c.fillStyle=g;c.fillRect(0,0,S,S);c.fillStyle='rgba(255,200,120,.25)';c.beginPath();c.arc(80*u,18*u,14*u,0,7);c.fill();
   c.save();c.translate(0,0);drawPortrait(c,LOOK.mark,S,0.12,false,false);c.restore();c.fillStyle='rgba(120,80,40,.25)';c.fillRect(0,0,S,S);for(let i=0;i<900;i++){c.fillStyle=`rgba(0,0,0,${Math.random()*.05})`;c.fillRect(Math.random()*S,Math.random()*S,1,1);}}
  else if(kind==='car'){const g=c.createLinearGradient(0,0,0,S);g.addColorStop(0,'#8fb4d8');g.addColorStop(.55,'#dfe8ef');g.addColorStop(.56,'#555a60');g.addColorStop(1,'#3a3d42');c.fillStyle=g;c.fillRect(0,0,S,S);
@@ -431,10 +450,10 @@ function drawPhoto(c,kind,S){c.save();c.clearRect(0,0,S,S);const u=S/100;
   c.strokeStyle='#5a1d1d';c.lineWidth=1.2*u;c.beginPath();c.arc(0,37*u,4*u,.2,Math.PI-.2);c.stroke();c.restore();
   c.fillStyle='#fff';c.font=`bold ${6.5*u}px Inter`;c.textAlign='left';c.lineWidth=2*u;c.strokeStyle='rgba(0,0,0,.5)';c.strokeText('Benidorm baby!! ☀️',4*u,94*u);c.fillText('Benidorm baby!! ☀️',4*u,94*u);}
  c.fillStyle='rgba(255,250,235,.06)';c.fillRect(0,0,S,S);c.restore();}
-const PHOTOS=[['profile','Profile picture — “Norman P”'],['car','“new motor” — silver estate, plate cropped'],['beach','Holiday post — tagged Benidorm. Del is sorry.']];
-function photoStrip(size=120){return `<div style="display:flex;gap:8px;flex-wrap:wrap;margin:6px 0">${PHOTOS.map(p=>`<figure style="margin:0;width:${size}px;background:#f4f1ea;padding:5px 5px 4px;border-radius:2px;box-shadow:0 4px 14px rgba(0,0,0,.5);transform:rotate(${p[0]==='beach'?2:p[0]==='car'?-1.5:-.5}deg)"><canvas data-photo="${p[0]}" width="240" height="240" style="width:100%;display:block"></canvas><figcaption style="font:10px/1.25 Inter;color:#333;margin-top:4px">${esc(p[1])}</figcaption></figure>`).join('')}</div>`;}
+let PHOTOS=[['profile','Profile picture — “Norman P”'],['car','“new motor” — silver estate, plate cropped'],['beach','Holiday post — tagged Benidorm. Del is sorry.']];
+function photoStrip(size=120){return `<div style="display:flex;gap:8px;flex-wrap:wrap;margin:6px 0">${PHOTOS.map(p=>`<figure style="margin:0;width:${size}px;background:#f4f1ea;padding:5px 5px 4px;border-radius:2px;box-shadow:0 4px 14px rgba(0,0,0,.5);transform:rotate(${(p[0]==='beach'||p[0]==='fish')?2:(p[0]==='car'||p[0]==='van')?-1.5:-.5}deg)"><canvas data-photo="${p[0]}" width="240" height="240" style="width:100%;display:block"></canvas><figcaption style="font:10px/1.25 Inter;color:#333;margin-top:4px">${esc(p[1])}</figcaption></figure>`).join('')}</div>`;}
 function hydratePhotos(root){root.querySelectorAll('canvas[data-photo]').forEach(k=>drawPhoto(k.getContext('2d'),k.dataset.photo,240));}
-const SUSPECT_HTML=()=>`<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start"><div><div class="mono" style="font-size:11px;color:var(--dim)">NAME (ALLEGED)</div><div style="font-size:20px;font-weight:800">Norman P</div><div class="mono" style="font-size:11px;color:var(--dim);margin-top:6px">AGE (ALLEGED)</div><div style="font-size:20px;font-weight:800">68</div><div style="margin-top:6px">${tagHTML('UNCERTAIN')}</div><p style="font-size:11px;color:var(--dim);max-width:200px">Both come from his public profile. Nothing here is confirmed.</p></div>${photoStrip(118)}</div>`;
+let SUSPECT_HTML=()=>`<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start"><div><div class="mono" style="font-size:11px;color:var(--dim)">NAME (ALLEGED)</div><div style="font-size:20px;font-weight:800">Norman P</div><div class="mono" style="font-size:11px;color:var(--dim);margin-top:6px">AGE (ALLEGED)</div><div style="font-size:20px;font-weight:800">68</div><div style="margin-top:6px">${tagHTML('UNCERTAIN')}</div><p style="font-size:11px;color:var(--dim);max-width:200px">Both come from his public profile. Nothing here is confirmed.</p></div>${photoStrip(118)}</div>`;
 
 /* ================= INPUT ================= */
 const keys={};let joy={x:0,y:0,id:null};const IS_TOUCH=('ontouchstart' in window)||navigator.maxTouchPoints>0;
@@ -465,6 +484,7 @@ function onKey(k){
  if(M&&M.introLock&&STATE==='BRIEFING_ROOM')return;
  if((k==='e'||k===' '||k==='enter')&&(STATE==='BRIEFING_ROOM'||STATE==='APPROACH'))interact();
  if(k==='c'&&STATE==='APPROACH')openPhone();
+ if((k==='c'||k==='f')&&STATE==='BRIEFING_ROOM'&&!UI.modal)toast('Not yet',k==='c'?'Your phone only works out on the street.':'The sting button is for the mission — head out the door first.','#ffb627');
  if(k==='v'&&STATE==='STING'&&!UI.modal)openEvidence();
  if(k==='f'&&STATE==='APPROACH')stingButton();
  if((k===' '||k==='enter')&&STATE==='POLICE_CALL')skipLine();
@@ -483,7 +503,7 @@ function newMission(){M={clock:0,intel:{},read:new Set(),flags:new Set(),hist:{f
  attendedTime:null,attendedSeen:false,hints:new Set(),timeline:[],result:null,fail:null,newAch:[],goodQs:0,seenMark:false};}
 
 /* ================= INTEL / EVIDENCE ================= */
-const INTEL={
+let INTEL={
  log_export:{title:'Chat export from account “BigNorm420”',src:'Platform export, preserved by the team',conf:'VERIFIED'},
  log_age:{title:'Profile stated age 14 (19:05); account acknowledged it (19:06)',src:'Chat export',conf:'VERIFIED'},
  log_flagged:{title:'Message flagged as sexual content — redacted, preserved unaltered',src:'Chat export',conf:'VERIFIED'},
@@ -534,16 +554,17 @@ function buildLiving(){
  a({x:0,y:0,w:800,h:74,draw:drawLivingWall});
  a({x:0,y:0,w:24,h:580,col:'#3b2f2a'});a({x:776,y:0,w:24,h:580,col:'#3b2f2a'});
  a({x:0,y:556,w:50,h:24,col:'#3b2f2a'});a({x:150,y:556,w:650,h:24,col:'#3b2f2a'});
- a({x:290,y:404,w:230,h:56,h3:34,col:'#6a4a6e',draw:drawSofa});
- a({x:350,y:292,w:120,h:48,h3:14,col:'#7b5636',draw:(c,s)=>{drawSolidPlain(c,s);c.fillStyle='#ddd';c.fillRect(s.x+18,s.y-s.h3+10,24,16);c.fillStyle='#c0392b';c.beginPath();c.arc(s.x+86,s.y-s.h3+22,7,0,7);c.fill();c.fillStyle='#f5f5f5';c.beginPath();c.arc(s.x+86,s.y-s.h3+22,4,0,7);c.fill();}});
+ a({x:350,y:408,w:130,h:34,h3:26,col:'#6a4a6e',draw:drawSofa});
+ a({x:96,y:272,w:136,h:60,h3:18,col:'#4a2f1a',draw:drawRoulette});
  a({x:300,y:74,w:200,h:34,h3:26,col:'#2a2a2e',draw:drawTV});
  a({x:600,y:74,w:170,h:56,h3:30,col:'#8a6a45',draw:drawDesk});
  a({x:30,y:74,w:60,h:84,h3:34,col:'#5c3b22',draw:drawShelf});
- a({x:110,y:282,w:72,h:62,h3:30,col:'#4a5d3a',draw:(c,s)=>{drawSolidPlain(c,s);c.fillStyle=shade(s.col,15);rr(c,s.x+6,s.y-s.h3+6,s.w-12,s.h-14,6);c.fill();c.fillStyle=shade(s.col,-12);c.fillRect(s.x,s.y-s.h3-8,s.w,12);}});
+ a({x:344,y:262,w:128,h:76,h3:26,col:'#5a3a22',draw:drawPool});
+ a({x:34,y:164,w:52,h:30,h3:16,col:'#5a3b22',draw:drawRecordPlayer});
  a({x:730,y:482,w:40,h:40,h3:44,col:'#2f5d3a',draw:drawPlant});
  a({x:690,y:300,w:52,h:48,h3:46,col:'#6e4a2c',draw:drawWardrobe});
  a({x:620,y:300,w:30,h:30,h3:46,col:'#3a3030',draw:(c,s)=>{c.fillStyle='rgba(0,0,0,.25)';c.beginPath();c.ellipse(s.x+15,s.y+s.h,14,5,0,0,7);c.fill();c.fillStyle='#2a2424';c.fillRect(s.x+13,s.y-s.h3+10,4,s.h3+s.h-12);c.fillStyle='#f3d9a4';c.beginPath();c.moveTo(s.x+3,s.y-s.h3+14);c.lineTo(s.x+27,s.y-s.h3+14);c.lineTo(s.x+22,s.y-s.h3-4);c.lineTo(s.x+8,s.y-s.h3-4);c.closePath();c.fill();}});
- return{name:'living',w:800,h:580,solids:S,floor:drawLivingFloor,ints:[{x:197,y:100,r:74,label:'Edit team banner — name, team, emblem',act:()=>openSignIn('edit'),hl:{x:197,y:36}},{x:716,y:324,r:64,label:'Open your wardrobe — change your clothes',act:openWardrobe,hl:{x:716,y:264}},{x:686,y:148,r:62,label:'Use the case computer',act:openComputer,hl:{x:686,y:100}},{x:100,y:540,r:55,label:'Head out — start the mission',act:confirmStart}]};
+ return{name:'living',w:800,h:580,solids:S,floor:drawLivingFloor,ints:[{x:400,y:116,r:46,cond:()=>player.y<142&&Math.abs(player.x-400)<75&&player.dir&&player.dir.y<-.3,get label(){return tvLabel();},act:cycleTV,hl:{x:400,y:38,hrad:46}},{x:408,y:300,r:86,get label(){return M&&M.pool&&M.pool.state!=='idle'?'Pool table — already broken this visit':'Break the rack at the pool table';},act:poolBreak,hl:{x:408,y:296}},{x:60,y:198,r:64,get label(){return 'Record player — now: '+MUSIC_NAMES[(P.briefMusic|0)%3]+' (change)';},act:cycleBriefMusic,hl:{x:60,y:176}},{x:197,y:100,r:74,label:'Edit team banner — name, team, emblem',act:()=>openSignIn('edit'),hl:{x:197,y:36}},{x:716,y:324,r:64,label:'Open your wardrobe — change your clothes',act:openWardrobe,hl:{x:716,y:264}},{x:686,y:148,r:62,label:'Use the case computer',act:openComputer,hl:{x:686,y:100}},{x:100,y:540,r:55,label:'Head out — start the mission',act:confirmStart}]};
 }
 function drawWardrobe(c,s){drawSolidPlain(c,s);const t=s.y-s.h3;c.fillStyle=shade(s.col,10);c.fillRect(s.x+3,t+3,s.w/2-4,s.h-6);c.fillRect(s.x+s.w/2+1,t+3,s.w/2-4,s.h-6);
  c.fillStyle=shade(s.col,-45);c.fillRect(s.x+s.w/2-1,t,2,s.h);c.fillStyle='#d9b45a';c.fillRect(s.x+s.w/2-5,t+s.h/2-6,2,10);c.fillRect(s.x+s.w/2+3,t+s.h/2-6,2,10);
@@ -572,10 +593,37 @@ function drawLivingWall(c,s){c.fillStyle='#46566a';c.fillRect(0,0,800,74);c.fill
  drawEmblem(c,P.emblem,bx+32,by+bh/2,22);
  const name=P.team.toUpperCase();let fs=28;c.font=`${fs}px Bebas Neue, Impact, sans-serif`;while(c.measureText(name).width>bw-72&&fs>14){fs--;c.font=`${fs}px Bebas Neue, Impact, sans-serif`;}
  c.textAlign='left';c.fillStyle='#000';c.fillText(name,bx+61,by+34);c.fillStyle='#fff';c.fillText(name,bx+60,by+33);
- c.fillStyle='#ffb627';c.font='9px IBM Plex Mono, monospace';c.fillText('CASE NH-014 · TAKEAWAY',bx+60,by+50);
+ c.fillStyle='#ffb627';c.font='9px IBM Plex Mono, monospace';c.fillText(CASE==='cp'?'CASE NH-015 · CAR PARK':'CASE NH-014 · TAKEAWAY',bx+60,by+50);
  c.fillStyle='#d9c9a0';c.fillRect(630,16,40,30);c.fillStyle='#7a5a3a';c.fillRect(634,20,32,22);c.fillStyle='#e8d9b0';c.fillRect(690,20,30,24);c.fillStyle='#9c6644';c.fillRect(694,24,22,16);}
-function drawSofa(c,s){drawSolidPlain(c,s);c.fillStyle=shade(s.col,18);rr(c,s.x+6,s.y-s.h3+4,s.w-12,20,6);c.fill();c.fillStyle=shade(s.col,-10);c.fillRect(s.x,s.y-s.h3-10,14,s.h+10);c.fillRect(s.x+s.w-14,s.y-s.h3-10,14,s.h+10);c.fillStyle='#e9c46a';c.fillRect(s.x+40,s.y-s.h3+8,24,16);}
-function drawTV(c,s){drawSolidPlain(c,s);c.fillStyle='#050505';c.fillRect(s.x+30,s.y-s.h3-34,140,44);const t=perfNow*.001;c.fillStyle=`hsl(${200+Math.sin(t)*30},60%,${30+Math.sin(t*3)*6}%)`;c.fillRect(s.x+34,s.y-s.h3-30,132,36);c.fillStyle='rgba(255,255,255,.7)';c.font='8px IBM Plex Mono';c.fillText('BBC 1  CORRIE',s.x+40,s.y-s.h3-18);}
+function drawSofa(c,s){const x=s.x,w=s.w,top=s.y-s.h3,b=s.y+s.h;c.fillStyle='rgba(0,0,0,.25)';c.fillRect(x+3,b-2,w,6);c.fillStyle='#2a1c2d';c.fillRect(x+6,b-4,6,6);c.fillRect(x+w-12,b-4,6,6);
+ c.fillStyle=shade(s.col,-18);rr(c,x+8,top-8,w-16,22,7);c.fill();c.fillStyle=shade(s.col,-6);rr(c,x+12,top-5,w-24,16,6);c.fill();
+ c.fillStyle=shade(s.col,-8);rr(c,x,top+2,16,s.h3+s.h-6,6);c.fill();rr(c,x+w-16,top+2,16,s.h3+s.h-6,6);c.fill();
+ const g=c.createLinearGradient(0,top+10,0,b);g.addColorStop(0,shade(s.col,14));g.addColorStop(1,shade(s.col,-12));c.fillStyle=g;rr(c,x+14,top+12,w-28,s.h3+s.h-18,6);c.fill();
+ c.strokeStyle='rgba(0,0,0,.35)';c.lineWidth=1;c.beginPath();c.moveTo(x+w/2,top+14);c.lineTo(x+w/2,b-6);c.stroke();
+ c.fillStyle='#e9c46a';rr(c,x+20,top+4,18,14,4);c.fill();c.fillStyle='#8fb996';rr(c,x+w-38,top+4,18,14,4);c.fill();}
+const TV_NAMES=['Weather','Racing','Lightsaber Duel','Late Night Chat'];
+function drawTV(c,s){drawSolidPlain(c,s);const sx=s.x+34,sy=s.y-s.h3-30,sw=132,sh=36;c.fillStyle='#050505';c.fillRect(s.x+30,s.y-s.h3-34,140,44);c.save();c.beginPath();c.rect(sx,sy,sw,sh);c.clip();drawTVScreen(c,sx,sy,sw,sh,(P&&P.tvCh|0)%4,perfNow*.001);c.restore();c.fillStyle='rgba(255,255,255,.07)';c.fillRect(sx,sy,sw,10);}
+function drawTVScreen(c,x,y,w,h,ch,t){
+ if(ch===0){c.fillStyle='#1d4f86';c.fillRect(x,y,w,h);c.fillStyle='#2f7bc4';c.fillRect(x,y,w,16);
+  for(let i=0;i<3;i++){const cx=x+26+i*40+Math.sin(t*.6+i)*3;c.fillStyle='rgba(255,255,255,.85)';c.beginPath();c.arc(cx,y+16,6,0,7);c.arc(cx+7,y+17,5,0,7);c.arc(cx-7,y+18,5,0,7);c.fill();}
+  c.fillStyle='#ffd23f';c.beginPath();c.arc(x+w-18,y+10,5,0,7);c.fill();c.strokeStyle='rgba(60,140,255,.9)';c.lineWidth=1;for(let i=0;i<5;i++){const rx=x+20+i*22+((t*20)%8);c.beginPath();c.moveTo(rx,y+24);c.lineTo(rx-2,y+29);c.stroke();}
+  c.fillStyle='rgba(0,0,0,.55)';c.fillRect(x,y+h-9,w,9);c.fillStyle='#fff';c.font='7px IBM Plex Mono';c.textAlign='left';c.fillText('WEATHER  MON 9° TUE 11° WED 8°',x+3,y+h-2);}
+ else if(ch===1){c.fillStyle='#3a8a3a';c.fillRect(x,y,w,h);c.fillStyle='#2d6f2d';c.fillRect(x,y+h*.42,w,h*.2);c.strokeStyle='#fff';c.lineWidth=1;c.beginPath();c.moveTo(x,y+h*.4);c.lineTo(x+w,y+h*.4);c.moveTo(x,y+h*.78);c.lineTo(x+w,y+h*.78);c.stroke();
+  const cols=['#e63946','#f4d03f','#4da3ff','#ffffff','#b56bff'];for(let i=0;i<5;i++){const p=((t*(.22+i*.025)+i*.19)%1.2)-.1,hx=x+p*w,hy=y+h*(.5+(i%3)*.12);c.fillStyle='#3b2a1a';c.beginPath();c.ellipse(hx,hy+2,6,3.4,0,0,7);c.fill();c.fillStyle='#7a5230';c.fillRect(hx+3,hy-5,3,4);c.fillStyle=cols[i];c.fillRect(hx-3,hy-6,5,5);c.fillStyle='#e0b48f';c.fillRect(hx-1.5,hy-9,3,3);}
+  c.fillStyle='rgba(0,0,0,.55)';c.fillRect(x,y,w,9);c.fillStyle='#fff';c.font='7px IBM Plex Mono';c.textAlign='left';c.fillText('LIVE · 2:30 AINTREE',x+3,y+7);}
+ else if(ch===2){c.fillStyle='#0b0d1f';c.fillRect(x,y,w,h);c.fillStyle='#fff';for(let i=0;i<12;i++)c.fillRect(x+((i*47)%w),y+((i*23)%20),1,1);c.fillStyle='#1a1d3a';c.fillRect(x,y+h-6,w,6);
+  const sw=Math.sin(t*5),cx=x+w/2,by=y+h-6,fig=(px,col,dir,a)=>{c.strokeStyle='#ddd';c.lineWidth=1.3;c.beginPath();c.arc(px,by-20,2.4,0,7);c.moveTo(px,by-17.5);c.lineTo(px,by-9);c.moveTo(px,by-9);c.lineTo(px-3,by);c.moveTo(px,by-9);c.lineTo(px+3,by);c.moveTo(px,by-15);c.lineTo(px+dir*7,by-15-a*5);c.stroke();
+   const hx=px+dir*7,hy=by-15-a*5,tx=hx+dir*(6+a*3),ty=hy-10+a*14;c.strokeStyle=col;c.shadowColor=col;c.shadowBlur=6;c.lineWidth=2;c.beginPath();c.moveTo(hx,hy);c.lineTo(tx,ty);c.stroke();c.shadowBlur=0;};
+  fig(cx-16+sw*2,'#3dff6a',1,sw);fig(cx+16-sw*2,'#b44dff',-1,-sw);if(Math.sin(t*5)>.9){c.fillStyle='#fff';c.beginPath();c.arc(cx,by-18,3,0,7);c.fill();}}
+ else{c.fillStyle='#2a0f3d';c.fillRect(x,y,w,h);const g=c.createLinearGradient(x,y,x+w,y+h);g.addColorStop(0,'#ff2d95');g.addColorStop(1,'#5b2cff');c.globalAlpha=.55;c.fillStyle=g;c.fillRect(x,y,w,h);c.globalAlpha=1;
+  c.fillStyle='#d05a6e';rr(c,x+22,y+h-14,88,12,4);c.fill();rr(c,x+22,y+h-20,14,10,3);c.fill();rr(c,x+96,y+h-20,14,10,3);c.fill();c.fillStyle='#e8798c';rr(c,x+26,y+h-18,80,8,3);c.fill();
+  const sh=Math.sin(t*9)*5,px=x+64;c.fillStyle='#f1c27d';c.beginPath();c.arc(px,y+h-23,3.2,0,7);c.fill();c.fillStyle='#5a3a22';c.beginPath();c.arc(px,y+h-24.5,3.4,Math.PI,0);c.fill();c.fillRect(px-3.4,y+h-25,1.5,7);
+  c.fillStyle='#ff5a8a';c.fillRect(px-3,y+h-20,6,3);c.fillRect(px-2.5,y+h-15.5,5,2);c.fillStyle='#f1c27d';c.fillRect(px-2.5,y+h-17,5,1.5);c.fillRect(px-2,y+h-13.5,4,3);
+  c.strokeStyle='#f1c27d';c.lineWidth=1.6;c.beginPath();c.moveTo(px+3,y+h-19);c.lineTo(px+8+sh,y+h-26);c.stroke();c.fillStyle='#222';c.save();c.translate(px+8+sh,y+h-27);c.rotate(sh*.12);c.fillRect(-1.5,-4,3,7);c.restore();
+  const bl=Math.floor(t*2)%2;c.fillStyle=bl?'#ffe600':'#ff2d95';c.font='bold 9px Inter';c.textAlign='left';c.fillText('CALL NOW!',x+3,y+10);c.font='bold 7px IBM Plex Mono';c.fillStyle='#fff';c.fillText('0871 · LATE NIGHT CHAT',x+3,y+18);
+  c.fillStyle='rgba(0,0,0,.6)';c.fillRect(x,y+h-7,w,7);c.fillStyle='#ffe600';c.font='6px IBM Plex Mono';const tx=x+w-((t*30)%(w+150));c.fillText('TEXT CHAT TO 69xxx · CALLS 80p/MIN + NETWORK EXTRAS · 18+ · ',tx,y+h-1.5);}}
+function tvLabel(){const n=(P.tvCh|0)%4;return 'TV — now: '+TV_NAMES[n]+' (change channel)';}
+function cycleTV(){P.seenTV=P.seenTV||[];if(!P.seenTV.includes(P.tvCh|0))P.seenTV.push(P.tvCh|0);P.tvCh=((P.tvCh|0)+1)%4;if(!P.seenTV.includes(P.tvCh))P.seenTV.push(P.tvCh);if(P.seenTV.length>=4)unlock('telly');saveP();SFX.blip&&SFX.blip();}
 function drawDesk(c,s){drawSolidPlain(c,s);const tx=s.x+60,ty=s.y-s.h3-22;c.fillStyle='#1b1b1f';c.fillRect(tx,ty,64,36);c.fillStyle=`rgba(69,224,138,${.7+Math.sin(perfNow*.004)*.15})`;c.fillRect(tx+4,ty+4,56,26);c.fillStyle='#062';for(let i=0;i<5;i++)c.fillRect(tx+8,ty+8+i*4,20+((i*13)%28),2);c.fillStyle='#333';c.fillRect(tx+26,ty+36,12,6);
  const kx=tx+4,ky=s.y-s.h3+18;c.fillStyle='#1d1f24';rr(c,kx,ky,54,13,2);c.fill();c.fillStyle='#5b606a';for(let r=0;r<3;r++)for(let k=0;k<11;k++)c.fillRect(kx+2+k*4.7,ky+2+r*3.6,3.6,2.6);c.fillRect(kx+10,ky+10,32,1.8);
  const mx=kx+68,my=ky+3;c.strokeStyle='#2a2d33';c.lineWidth=1;c.beginPath();c.moveTo(mx,my-2);c.quadraticCurveTo(mx-4,my-12,tx+40,ty+42);c.stroke();c.fillStyle='#22252b';c.beginPath();c.ellipse(mx,my+5,5,7,0,0,7);c.fill();c.strokeStyle='#5b606a';c.lineWidth=.8;c.beginPath();c.moveTo(mx,my-1.5);c.lineTo(mx,my+3);c.moveTo(mx-5,my+3);c.lineTo(mx+5,my+3);c.stroke();
@@ -588,7 +636,7 @@ function drawPlant(c,s){c.fillStyle='#8a4b2a';c.fillRect(s.x+8,s.y,24,s.h);c.fil
 /* ---------- High street ---------- */
 const DOOR_OUT={x:810,y:500},DOOR_IN={x:810,y:430};
 const insideShop=p=>p.x>612&&p.x<988&&p.y<458&&p.y>120;
-function navPath(from,to){const a=insideShop(from),b=insideShop(to);if(a&&!b)return[{...DOOR_IN},{...DOOR_OUT},{...to}];if(!a&&b)return[{...DOOR_OUT},{...DOOR_IN},{...to}];return[{...to}];}
+function navPath(from,to){if(CASE==='cp')return[{...to}];const a=insideShop(from),b=insideShop(to);if(a&&!b)return[{...DOOR_IN},{...DOOR_OUT},{...to}];if(!a&&b)return[{...DOOR_OUT},{...DOOR_IN},{...to}];return[{...to}];}
 function buildStreet(){
  const S=[];const a=o=>(S.push(o),o);
  a({x:0,y:20,w:600,h:450,h3:70,col:'#2c2f38',draw:(c,s)=>drawShopBlock(c,s,'LUCKY STAR BETS','#1e8449','#f4d03f')});
@@ -599,6 +647,9 @@ function buildStreet(){
  a({x:600,y:458,w:180,h:14,h3:40,col:'#6b4a36',draw:drawShopFront});a({x:840,y:458,w:160,h:14,h3:40,col:'#6b4a36',draw:drawShopFront});
  a({x:630,y:190,w:340,h:24,h3:22,col:'#c7c2b8',draw:drawCounter});
  a({x:616,y:270,w:26,h:150,h3:14,col:'#8a2d2d'});a({x:958,y:270,w:26,h:150,h3:14,col:'#8a2d2d'});
+ a({x:872,y:330,w:50,h:32,h3:18,col:'#6b4a36',draw:drawPaperTable});
+ a({x:654,y:300,w:56,h:34,h3:18,col:'#6b4a36',draw:drawDinerTable,plates:true});
+ a({x:654,y:384,w:56,h:34,h3:18,col:'#6b4a36',draw:drawDinerTable,plates:false});
  a({x:300,y:500,w:90,h:20,h3:16,col:'#6d4c33'});a({x:520,y:498,w:20,h:20,h3:24,col:'#2d3a2f'});
  a({x:1550,y:516,w:130,h:18,h3:62,col:'#334',draw:drawBusStop});
  const car=a({x:1150,y:618,w:116,h:48,h3:0,col:'#b9bfc6',off:true,draw:()=>{}});car.isCar=true;
@@ -606,18 +657,36 @@ function buildStreet(){
  return{name:'street',w:2000,h:900,solids:S,floor:drawStreetFloor,carSolid:car,ints:[
   {x:1200,y:490,r:55,label:'Inspect the CCTV notice',act:()=>{addIntel('cctv');addTimeline('Noted CCTV covering takeaway frontage');bark(player,'CCTV covers the front. Police can request it.');}},
   {x:800,y:236,r:46,label:'Read the menu board',act:()=>bark(player,'Cod & chips £9.20. Thursday special: mushy peas free.'),cond:()=>insideShop(player)},
-  {x:1615,y:548,r:50,label:'Check the bus timetable',act:()=>bark(player,'Next 42 bus: 18:36. Probably late.')},
+  {x:897,y:372,r:50,label:'Read the newspapers',act:()=>bark(player,'Yesterday\'s Sun, a Mirror, a chip-fat-stained Metro. Nothing useful.'),cond:()=>insideShop(player),hl:{x:897,y:350}},
+  {x:1615,y:548,r:50,label:'Check the bus timetable',act:()=>bark(player,'Next 42 bus: 18:33. Then 18:48.')},
   {x:345,y:528,r:45,label:'Look at the bench',act:()=>bark(player,'Someone\'s left a soggy copy of the Metro.')}
  ]};
 }
 function drawShopBlock(c,s,name,signCol,txtCol){const top=s.y-s.h3;c.fillStyle=shade(s.col,-12);c.fillRect(s.x,top,s.w,s.h);c.fillStyle='rgba(255,255,255,.04)';for(let x=s.x+20;x<s.x+s.w;x+=90){c.fillRect(x,top+40,40,30);c.fillRect(x+10,top+160,26,26);}
  const fy=s.y+s.h-s.h3;c.fillStyle=s.col;c.fillRect(s.x,fy,s.w,s.h3);c.fillStyle=signCol;c.fillRect(s.x+10,fy+2,s.w-20,20);c.fillStyle=txtCol;c.font='16px Bebas Neue';c.textAlign='center';c.fillText(name,s.x+s.w/2,fy+18);
- for(let x=s.x+20;x<s.x+s.w-60;x+=120){c.fillStyle='rgba(255,214,140,.25)';c.fillRect(x,fy+28,80,36);c.strokeStyle='#111';c.strokeRect(x,fy+28,80,36);}
+ {const bets=name.startsWith('LUCKY'),wine=name.startsWith('PATEL'),t=perfNow*.001;let wi=0;for(let x=s.x+20;x<s.x+s.w-60;x+=120,wi++){drawShopWindow(c,x,fy+28,80,36,bets,wine,wi,t);}if(bets||wine){c.fillStyle='#0a0a0a';rr(c,s.x+s.w-110,fy+26,44,12,3);c.fill();const on=Math.floor(t*1.4)%7!==0;c.fillStyle=on?(bets?'#ff4d5e':'#4dd0ff'):'#552';c.font='bold 9px Inter';c.textAlign='center';c.fillText('OPEN',s.x+s.w-88,fy+35.5);}}
  if(name.startsWith('PATEL')){c.fillStyle='#ffd60a';c.fillRect(s.x+190,fy+30,24,16);c.fillStyle='#000';c.font='8px Inter';c.fillText('CCTV',s.x+202,fy+41);c.fillStyle='#333';c.fillRect(s.x+186,fy+4,10,8);}
  c.fillStyle='#1a1a1a';c.fillRect(s.x+s.w-56,fy+26,30,44);}
+function drawDinerTable(c,s){drawSolidPlain(c,s);const x=s.x,y=s.y-s.h3;c.fillStyle='#c9a46b';c.fillRect(x+1,y+1,s.w-2,s.h-2);c.strokeStyle='rgba(0,0,0,.18)';c.lineWidth=1;c.strokeRect(x+1.5,y+1.5,s.w-3,s.h-3);
+ if(s.plates){for(const px of[x+15,x+s.w-15]){c.fillStyle='#f4f1ea';c.beginPath();c.ellipse(px,y+s.h/2,10,7,0,0,7);c.fill();c.strokeStyle='rgba(0,0,0,.25)';c.stroke();c.fillStyle='#e0a93b';for(let i=0;i<4;i++)c.fillRect(px-5+i*2.6,y+s.h/2-1+(i%2),1.8,6);c.fillStyle='#d9983a';rr(c,px-7,y+s.h/2-5,10,4.5,2);c.fill();c.fillStyle='#8aa';c.fillRect(px+8,y+s.h/2-5,.8,9);}c.fillStyle='#c0392b';c.fillRect(x+s.w/2-1.5,y+4,3,6);c.fillStyle='#d8d28a';c.fillRect(x+s.w/2-1.5,y+s.h-9,3,6);}
+ else{c.fillStyle='#d8d28a';c.fillRect(x+s.w/2-4,y+s.h/2-3,3,6);c.fillStyle='#c0392b';c.fillRect(x+s.w/2+1,y+s.h/2-3,3,6);}}
+function drawPaperTable(c,s){drawSolidPlain(c,s);const x=s.x,y=s.y-s.h3;c.fillStyle='#d9d2c3';rr(c,x+4,y+2,20,14,1);c.fill();c.fillStyle='#e8e1d0';c.save();c.translate(x+34,y+9);c.rotate(.2);c.fillRect(-11,-7,22,14);c.restore();c.fillStyle='#b9bfc9';c.save();c.translate(x+22,y+14);c.rotate(-.15);c.fillRect(-12,-5,24,10);c.restore();c.fillStyle='#222';c.fillRect(x+10,y+5,10,2);c.fillRect(x+27,y+6,12,1.5);c.fillStyle='#c0392b';c.fillRect(x+12,y+13,9,2);c.fillStyle='rgba(0,0,0,.35)';for(let i=0;i<3;i++)c.fillRect(x+8+i*3,y+9,2,1);}
+function foodPic(c,x,y,w,h,k){c.fillStyle='#f3ece0';c.fillRect(x,y,w,h);c.strokeStyle='#222';c.lineWidth=1;c.strokeRect(x,y,w,h);const cx=x+w/2,cy=y+h/2;
+ if(k===0){c.fillStyle='#d9a441';rr(c,cx-14,cy-6,20,9,4);c.fill();c.fillStyle='#e8c25a';for(let i=0;i<5;i++)c.fillRect(cx-6+i*4,cy+2,2.5,8);c.fillStyle='#b9822c';c.fillRect(cx-12,cy-4,14,2);}
+ else if(k===1){c.fillStyle='#b8532f';rr(c,cx-16,cy-3,26,5,2.5);c.fill();c.fillStyle='#e8c25a';for(let i=0;i<4;i++)c.fillRect(cx-4+i*4,cy+3,2.5,7);}
+ else if(k===2){c.fillStyle='#e0b24c';rr(c,cx-12,cy-6,24,12,5);c.fill();c.fillStyle='#a8722a';c.fillRect(cx-8,cy-3,16,2);}
+ else{c.fillStyle='#e8e0cf';c.beginPath();c.ellipse(cx,cy+2,14,6,0,0,7);c.fill();c.fillStyle='#d98a1d';c.beginPath();c.ellipse(cx+2,cy,8,3.5,0,0,7);c.fill();c.fillStyle='#e8c25a';c.fillRect(cx-10,cy-8,2.5,6);c.fillRect(cx-6,cy-9,2.5,6);}}
+function drawShopWindow(c,x,y,w,h,bets,wine,i,t){c.save();c.beginPath();c.rect(x,y,w,h);c.clip();
+ c.fillStyle=bets?'#f3e6bf':wine?'#f1d9a8':'rgba(255,214,140,.25)';c.fillRect(x,y,w,h);
+ if(bets){c.fillStyle='#10161c';c.fillRect(x+3,y+3,w-6,15);for(let r=0;r<3;r++){c.fillStyle=(Math.floor(t*.8)+r+i)%3?'#2ecc71':'#f4d03f';c.fillRect(x+6,y+5+r*4,10+((r*17+i*9)%26),2);c.fillStyle='#ff4d5e';c.fillRect(x+w-22,y+5+r*4,12,2);}c.fillStyle='#2a3a52';c.fillRect(x+3,y+22,w-6,2);}
+ else if(wine){c.fillStyle='#7a5530';c.fillRect(x,y+12,w,2);c.fillRect(x,y+24,w,2);for(let k=0;k<9;k++){c.fillStyle=['#2d6a3a','#7b1e2e','#c9a227','#3a2a1a'][(k+i)%4];c.fillRect(x+3+k*8.5,y+3,4,9);c.fillRect(x+5+k*8.5,y+15,4,9);}}
+ const ph=(t*.35+i*.37)%1,cx=x+w*(.15+.7*(.5+.5*Math.sin(t*.5+i*2.1))),vis=(i+Math.floor(t/6))%3!==2;
+ if(vis){const px=bets?x+18+((i*29)%(w-36)):cx;c.fillStyle='rgba(20,18,24,.88)';c.beginPath();c.arc(px,y+h-17,4,0,7);c.fill();rr(c,px-5,y+h-13,10,13,2);c.fill();}
+ if(bets&&i===1){c.fillStyle='rgba(20,18,24,.88)';const qx=x+60+Math.sin(t*.7)*2;c.beginPath();c.arc(qx,y+h-17,4,0,7);c.fill();rr(c,qx-5,y+h-13,10,13,2);c.fill();}
+ c.fillStyle='rgba(255,255,255,.12)';c.fillRect(x,y,w,6);c.restore();c.strokeStyle='#111';c.lineWidth=1;c.strokeRect(x,y,w,h);}
 function drawShopBack(c,s){const top=s.y-s.h3;c.fillStyle='#2b1d17';c.fillRect(s.x,top,s.w,s.h);c.fillStyle='#4a3326';c.fillRect(s.x,s.y+s.h-s.h3,s.w,s.h3);
  c.fillStyle='#111';c.fillRect(s.x+110,s.y+s.h-s.h3+4,180,40);c.fillStyle='#ffd166';c.font='11px IBM Plex Mono';c.textAlign='left';['COD & CHIPS   9.20','SAUSAGE       4.10','PUDDING       4.50','CURRY SAUCE   2.00'].forEach((t,i)=>c.fillText(t,s.x+120,s.y+s.h-s.h3+14+i*9));
- c.fillStyle='#8d99a6';c.fillRect(s.x+30,s.y+s.h-s.h3+6,60,36);c.fillRect(s.x+310,s.y+s.h-s.h3+6,60,36);c.fillStyle='rgba(255,180,60,.4)';c.fillRect(s.x+34,s.y+s.h-s.h3+10,52,10);}
+ {const fy=s.y+s.h-s.h3+6;c.fillStyle='#111';c.fillRect(s.x+14,fy-3,86,42);c.fillRect(s.x+300,fy-3,86,42);foodPic(c,s.x+18,fy,38,34,0);foodPic(c,s.x+58,fy,38,34,1);foodPic(c,s.x+304,fy,38,34,2);foodPic(c,s.x+344,fy,38,34,3);c.fillStyle='#ffd166';c.font='7px IBM Plex Mono';c.textAlign='center';c.fillText('COD',s.x+37,fy+42);c.fillText('SAUSAGE',s.x+77,fy+42);c.fillText('PUDDING',s.x+323,fy+42);c.fillText('CURRY',s.x+363,fy+42);}}
 function drawShopFront(c,s){drawSolidPlain(c,s);c.fillStyle='rgba(180,220,255,.25)';c.fillRect(s.x+4,s.y-s.h3+4,s.w-8,s.h3-12);if(s.x===600){c.fillStyle='#ffcc33';c.font='22px Bebas Neue';c.textAlign='left';c.shadowColor='#ff9900';c.shadowBlur=12;c.fillText('GOLDEN FRYER',s.x+20,s.y-s.h3+24);c.shadowBlur=0;}}
 function drawCounter(c,s){drawSolidPlain(c,s);c.fillStyle='rgba(255,255,255,.25)';c.fillRect(s.x+10,s.y-s.h3+2,s.w-20,6);c.fillStyle='#333';c.fillRect(s.x+150,s.y-s.h3-6,30,10);c.fillStyle='#2ecc71';c.fillRect(s.x+153,s.y-s.h3-4,24,5);}
 function drawBusStop(c,s){c.fillStyle='rgba(150,190,220,.25)';c.fillRect(s.x,s.y-s.h3,s.w,s.h3);c.fillStyle='#223';c.fillRect(s.x,s.y-s.h3-6,s.w,8);c.fillRect(s.x,s.y-s.h3,4,s.h3+s.h);c.fillRect(s.x+s.w-4,s.y-s.h3,4,s.h3+s.h);c.fillStyle='#e74c3c';c.fillRect(s.x+s.w+8,s.y-s.h3-20,14,14);c.fillStyle='#fff';c.font='9px Inter';c.textAlign='center';c.fillText('BUS',s.x+s.w+15,s.y-s.h3-10);}
@@ -650,12 +719,41 @@ function drawCar(c,k){c.save();c.translate(k.x,k.y);const w=k.w||116,h=k.h||46;c
 /* ================= NPCs ================= */
 function mkNPC(id,name,look,x,y,o){return Object.assign({id,name,look,x,y,dir:{x:0,y:1},walk:0,speed:68,path:[],susp:0,stare:0,follow:0,close:0,state:'CALM',aware:250,sens:1,icon:null,present:true,stage:'IDLE',moving:false,engaged:false,glanceT:rnd(0,3)},o||{});}
 const QUEUE_SPOTS=[{x:810,y:240},{x:810,y:280},{x:810,y:320},{x:810,y:360},{x:810,y:400}];
-const WAIT_SPOTS=[{x:668,y:290},{x:690,y:390},{x:938,y:300},{x:930,y:392}];
+const WAIT_SPOTS=[{x:762,y:292},{x:752,y:392},{x:938,y:300},{x:930,y:392}];
 let queue=[],server={busy:null};
 function suspState(v){return v>=100?'FLEEING':v>=78?'FLIGHT_RISK':v>=50?'ALARMED':v>=25?'UNEASY':'CALM';}
 function stepPath(n,dt){n.moving=false;if(!n.path.length)return true;const t=n.path[0],dx=t.x-n.x,dy=t.y-n.y,d=Math.hypot(dx,dy),sp=n.speed*dt;if(d<=sp+.5){n.x=t.x;n.y=t.y;n.path.shift();return !n.path.length;}n.x+=dx/d*sp;n.y+=dy/d*sp;n.dir={x:dx/d,y:dy/d};n.moving=true;n.walk+=dt*n.speed/7;return false;}
 function bark(n,text,t=3.2){barks=barks.filter(b=>b.n!==n);barks.push({n,text,until:perfNow+t*1000});}
-function buildBriefingNPCs(){npcs=[mkNPC('founder','Del',LOOK.founder,400,166,{role:'The Founder'}),mkNPC('decoy','Jas',LOOK.decoy,150,384,{role:'The Decoy'}),mkNPC('stranger','Maureen',LOOK.stranger,580,440,{role:'The Concerned Stranger'}),mkNPC('vet','Ray',LOOK.vet,235,205,{role:'The Team Veteran'})];}
+
+const MUSIC_NAMES=['House stereo','Donk dance mix','Chill lounge'];
+function cycleBriefMusic(){P.heard=P.heard||[];if(!P.heard.includes(P.briefMusic|0))P.heard.push(P.briefMusic|0);P.briefMusic=((P.briefMusic|0)+1)%3;if(!P.heard.includes(P.briefMusic))P.heard.push(P.briefMusic);if(P.heard.length>=3)unlock('audio');saveP();SFX.select();toast('Record player','Now playing: '+MUSIC_NAMES[P.briefMusic],'#ffb627');}
+const PL={w:128,h:76,r:3.1};
+function poolInit(){const balls=[],cols=['#f1c40f','#2980b9','#c0392b','#8e44ad','#e67e22','#27ae60','#7b241c','#111','#f1c40f','#2980b9','#c0392b','#8e44ad','#e67e22','#27ae60','#7b241c'];let k=0;const ax=84,ay=PL.h/2,dx=PL.r*1.75,dy=PL.r*2.04;
+ for(let col=0;col<5;col++)for(let row=0;row<=col;row++)balls.push({x:ax+col*dx,y:ay+(row-col/2)*dy,vx:0,vy:0,c:cols[k++%15]});
+ balls.push({x:30,y:PL.h/2+1,vx:0,vy:0,c:'#fafafa',cue:true});M.pool={balls,state:'idle',t:0,snd:0};}
+function poolBreak(){if(!M.pool)poolInit();const p=M.pool;if(p.state!=='idle'){toast('Pool table','The balls are already scattered. It gets re-racked next time you come in.','#ffb627');return;}
+ p.state='rolling';p.t=0;const cue=p.balls[p.balls.length-1];cue.vx=330;cue.vy=(Math.random()-.5)*16;SFX.clack();unlock('breaker');}
+function updatePool(dt){const p=M&&M.pool;if(!p||p.state!=='rolling')return;p.t+=dt;p.snd-=dt;const B=p.balls,r=PL.r,x0=6+r,x1=PL.w-6-r,y0=6+r,y1=PL.h-6-r;
+ for(let st=0;st<4;st++){const h=dt/4;for(const b of B){b.x+=b.vx*h;b.y+=b.vy*h;if(b.x<x0){b.x=x0;b.vx=Math.abs(b.vx)*.8;}if(b.x>x1){b.x=x1;b.vx=-Math.abs(b.vx)*.8;}if(b.y<y0){b.y=y0;b.vy=Math.abs(b.vy)*.8;}if(b.y>y1){b.y=y1;b.vy=-Math.abs(b.vy)*.8;}}
+  for(let i=0;i<B.length;i++)for(let j=i+1;j<B.length;j++){const a=B[i],c=B[j],dx=c.x-a.x,dy=c.y-a.y,d=Math.hypot(dx,dy);if(d<r*2&&d>.001){const nx=dx/d,ny=dy/d,ov=r*2-d;a.x-=nx*ov/2;a.y-=ny*ov/2;c.x+=nx*ov/2;c.y+=ny*ov/2;const rv=(c.vx-a.vx)*nx+(c.vy-a.vy)*ny;if(rv<0){a.vx+=rv*nx;a.vy+=rv*ny;c.vx-=rv*nx;c.vy-=rv*ny;if(p.snd<=0&&Math.abs(rv)>25){SFX.clack();p.snd=.07;}}}}}
+ const fr=Math.pow(.38,dt);let mv=0;for(const b of B){b.vx*=fr;b.vy*=fr;mv=Math.max(mv,Math.hypot(b.vx,b.vy));if(Math.hypot(b.vx,b.vy)<2.5){b.vx=0;b.vy=0;}}
+ if(mv<2.5||p.t>7){p.state='done';for(const b of B){b.vx=b.vy=0;}}}
+function drawPool(c,s){drawSolidPlain(c,s);const tx=s.x,ty=s.y-s.h3,w=s.w,h=s.h;c.fillStyle='#4a2f1a';c.fillRect(tx,ty,w,h);c.fillStyle='#1f7d4b';c.fillRect(tx+6,ty+6,w-12,h-12);c.fillStyle='rgba(255,255,255,.07)';c.fillRect(tx+6,ty+6,w-12,(h-12)*.4);
+ c.fillStyle='#0b0d0f';for(const[px,py]of[[tx+5,ty+5],[tx+w/2,ty+4],[tx+w-5,ty+5],[tx+5,ty+h-5],[tx+w/2,ty+h-4],[tx+w-5,ty+h-5]]){c.beginPath();c.arc(px,py,4.2,0,7);c.fill();}
+ c.strokeStyle='rgba(255,255,255,.25)';c.lineWidth=.8;c.beginPath();c.moveTo(tx+w*.28,ty+8);c.lineTo(tx+w*.28,ty+h-8);c.stroke();
+ if(!M.pool)poolInit();for(const b of M.pool.balls){c.fillStyle='rgba(0,0,0,.28)';c.beginPath();c.ellipse(tx+b.x+.8,ty+b.y+1.2,PL.r,PL.r*.8,0,0,7);c.fill();c.fillStyle=b.c;c.beginPath();c.arc(tx+b.x,ty+b.y,PL.r,0,7);c.fill();c.fillStyle='rgba(255,255,255,.55)';c.beginPath();c.arc(tx+b.x-.9,ty+b.y-.9,.8,0,7);c.fill();}}
+function drawRoulette(c,s){drawSolidPlain(c,s);const tx=s.x,ty=s.y-s.h3,w=s.w,h=s.h;c.fillStyle='#3a2412';c.fillRect(tx,ty,w,h);c.fillStyle='#1b6e44';c.fillRect(tx+4,ty+4,w-8,h-8);
+ const reds=[1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];for(let n=1;n<=36;n++){const col=(n-1)/3|0,row=2-((n-1)%3),x=tx+8+col*5.9,y=ty+10+row*9;c.fillStyle=reds.includes(n)?'#b5262c':'#15171b';c.fillRect(x,y,5.3,8.3);}
+ c.fillStyle='#e8e8e8';c.fillRect(tx+8,ty+37,70,.8);
+ const cx=tx+w-28,cy=ty+h/2,R=21,t=(perfNow||0)*.0014;c.fillStyle='#2a170a';c.beginPath();c.arc(cx,cy,R,0,7);c.fill();
+ for(let i=0;i<24;i++){const a0=t+i/24*Math.PI*2,a1=t+(i+1)/24*Math.PI*2;c.fillStyle=i===0?'#1e8a4a':i%2?'#15171b':'#b5262c';c.beginPath();c.moveTo(cx,cy);c.arc(cx,cy,R-3,a0,a1);c.closePath();c.fill();}
+ c.fillStyle='#d8b43c';c.beginPath();c.arc(cx,cy,6,0,7);c.fill();c.fillStyle='#8a6a14';c.beginPath();c.arc(cx,cy,2.2,0,7);c.fill();c.fillStyle='#fff';c.beginPath();c.arc(cx+Math.cos(-t*2.3)*(R-5),cy+Math.sin(-t*2.3)*(R-5),1.6,0,7);c.fill();}
+function drawRecordPlayer(c,s){drawSolidPlain(c,s);const tx=s.x,ty=s.y-s.h3,sp=(perfNow||0)*.004*(((P.briefMusic|0)===1)?1.8:1);c.fillStyle='#2b1c10';c.fillRect(tx+2,ty+2,s.w-4,s.h-4);
+ const cx=tx+22,cy=ty+s.h/2;c.fillStyle='#0e0e10';c.beginPath();c.arc(cx,cy,11,0,7);c.fill();c.strokeStyle='rgba(255,255,255,.12)';c.lineWidth=.6;for(const rr_ of[4,6,8,10]){c.beginPath();c.arc(cx,cy,rr_,0,7);c.stroke();}
+ c.fillStyle='#c0392b';c.beginPath();c.arc(cx,cy,3.6,0,7);c.fill();c.strokeStyle='#fff';c.lineWidth=.8;c.beginPath();c.moveTo(cx,cy);c.lineTo(cx+Math.cos(sp)*3.4,cy+Math.sin(sp)*3.4);c.stroke();
+ c.strokeStyle='#c9ccd1';c.lineWidth=1.3;c.beginPath();c.moveTo(tx+s.w-8,ty+6);c.lineTo(cx+9,cy-4);c.stroke();c.fillStyle='#c9ccd1';c.beginPath();c.arc(tx+s.w-8,ty+6,2.2,0,7);c.fill();c.fillStyle='#45e08a';c.beginPath();c.arc(tx+s.w-9,ty+s.h-7,1.5,0,7);c.fill();}
+function BRIEF_CREW(){return CASE==='cp'?['founder','decoy','vet']:['founder','decoy','stranger','vet'];}
+function buildBriefingNPCs(){npcs=[mkNPC('founder','Del',LOOK.founder,400,166,{role:'The Founder'}),mkNPC('decoy','Jas',LOOK.decoy,150,384,{role:'The Decoy'}),mkNPC('stranger','Maureen',LOOK.stranger,580,440,{role:'The Concerned Stranger'}),mkNPC('vet','Ray',LOOK.vet,235,205,{role:'The Team Veteran',cig:true})];if(CASE==='cp')npcs=npcs.filter(n=>n.id!=='stranger');}
 let mark=null,kev=null;
 function buildStreetNPCs(){
  queue=[];server={busy:null};
@@ -667,13 +765,49 @@ function buildStreetNPCs(){
  const rob=cust('rob','Rob',LOOK.c3,62,{x:-40,y:560,talk:()=>'Starving, me. Long shift.',orderName:'Sausage and chips!'});
  const pat=mkNPC('pat','Pat',LOOK.c4,300,560,{stage:'STROLL',speed:44,aware:180,talk:()=>'Can\'t stop, love, my programme\'s on.'});
  const lol=mkNPC('lol','Lol',LOOK.c5,1600,560,{stage:'BUS',dir:{x:0,y:1},aware:200,talk:()=>'Bus is late again. Always is, round here.'});
+ const dealer=mkNPC('dealer','Man on a bike',LOOK.dealer,884,818,{stage:'SCRIPT',aware:150,sens:.3,speed:62,bike:true,dir:{x:-1,y:0},talk:()=>'Mind your own business.'}),buyer=mkNPC('buyer','Passer-by',LOOK.buyer,-40,818,{present:false,stage:'SCRIPT',aware:150,sens:.3,speed:58,talk:()=>'Not now, mate.'});deal={ph:0,t:0,dealer,buyer};
+ const amb=(id,name,look,at,x,y,route)=>mkNPC(id,name,look,x,y,{present:false,stage:'AMB',spawnAt:at,route,aware:150,sens:.3,speed:58,talk:()=>'Not now, mate.'});
+ const punter=amb('punter','Punter',LOOK.c3,.4,240,545,[{x:540,y:530},{x:559,y:474}]),wIn=amb('wIn','Shopper',LOOK.c5,22,1700,545,[{x:1380,y:520},{x:1359,y:474}]),wOut=amb('wOut','Customer',LOOK.c1,40,1359,470,[{x:1345,y:530},{x:1100,y:548},{x:-60,y:548}]);
  const tyler=mkNPC('tyler','Tyler',LOOK.c6,420,520,{stage:'LOITER',aware:230,sens:1.3,talk:()=>'You filming summat? ...Nah. Didn\'t see nothing.'});
  queue.push(sharon,dev);
- npcs=[kev,mark,sharon,dev,rob,pat,lol,tyler];
+ npcs=[kev,mark,sharon,dev,rob,pat,lol,tyler,punter,wIn,wOut,dealer,buyer];
  cars=[{x:-200,y:742,dir:1,v:150,col:'#7a1f2b',w:110,h:44},{x:2300,y:700,dir:-1,v:130,col:'#1f4e79',w:120,h:46},{x:900,y:742,dir:1,v:170,col:'#2e2e2e',w:104,h:44}];
+ bus={x:2520,y:690,w:236,h:58,dir:-1,state:'WAIT',v:0,t:0};
  const mc={x:2200,y:642,dir:-1,v:0,col:'#b9bfc6',w:116,h:48,markCar:true,plate:true,state:'WAITING'};cars.push(mc);mark.car=mc;
  policeCar=null;officers=[];
 }
+let bus=null,deal=null;
+function updateDeal(dt){if(!deal||!M)return;const d=deal.dealer,b=deal.buyer;
+ if(deal.ph===0){d.moving=false;d.dir={x:-1,y:0};if(M.clock>=8){deal.ph=1;b.present=true;b.x=-40;b.y=818;b.path=[{x:846,y:818}];}}
+ else if(deal.ph===1){if(stepPath(b,dt)){deal.ph=2;deal.t=0;b.dir={x:-1,y:0};d.dir={x:1,y:0};b.moving=false;}}
+ else if(deal.ph===2){deal.t+=dt;d.moving=false;if(deal.t>3.6){deal.ph=3;d.speed=40;d.path=[{x:2140,y:818}];b.path=[{x:-80,y:818}];}}
+ else if(deal.ph===3){d.speed=Math.min(230,d.speed+170*dt);if(stepPath(d,dt)){d.present=false;}d.moving=false;if(stepPath(b,dt)){b.present=false;}if(!d.present&&!b.present)deal.ph=4;}}
+function drawBike(c,n){const f=(n.dir&&n.dir.x<0)?-1:1;c.save();c.translate(n.x,n.y);c.fillStyle='rgba(0,0,0,.3)';c.beginPath();c.ellipse(0,1,22,4,0,0,7);c.fill();
+ const wheel=x=>{c.fillStyle='#111';c.beginPath();c.arc(x,-7,7,0,7);c.fill();c.strokeStyle='#555';c.lineWidth=1;c.beginPath();c.arc(x,-7,4.4,0,7);c.stroke();c.fillStyle='#888';c.beginPath();c.arc(x,-7,1.4,0,7);c.fill();};
+ wheel(-15*f);wheel(15*f);
+ c.strokeStyle='#1d2433';c.lineWidth=2.4;c.beginPath();c.moveTo(-15*f,-7);c.lineTo(-4*f,-13);c.lineTo(8*f,-13);c.lineTo(15*f,-7);c.moveTo(8*f,-13);c.lineTo(12*f,-21);c.stroke();
+ c.fillStyle='#c9ccd1';rr(c,-6*f-(f<0?9:0),-12.5,9,7,1.5);c.fill();c.fillStyle='#2a6bff';c.fillRect(-4*f-(f<0?5:0),-9,5,1.4);
+ c.fillStyle='#16181d';rr(c,-13*f-(f<0?12:0),-16.5,12,3.5,1.5);c.fill();
+ c.strokeStyle='#222';c.lineWidth=1.6;c.beginPath();c.moveTo(9*f,-21.5);c.lineTo(14*f,-22.5);c.stroke();
+ c.restore();}
+function busBlocks(k){return bus&&bus.state!=='WAIT'&&bus.state!=='GONE'&&k.x>bus.x&&k.x-bus.x<bus.w/2+k.w/2+34&&Math.abs(k.y-bus.y)<50;}
+function updateBus(dt){if(!bus||!M)return;const lol=npcs.find(n=>n.id==='lol');
+ if(bus.state==='WAIT'){if(M.clock>=75){bus.state='ARRIVING';bus.v=170;}}
+ else if(bus.state==='ARRIVING'){bus.v=Math.max(22,Math.min(170,(bus.x-1650)*1.1));bus.x-=bus.v*dt;if(bus.x<=1652){bus.x=1650;bus.state='STOPPED';bus.t=M.clock;if(lol&&lol.present&&lol.stage==='BUS'&&!lol.engaged){lol.stage='AMB';lol.started=true;lol.speed=60;lol.path=[{x:1560,y:612},{x:1560,y:654}];bark(lol,'About time!',2);}}}
+ else if(bus.state==='STOPPED'){const done=!lol||lol.stage==='DEPARTED'||!lol.present||lol.stage!=='AMB';if(M.clock-bus.t>2&&(done||M.clock-bus.t>14)){bus.state='LEAVING';bus.v=0;}}
+ else if(bus.state==='LEAVING'){bus.v=Math.min(200,bus.v+90*dt);bus.x-=bus.v*dt;if(bus.x<-300)bus.state='GONE';}}
+function drawBus(c,k){c.save();c.translate(k.x,k.y);const w=k.w,h=k.h,sh=14;c.fillStyle='rgba(0,0,0,.35)';rr(c,-w/2+4,-h/2+7,w,h,9);c.fill();
+ c.fillStyle='#d99a00';rr(c,-w/2,-h/2+8,w,h-8,9);c.fill();
+ c.fillStyle='#ffc400';rr(c,-w/2,-h/2,w,h-sh,9);c.fill();
+ c.strokeStyle='rgba(120,80,0,.55)';c.lineWidth=1;const r=6;for(let gx=-w/2+88;gx<w/2-8;gx+=r*1.75){for(let gy=0,row=0;gy<h-sh-8;gy+=r*1.5,row++){const cx=gx+(row%2)*r*.87,cy=-h/2+8+gy;c.beginPath();for(let i=0;i<6;i++){const a=Math.PI/3*i+Math.PI/6;c.lineTo(cx+Math.cos(a)*r*.62,cy+Math.sin(a)*r*.62);}c.closePath();c.stroke();}}
+ c.fillStyle='#1b1d22';rr(c,-w/2+4,-h/2+4,w*.12,h-sh-8,4);c.fill();
+ c.fillStyle='#e8e8e8';c.fillRect(-w/2+w*.3,-h/2+h*.12,30,3);c.fillRect(w/2-60,-h/2+h*.12,22,3);
+ c.fillStyle='#16181c';c.fillRect(-w/2+2,h/2-sh+1,w-4,sh-3);
+ for(let i=0;i<9;i++){const wx=-w/2+36+i*23;c.fillStyle=i===0?'#8fd4ff':'rgba(120,160,190,.75)';c.fillRect(wx,h/2-sh+3,i===0?20:19,sh-7);}
+ c.fillStyle='#ffd25a';c.font='700 8px IBM Plex Mono';c.textAlign='left';c.fillText('42 PICCADILLY GDNS',-w/2+30,-h/2+h*.12+14);
+ c.fillStyle='#ffe9a0';c.fillRect(-w/2,-h/2+8,3,9);c.fillRect(-w/2,-h/2+h-sh-14,3,9);
+ c.fillStyle='#ff3b3b';c.fillRect(w/2-3,-h/2+8,3,9);c.fillRect(w/2-3,-h/2+h-sh-14,3,9);
+ c.fillStyle='#7a5d00';c.fillRect(-w/2+36,-h/2,20,3);c.restore();}
 function joinQueue(n){if(!queue.includes(n))queue.push(n);n.stage='QUEUING';}
 function updateQueue(){
  queue=queue.filter(q=>q.stage==='QUEUING'&&q.present);
@@ -684,6 +818,7 @@ let waitIdx=0;
 function custUpdate(n,dt){
  if(n.engaged){n.moving=false;return;}
  switch(n.stage){
+ case 'AMB':if(!n.started){if(M.clock>=n.spawnAt){n.started=true;n.present=true;n.path=n.route.map(p=>({...p}));}break;}if(stepPath(n,dt)){n.present=false;n.stage='DEPARTED';}break;
  case 'WAIT_SPAWN':if(M.clock>=n.spawnAt){n.present=true;n.stage='GOING_IN';n.path=navPath(n,DOOR_IN).slice(0);}break;
  case 'GOING_IN':if(stepPath(n,dt))joinQueue(n);break;
  case 'QUEUING':stepPath(n,dt);if(!n.moving)n.dir={x:0,y:-1};break;
@@ -696,7 +831,7 @@ function custUpdate(n,dt){
  case 'AT_CAR':n.moving=false;if(M.clock>=n.until){n.present=false;n.stage='DEPARTED';n.departedAt=M.clock;if(n.car){n.car.state='LEAVING';n.car.dir=-1;}R.carSolid.off=true;addTimeline(n.fled?'Subject fled in the silver estate':'Subject drove away in the silver estate');}break;
  }
 }
-function startLeaving(n){if(n.isMark){if(queue.includes(n))queue=queue.filter(q=>q!==n);if(server.busy===n)server.busy=null;n.stage='LEAVING';n.path=navPath(n,{x:1180,y:604});}else{n.stage='LEAVING';n.path=navPath(n,n.exit);}}
+function startLeaving(n){if(n.isMark){if(queue.includes(n))queue=queue.filter(q=>q!==n);if(server.busy===n)server.busy=null;n.stage='LEAVING';n.path=navPath(n,carSpot());}else{n.stage='LEAVING';n.path=navPath(n,n.exit);}}
 function markUpdate(dt){
  const m=mark;
  if(m.stage==='ABSENT'){
@@ -730,13 +865,13 @@ function updateSuspicion(n,dt){
  const prev=n.state;n.state=suspState(n.susp);
  if(n.state!==prev){if(n.state==='UNEASY'&&prev==='CALM')bark(n,n.isMark?'...':'You alright, mate?',2);if(n.state==='ALARMED')bark(n,n.isMark?'Got a problem?':'Back off, will you.',2.5);}
  if(n.isMark){M.markPeak=Math.max(M.markPeak,n.susp);
-  if(n.state==='FLIGHT_RISK'&&!n.abandoned&&['QUEUING','WAITING_FOOD','HOLDING_FOOD','WALKING'].includes(n.stage)&&Math.random()<dt*.4){n.abandoned=true;bark(n,'Forget this.');addTimeline('Subject became uneasy and abandoned his plans early');if(n.stage==='WALKING'){n.path=[{x:1180,y:604}];n.stage='LEAVING';}else startLeaving(n);}
+  if(n.state==='FLIGHT_RISK'&&!n.abandoned&&['QUEUING','WAITING_FOOD','HOLDING_FOOD','WALKING','SITTING'].includes(n.stage)&&Math.random()<dt*.4){n.abandoned=true;bark(n,'Forget this.');addTimeline('Subject became uneasy and abandoned his plans early');if(n.stage==='WALKING'){n.path=[carSpot()];n.stage='LEAVING';}else startLeaving(n);}
   if(n.state==='FLEEING'&&!n.fled&&n.stage!=='AT_CAR')markFlee();}
 }
-function markFlee(){const m=mark;if(m.fled)return;m.fled=true;m.engaged=false;m.speed=205;if(queue.includes(m))queue=queue.filter(q=>q!==m);if(server.busy===m)server.busy=null;m.stage='FLEEING';m.path=navPath(m,{x:1180,y:604});bark(m,'Get away from me!');SFX.alert();addTimeline('Subject fled on foot towards the silver estate');}
+function markFlee(){const m=mark;if(m.fled)return;m.fled=true;m.engaged=false;m.speed=205;if(queue.includes(m))queue=queue.filter(q=>q!==m);if(server.busy===m)server.busy=null;m.stage='FLEEING';m.path=navPath(m,carSpot());bark(m,'Get away from me!');SFX.alert();addTimeline('Subject fled on foot towards the silver estate');}
 
 /* ================= BRIEFING CHARACTERS & DIALOGUE ================= */
-const BRIEF={
+let BRIEF={
  founder:{name:'Del',role:'The Founder',bio:'Runs the team. Ex-youth worker. Dry, procedural, allergic to drama.',topics:[
   {id:'job',q:'What\'s the job tonight?',a:'Simple on paper. We watch who turns up, we confirm what we can, we talk to him calmly, and we hand everything to the police. Police decide what happens. Not us.'},
   {id:'plan',q:'Talk me through the plan.',a:'Head down the high street. The account said the Golden Fryer, about 18:35. Watch him arrive and note the time. If there\'s a car, look at the plate. Pick your moment to talk to him. When you want police, radio me — they\'re about twenty seconds out.'},
@@ -761,8 +896,8 @@ const BRIEF={
   {id:'fb',q:'Is this the man from the Facebook page?',req:['r_social'],a:'Could be. Same sort of coat. I wouldn\'t swear to it, not off that photo. I\'m not putting my name to a guess.'},
   {id:'plate',q:'Did you ever see his number plate?',req:['r_car'],a:'His plate? No. Why would I look at a plate? I just know the car.'}]},
  vet:{name:'Ray',role:'The Team Veteran',bio:'Ex-security, years on the team. Quiet, patient, never in a hurry. Gives straight advice.',topics:[
-  {id:'police',q:'When should I ring the police?',a:'Not too early and not too late. They need twenty seconds once you call, so ringing the second you see him leaves you waiting with nothing to show. Get your own eyes on him first — see him arrive, check the car. Then ring while he\'s waiting for his food, just before you walk over. They turn up as you\'re finishing. Don\'t tell him they\'re coming unless he asks.'},
-  {id:'moment',q:'When is the best time to speak to him?',a:'When he\'s ordered and is waiting for his food. He\'s stuck there, he\'s relaxed, and he\'ll put up with a few questions. In the queue, before he\'s ordered, he\'ll bolt after a couple of questions. Out on the street, away from the takeaway, he\'ll just say he\'s going for a walk. And once he\'s heading back to the car you get two answers before he panics. Pick your moment.'},
+  {id:'police',q:'When should I ring the police?',a:'Ring after your first question or two — not before. They need about twenty seconds once you call, so ringing before you\'ve spoken to him starts the clock while you\'re still getting your first answer, and you end up without enough on record. Get one or two statements first, then ring, so they turn up as you\'re finishing. Don\'t tell him they\'re coming unless he asks.'},
+  {id:'moment',q:'When is the best time to speak to him?',a:'When he\'s ordered and is waiting for his food. He\'s stuck there, he\'s relaxed, and he\'ll put up with a few questions. In the queue, before he\'s ordered, you\'ll get a couple of questions before he gets twitchy — ring after your first answer if you want to keep going. Out on the street, away from the takeaway, you only get one question before he runs unless the police are already coming, and he\'ll say he\'s going for a walk. And once he\'s heading back to the car you get two answers before he panics. Pick your moment.'},
   {id:'evidence',q:'What evidence should I be gathering?',a:'Three things. One: that he turned up, and when — watch him arrive, don\'t guess. Two: the car. Walk up to it while it\'s parked and look at the plate. Three: his own words, and what they match against the chat log. Add those to what\'s on the computer and you\'ve got something. Skip any one and your report gets thin.'},
   {id:'weight',q:'How much does each bit of evidence count for?',a:'What you see yourself and what\'s verified counts most. What he tells you is a statement — useful, but only his word. Maureen\'s cousin\'s bingo story is hearsay, and a Facebook group is allegation. Log them, but don\'t lean on them. A partial plate, “K7”, is a lead, not a match.'},
   {id:'calm',q:'How do I keep him calm?',a:'Slowly. Every question costs you some of his patience, so don\'t fire them off. Start easy — Thursdays, his food, what brings him here. Save the awkward ones for later. Never open with an accusation. If his suspicion is climbing, ease off, and let him answer without cutting in. The clock\'s on your side if you\'re calm.'},
@@ -770,7 +905,7 @@ const BRIEF={
   {id:'run',q:'What if he tries to run?',a:'Let him. No hands, no blocking the door, no standing in front of the car. If he drives off, step clear — he\'ll be quicker leaving than he was arriving. Make a note of what you saw and say it straight. If you grab him, the night\'s over and you\'re the one in trouble.'},
   {id:'confess',q:'If he admits it, is that enough?',a:'No. Nothing he says on a high street decides it on its own — neither a confession nor a slip-up. What counts is everything together: the chat log, the age that was stated, the meeting he arranged and turned up to, and whether the man in front of you is the same one behind the account. Police weigh that, not us.'},
   {id:'report',q:'What do I say to the police at the end?',a:'Only what you know, and say how you know it. “I saw him arrive at half six, I checked the plate, he told me this.” Don\'t pad it. Calling hearsay fact, or saying something you only assumed, costs you more than leaving it out.'},
-  {id:'phone',q:'What can I do with my phone?',a:'It\'s your lifeline. You can call Del, ring the police, or ask me what I\'d do right now. You can also open the evidence file — the clock stops while you read it, so use it. Check what you\'ve actually got before you walk over.'},
+  {id:'phone',q:'Can I get hold of you during the mission?',a:'Any time. Open your phone, hit “Ask Ray for advice”, and I\'ll tell you what I\'d do right now, given where he is. You can also call Del, ring the police, or open the evidence file. You can also open the evidence file — the clock stops while you read it, so use it. Check what you\'ve actually got before you walk over.'},
   {id:'mess',q:'What if it all goes wrong?',a:'It happens. Everything you do in this room is saved when you step out the door. If the approach falls apart you can go again from that point with the same notes, or start the whole night over. Learn what spooked him and try a different order.'}]}
 };
 function npcHasIntel(n){if(!n||n.id==='vet'||!M||M.introLock)return false;const C=BRIEF[n.id];if(!C)return false;
@@ -793,14 +928,14 @@ function openTalk(id){
 }
 
 /* ================= CASE COMPUTER ================= */
-const CHAT=[
+let CHAT=[
  {ts:'14 Sep 19:02',from:'BigNorm420',sum:'Opens the conversation. Asks whether the profile is local.',id:'c1',intel:['log_export']},
  {ts:'14 Sep 19:05',from:'Decoy profile',sum:'States age: 14 (matches profile bio).',id:'c2',intel:['log_export','log_age']},
  {ts:'14 Sep 19:06',from:'BigNorm420',sum:'Acknowledges the stated age and continues the conversation.',id:'c3',intel:['log_export','log_age']},
  {ts:'15 Sep 21:40',from:'BigNorm420',sum:'<span class="red">CONTENT REDACTED</span> Flagged by the team as sexual content. Preserved unaltered in the export for police; not reproduced here.',id:'c4',intel:['log_export','log_flagged'],flag:'r_flagged'},
  {ts:'16 Sep 20:11',from:'BigNorm420',sum:'Sends a photo of a silver estate car. Plate mostly cropped; “K7” visible.',id:'c5',intel:['log_export','car_photo'],flag:'r_car'},
  {ts:'17 Sep 18:02',from:'BigNorm420',sum:'Proposes meeting at the Golden Fryer on Thursday, “about 6:35”.',id:'c6',intel:['log_export','meet_arranged']}];
-const TABS={
+let TABS={
  overview:()=>`<h3>Case NH-014 — The Takeaway</h3><p>Team: <b>${esc(P.team)}</b>. Lead: Del.</p><p><b>Objectives</b></p><ol><li>Review the evidence and know its limits.</li><li>Observe who arrives at the Golden Fryer, and when.</li><li>Establish identity and attendance from what you can see and hear.</li><li>Record his account accurately — every word.</li><li>Hand over to police with an accurate report.</li></ol><p><b>Conduct</b>: no physical contact, no blocking, no threats. He is free to leave. Police decide any outcome.</p><p style="color:#7fb59a">Tip: open each record to log it. Some records unlock new questions in the room.</p>`,
  suspect:()=>`<h3>Suspect file</h3>${SUSPECT_HTML()}`+row('sp1','<b>Name & age</b>','“Norman P”, 68 — taken from his public profile. Found by matching the car in the chat photo and the Thursday check-ins: a lead, not a match. Unconfirmed: profiles lie.',{intel:['suspect_profile'],flag:'r_social'}),
  chat:()=>`<h3>Chat log — BigNorm420</h3><p style="color:#7fb59a;font-size:11px">Entries summarised by the team. The original export is hashed and unaltered.</p>`+CHAT.map(m=>row(m.id,`<span class="ts">${m.ts}</span> · <b>${esc(m.from)}</b>`,m.sum,m)).join(''),
@@ -824,12 +959,12 @@ function confirmStart(){const tot=Object.keys(INTEL).filter(k=>!['cctv','car_sce
 
 /* ================= STREET TALK ================= */
 function talkKev(){if(kev.state!=='CALM')return 'I\'m busy, mate. Order or don\'t.';addIntel('kev_regular');return 'Evening! Him in the grey coat? Thursday regular. Silver estate, cod and small chips, every week like clockwork.';}
-function talkNPC(n){if(n.isMark)return tryContact();let line=typeof n.talk==='function'?n.talk():'...';if(n.state==='ALARMED'||n.state==='FLIGHT_RISK')line='I\'m not talking to you.';else if(n.state==='UNEASY'&&n!==kev)line='Do I know you?';bark(n,line);n.dir={x:player.x-n.x,y:player.y-n.y};}
+function talkNPC(n){if(n.isMark)return tryContact();if(CASE==='cp')cpSpookCheck(n);let line=typeof n.talk==='function'?n.talk():'...';if(n.state==='ALARMED'||n.state==='FLIGHT_RISK')line='I\'m not talking to you.';else if(n.state==='UNEASY'&&n!==kev)line='Do I know you?';bark(n,line);n.dir={x:player.x-n.x,y:player.y-n.y};}
 
 /* ================= PHASE CONTROL ================= */
 function startBriefing(){newMission();CHK=null;officers=[];policeCar=null;cars=[];barks=[];S=null;CALL.queue=[];CALL.cur=null;$('stTrans').innerHTML='';$('sting').classList.add('hidden');$('call').classList.add('hidden');P.stats.played++;saveP();clearScreen();R=buildLiving();buildBriefingNPCs();player.x=200;player.y=500;player.dir={x:1,y:-1};STATE='BRIEFING_ROOM';
  cam.zt=clamp(Math.min(W/820,H/600)*1.12,.8,1.9);cam.zoom=cam.zt*.8;cam.x=400;cam.y=290;$('hud').classList.remove('hidden');if(IS_TOUCH)$('touch').classList.remove('hidden');announce('01','THE BRIEFING');renderHUD();M.introLock=true;const mid=M;setTimeout(()=>{if(M===mid&&STATE==='BRIEFING_ROOM')showIntro();},1500);}
-const INTRO=[()=>`Alright, ${P.name}. Glad you made it. Tonight's the Golden Fryer job.`,()=>'If you\'ve got time before you head out, check the computer — the whole case is on there. And speak to Jas properly about the chats.',()=>'We\'ve also got a woman in from down t\'road, Maureen. Might be worth asking her any questions you\'ve got.',()=>'And have a word with Ray before you go. He\'s been doing this longer than any of us — he\'ll tell you when to ring the police, what evidence to get, and how to keep things calm.',Object.assign(()=>'Here\'s who we think he is. Jas found the page from the car and the Thursday check-ins, so it\'s a lead, not a match. Goes by Norman, profile says he\'s 68 — none of it\'s confirmed. And... I\'m sorry about the third one.',{photos:true}),()=>'It\'s all on the computer and on your phone if you need it. Door\'s behind you when you\'re ready — he\'s not due till about half six.'];
+let INTRO=[()=>`Alright, ${P.name}. Glad you made it. Tonight's the Golden Fryer job.`,()=>'If you\'ve got time before you head out, check the computer — the whole case is on there. And speak to Jas properly about the chats.',()=>'We\'ve also got a woman in from down t\'road, Maureen. Might be worth asking her any questions you\'ve got.',()=>'And have a word with Ray before you go. He\'s been doing this longer than any of us — he\'ll tell you when to ring the police, what evidence to get, and how to keep things calm. You can also phone him mid-mission — Ask Ray.',Object.assign(()=>'Here\'s who we think he is. Jas found the page from the car and the Thursday check-ins, so it\'s a lead, not a match. Goes by Norman, profile says he\'s 68 — none of it\'s confirmed. And... I\'m sorry about the third one.',{photos:true}),()=>'It\'s all on the computer and on your phone if you need it. Door\'s behind you when you\'re ready — he\'s not due till about half six.'];
 function showIntro(){let i=0,shown=0,timer=null;const C=BRIEF.founder;
  const done=()=>{clearInterval(timer);closeModal();M.introLock=false;INTRO.forEach(f=>M.hist.founder.push({t:f()}));toast('Controls',IS_TOUCH?'Joystick to move · USE to talk':'Move: WASD / arrows · Talk / use: E · Pause: Esc','#ffb627');};
  const page=()=>{const t=INTRO[i]();const ph=INTRO[i].photos;if(ph)addIntel('suspect_profile');shown=0;clearInterval(timer);
@@ -841,17 +976,17 @@ function showIntro(){let i=0,shown=0,timer=null;const C=BRIEF.founder;
  openModal('',{close:done,type:'intro'});page();}
 let CHK=null;
 function resetRunState(){officers=[];policeCar=null;cars=[];barks=[];S=null;CALL.queue=[];CALL.cur=null;paused=false;$('stTrans').innerHTML='';$('sting').classList.add('hidden');$('call').classList.add('hidden');}
-function enterApproach(){R=buildStreet();buildStreetNPCs();player.x=120;player.y=820;player.dir={x:1,y:0};player.moving=false;STATE='APPROACH';M.clock=0;cam.x=player.x;cam.y=player.y;announce('02','THE APPROACH');addTimeline('Team member arrived on the high street');setTimeout(()=>STATE==='APPROACH'&&toast('Controls',IS_TOUCH?'Joystick to move · USE to talk · STING next to the subject · PHONE for Del, police & evidence':'Move: WASD · Talk: E · Sting: F (next to him) · Phone: C · Pause: Esc','#ffb627'),3600);}
+function enterApproach(){if(CASE==='cp'){R=buildCarPark();buildCarParkNPCs();}else{R=buildStreet();buildStreetNPCs();}player.x=120;player.y=820;player.dir={x:1,y:0};player.moving=false;STATE='APPROACH';M.clock=0;cam.x=player.x;cam.y=player.y;announce('02','THE APPROACH');addTimeline('Team member arrived on the high street');setTimeout(()=>STATE==='APPROACH'&&toast('Ray','Stuck? Phone → Ask Ray for advice. I\'m on the end of the line.','#45e08a'),9500);setTimeout(()=>STATE==='APPROACH'&&toast('Controls',IS_TOUCH?'Joystick to move · USE to talk · STING next to the subject · PHONE for Del, police & evidence':'Move: WASD · Talk: E · Sting: F (next to him) · Phone: C · Pause: Esc','#ffb627'),3600);}
 function startApproach(){closeModal();try{CHK=structuredClone(M);}catch(e){CHK=null;}fadeTo(enterApproach);}
 function restartCheckpoint(){if(!CHK)return fadeTo(startBriefing);closeModal();fadeTo(()=>{resetRunState();clearScreen();M=structuredClone(CHK);$('hud').classList.remove('hidden');if(IS_TOUCH)$('touch').classList.remove('hidden');enterApproach();renderHUD();toast('Checkpoint restored','Back at the start of the approach. Your briefing notes are intact.','#45e08a');});}
 
 function hint(id,title,body,col){if(P.hints===false||!M||!M.hints||M.hints.has(id))return;M.hints.add(id);toast(title,body,col||'#3fd0ff');}
-function approachHints(){if(STATE!=='APPROACH'||!mark)return;
+function approachHints(){if(STATE!=='APPROACH'||!mark||CASE==='cp')return;
  if(M.clock>9)hint('go','Ray','Head for the Golden Fryer and watch for a silver estate. No need to rush.','#45e08a');
  if(M.seenMark&&mark.present)hint('see','Tip','That\'s him. Don\'t stare or stand too close — watch what he does. Phone → Ask Ray for advice.');
  if(mark.present&&dist(player,mark)<95&&!M.contact)hint('near','Tip',IS_TOUCH?'Tap USE to chat — easy questions first. Tap STING when you\'re ready to go formal. Sting answers are timed.':'E: chat — easy questions first. F: start the sting when you\'re ready. Sting answers are timed.');
  if(mark.present&&mark.susp>=40)hint('uneasy','Tip','He\'s getting uneasy. Step back and give him space.','#ffb627');
- if(mark.stage==='WAITING_FOOD'&&!M.police.requested&&!M.contact)hint('wait','Ray','He\'s waiting for his food — the best moment. Ring the police, then walk over and ask slowly.','#45e08a');
+ if(mark.stage==='WAITING_FOOD'&&!M.police.requested&&!M.contact)hint('wait','Ray','He\'s waiting for his food — the best moment. Walk over, ask an easy question or two, then ring the police.','#45e08a');
  if(['HOLDING_FOOD','LEAVING'].includes(mark.stage)&&!M.contact)hint('leaving','Ray','He\'s heading out — you\'ll only get a couple of answers if you speak now.','#45e08a');}
 
 function openSettings(back){const v=P.vol;
@@ -870,7 +1005,7 @@ function togglePause(){paused=!paused;if(paused){openModal(`<div class="panelbox
  else closeModal();}
 
 /* ================= CONTACT / STING ================= */
-const WINDOWS={WALKING:'walking towards the takeaway',QUEUING:'inside, before ordering',WAITING_FOOD:'waiting for his order',HOLDING_FOOD:'holding his food',LEAVING:'leaving the takeaway'};
+let WINDOWS={WALKING:'walking towards the takeaway',QUEUING:'inside, before ordering',WAITING_FOOD:'waiting for his order',HOLDING_FOOD:'holding his food',LEAVING:'leaving the takeaway'};
 function tryContact(){const m=mark,st=m.stage;
  if(m.engaged)return;
  if(st==='ORDERING'){m.susp=Math.min(100,m.susp+18);bark(m,'Give us a minute, I\'m ordering.');addTimeline('Approach attempted while subject was ordering — rebuffed');return;}
@@ -888,7 +1023,7 @@ function stingButton(){
  if(st==='ORDERING'||st==='COLLECT'){counterBusy();return;}
  if(!WINDOWS[st]){toast('Bad moment','He\'s heading off — too late for that.','#ff8a3d');}
  tryContact();}
-const MARK_CHAT=[
+let MARK_CHAT=[
  {id:'busy',q:'"Is it always this busy in here?"',run:()=>insideShop(mark)?['Thursdays, yeah. Always is.',{claim:'thursdays',stmt:'In casual chat, said Thursdays are always busy here'}]:['Dunno, mate. Probably.',null]},
  {id:'good',q:'"Is this place any good?"',run:()=>['Cod\'s decent. Don\'t bother with the curry sauce.',{stmt:'In casual chat, recommended the cod'}]},
  {id:'time',q:'"Got the time, mate?"',run:()=>['Er... '+fmtClock(M.clock,false)+'.',null]},
@@ -911,16 +1046,16 @@ function openMarkChat(){
  openModal('',{close:closeModal,type:'markchat'});render();}
 let S=null;
 function startSting(stage){
- const m=mark;M.contact=true;M.contacts++;M.contactStage=M.contactStage||stage;m.engaged=true;
+ const m=mark;M.contact=true;M.contacts++;if(M.contactAt==null)M.contactAt=M.clock;M.contactStage=M.contactStage||stage;m.engaged=true;
  const recon=M.contacts>1;
- const far=stage==='WALKING'&&!m.entered&&dist(m,DOOR_OUT)>200;
- const base={WALKING:[60,5,'Eh? Do I know you?'],QUEUING:[60,6,'I\'m in the queue, mate. What do you want?'],WAITING_FOOD:[82,3,'What\'s this about? I\'m just waiting on my food.'],HOLDING_FOOD:[55,6,'Make it quick, my food\'s getting cold.'],LEAVING:[38,10,'I\'m going. What?']}[stage];
+ const far=CASE!=='cp'&&stage==='WALKING'&&!m.entered&&dist(m,DOOR_OUT)>200;
+ const base=(CASE==='cp'?{WALKING:[45,10,'Eh? Guys, please — what is this?'],SITTING:[58,8,'Guys please... what\'s this about? I\'m just sitting here.'],LEAVING:[30,12,'I\'m only going to my van, lads. What do you want?']}:{WALKING:[60,5,'Eh? Do I know you?'],QUEUING:[60,6,'I\'m in the queue, mate. What do you want?'],WAITING_FOOD:[82,3,'What\'s this about? I\'m just waiting on my food.'],HOLDING_FOOD:[55,6,'Make it quick, my food\'s getting cold.'],LEAVING:[38,10,'I\'m going. What?']})[stage];
  base[0]={QUEUING:28,WAITING_FOOD:92,LEAVING:45}[stage]??base[0];base[1]={QUEUING:22,WAITING_FOOD:0,LEAVING:30}[stage]??base[1];
  if(stage==='LEAVING')base[2]='Whoa — what? I\'m going to my car. What do you want?';
  if(far){base[0]=18;base[1]=12;base[2]='Eh? I\'m just out for a walk, mate. What do you want?';}
  S={stage,far,patience:recon?Math.min(base[0],25):base[0],calmUsed:0,turns:0,phase:'reply',text:'',shown:0,hold:0,choices:[],deadline:0,lastEv:null,qs:0,
-  fuse:far?0:stage==='QUEUING'?2:null,          // questions he'll tolerate before bolting (unless police already called)
-  boltAfter:stage==='LEAVING'?2:null};          // answers before he panics and runs, police or not
+  fuse:far?1:stage==='QUEUING'?2:CASE==='cp'?(stage==='SITTING'?3:1):null,          // questions he'll tolerate before bolting (unless police already called)
+  boltAfter:stage==='LEAVING'?2:(CASE==='cp'&&stage==='SITTING')?6:null};          // answers before he panics and runs, police or not
  m.susp=Math.min(100,m.susp+base[1]+(recon?15:0));
  const fx=player.x-m.x,fy=player.y-m.y,fd=Math.hypot(fx,fy)||1;m.dir={x:fx/fd,y:fy/fd};player.dir={x:-fx/fd,y:-fy/fd};
  STATE='STING';$('sting').classList.remove('hidden');$('touch').classList.add('hidden');$('prompt').classList.add('hidden');
@@ -930,6 +1065,7 @@ function startSting(stage){
  if(far&&!recon){recordClaim({claim:'walk',excuse:'walk',stmt:'Said he was just out for a walk'});transcript('team','Del','He\'s nowhere near the takeaway yet. He\'s got a story ready — careful, he\'s jumpy.');}
  if(stage==='QUEUING')transcript('team','Del','He\'s not even ordered. He\'s twitchy — keep it short.');
  if(stage==='LEAVING')transcript('team','Del','He\'s heading for the car. You\'ve got seconds, not minutes.');
+ if(CASE==='cp'&&stage==='SITTING')transcript('team','Del','He spooks quickly. Ring the police now — or after your first question — then keep it tight.');
 }
 function transcript(kind,who,text){M.transcript.push({kind,who,text,t:fmtClock(M.clock)});const box=$('stTrans');if(box){const d=document.createElement('div');d.className='l '+kind;d.innerHTML=`<small>${fmtClock(M.clock,false)}</small> <b>${esc(who)}:</b> ${esc(text)}`;box.appendChild(d);box.scrollTop=box.scrollHeight;}}
 function markSay(text,after){S.phase='reply';S.text=text;S.shown=0;S.hold=0;S.after=after||null;$('stWho').textContent='THE MARK';$('stChoices').innerHTML='';ACTIVE_CHOICES=[];transcript('mark','Mark',text);}
@@ -937,7 +1073,7 @@ function recordClaim(o){if(!o)return;if(o.claim)M.claims.add(o.claim);if(o.stmt)
 const EXCUSES={food:'I\'m just here for some food, mate',walk:'Just gone for a walk',chips:'Only getting my tea',hacked:'Account was hacked',mate:'A mate uses my phone',thought18:'Thought she was 18',warn:'Came to warn her',report:'Was going to report it',setup:'It\'s a set-up',banter:'It was just banter'};
 function logExcuse(k){if(!M.excusesThis.includes(k))M.excusesThis.push(k);if(!P.excuses.includes(k)){P.excuses.push(k);saveP();const NX=Object.keys(EXCUSES).length;toast('Excuse logged · '+P.excuses.filter(x=>EXCUSES[x]).length+'/'+NX,EXCUSES[k],'#b48bff');if(Object.keys(EXCUSES).every(x=>P.excuses.includes(x)))unlock('bingo');}}
 const C=k=>M.claims.has(k);
-const TOPICS=[
+let TOPICS=[
  {id:'name',q:'"Can I ask your name?"',run(){if(mark.susp>60)return['Why would I tell you that? No.',{stmt:'Refused to give his name'}];return['...Norman. Why?',{claim:'name',stmt:'Gave his first name as Norman'}];}},
  {id:'why',q:'"What brings you down here tonight?"',run(){if(S&&S.far)return['I told you. I\'m out for a walk. Bit of fresh air.',{claim:'walk',excuse:'walk',stmt:'Repeated that he was just out for a walk'}];if(['HOLDING_FOOD','LEAVING'].includes(S&&S.stage))return['Just been getting my tea. First time I\'ve been in there, actually.',{claim:'first_time',excuse:'chips',stmt:'Said he was only getting his tea and that it was his first visit'}];return['I\'m just here for some food, mate. First time I\'ve been in here, actually.',{claim:'first_time',excuse:'food',stmt:'Said he was just here for some food and that it was his first visit'}];}},
  {id:'car',q:'"Is the silver estate outside yours?"',req:()=>hasIntel('car_scene')||hasIntel('obs_car_exit'),run(){if(mark.susp<55)return['Yeah, it\'s mine. So what?',{claim:'admit_car',stmt:'Confirmed the silver estate is his',intel:'admit_car'}];return['Never seen it before in my life.',{claim:'deny_car',stmt:'Denied owning the silver estate'}];}},
@@ -945,10 +1081,11 @@ const TOPICS=[
  {id:'hackwhen',q:'"When did you notice it was hacked? Did you report it?"',good:true,req:()=>C('hacked'),run(){return['I dunno... few weeks? Didn\'t report it. Didn\'t think it mattered.',{stmt:'Could not say when the hack happened; did not report it'}];}},
  {id:'phone',q:'"Does anyone else use your phone?"',good:true,req:()=>C('hacked'),run(){return['My mate borrows it sometimes. Could\'ve been him, couldn\'t it?',{claim:'mate',excuse:'mate',stmt:'Suggested a friend who borrows his phone could have sent the messages'}];}},
  {id:'meet',q:'"Were you expecting to meet anyone here around 18:35?"',req:()=>hasIntel('meet_arranged'),run(){if(C('hacked')||C('thought18')||C('banter'))return['Alright — I came to warn her. Them chats are dangerous. A kid shouldn\'t be online like that.',{claim:'warn',excuse:'warn',stmt:'Said he came to the takeaway to warn the person he had been messaging'}];return['Meet someone? No. I told you, I\'m getting chips.',{claim:'no_meet',stmt:'Denied arranging to meet anyone'}];}},
+ {id:'chatnow',q:'"That account said it would be here tonight — and here you are. How come?"',req:()=>hasIntel('meet_arranged'),run(){if(S&&S.stage==='WALKING')return['I wasn\'t going in there. I\'m just out for a walk — it\'s a free country.',{claim:'walk',excuse:'walk',stmt:'Said he was not going to the takeaway and was just out for a walk'}];if(C('hacked'))return['I told you, that account\'s been hacked. Whoever wrote that, it wasn\'t me. I just fancied chips.',{claim:'coincidence',stmt:'Said the arranged meeting was written by whoever hacked the account and his being here is coincidence'}];return['It\'s a Thursday. I get chips on a Thursday. That\'s a coincidence, that is.',{claim:'coincidence',stmt:'Said being at the takeaway on the arranged night was a coincidence'}];}},
  {id:'age',q:'"The profile that account spoke to said they were 14."',req:()=>hasIntel('log_age'),run(){return['I thought she was eighteen. Them profiles lie about everything.',{claim:'thought18',excuse:'thought18',stmt:'Said he believed the person was 18'}];}},
  {id:'flag',q:'"One message from that account was flagged as sexual. It\'s preserved."',req:()=>hasIntel('log_flagged'),run(){return['That? Just banter. Didn\'t mean anything by it.',{claim:'banter',excuse:'banter',stmt:'Described the flagged message as “banter”'}];}}
 ];
-const CONTRAS=[
+let CONTRAS=[
  {id:'c_regular',when:()=>C('first_time')&&(hasIntel('kev_regular')||hasIntel('stranger_seen')),ev:()=>hasIntel('kev_regular')?'kev_regular':'stranger_seen',q:()=>hasIntel('kev_regular')?'Cite Kev: staff know a Thursday regular in a silver estate.':'Cite Maureen: she\'s seen a man in a grey coat here most Thursdays.',score:6,a:'...Lots of people have silver cars.',stmt:'Did not explain a firsthand account of a Thursday regular, after saying it was his first visit'},
  {id:'c_selfregular',when:()=>C('first_time')&&C('thursdays'),q:()=>'"Earlier you told me Thursdays are always this busy in here."',score:6,a:'...I meant generally. Everyone knows that.',stmt:'Had implied in casual chat that he comes on Thursdays, after saying it was his first visit'},
  {id:'c_social',when:()=>C('first_time')&&hasIntel('social_posts'),ev:()=>'social_posts',weak:true,q:()=>'Cite “Norman P” check-ins here (unverified).',score:1,a:'That\'s not even me. Loads of Normans about.',stmt:'Denied the social media check-ins'},
@@ -977,7 +1114,7 @@ function showStingChoices(){lockInput(300);S.phase='choose';S.choices=buildSting
  $('stChoices').querySelectorAll('.opt').forEach(b=>{b.onclick=()=>pickSting(+b.dataset.i);b.onmouseenter=()=>{S.lastEv=S.choices[+b.dataset.i].ev||null;renderStingSide();};});
  ACTIVE_CHOICES=S.choices.map((o,i)=>()=>pickSting(i));renderStingSide();}
 function pickSting(i){if(STATE!=='STING'||S.phase!=='choose')return;const o=S.choices[i];if(!o)return;SFX.select();S.phase='busy';ACTIVE_CHOICES=[];$('stChoices').innerHTML='';S.lastEv=o.ev||null;if(!o.noTranscript)transcript('you',P.name,o.text);S.turns++;
- if(o.q){S.qs++;if(S.fuse!=null&&!M.police.requested&&S.qs>S.fuse){addTimeline('Subject bolted when pressed with another question');markSay(S.far?'I said I\'m out for a walk! I\'m not doing this.':'Nah. I\'m not standing here for this.',()=>stingFlee());return;}}
+ if(o.q){S.qs++;if(S.fuse!=null&&!M.police.requested&&S.qs>S.fuse){addTimeline('Subject bolted when pressed with another question');markSay(CASE==='cp'?'You are harassing me here, lads! Guys please — I\'m off!':S.far?'I said I\'m out for a walk! I\'m not doing this.':'Nah. I\'m not standing here for this.',()=>stingFlee());return;}}
  o.fn();}
 function cost(p,s){S.patience-=p;mark.susp=clamp(mark.susp+s,0,100);M.markPeak=Math.max(M.markPeak,mark.susp);}
 function doTopic(t){M.asked.add(t.id);const[line,o]=t.run();recordClaim(o);M.goodQs+=1;cost(t.good?5:7,2);markSay(line);}
@@ -997,9 +1134,9 @@ function doGrab(){M.conduct+=3;transcript('team','Del','That\'s it — we\'re do
 function doEndContact(){S.patience=0;transcript('you',P.name,'(steps back)');markSay('Right. I\'m off.',()=>stingWalkOff());}
 function stingTimeout(){transcript('you',P.name,'(hesitates)');S.phase='busy';ACTIVE_CHOICES=[];$('stChoices').innerHTML='';cost(6,0);markSay(S.patience<20?'Well? I haven\'t got all night.':'Well? Spit it out.');}
 function afterReply(){if(S.after){const f=S.after;S.after=null;f();if(STATE!=='STING')return;}
- if(S.boltAfter!=null&&S.qs>=S.boltAfter){markSay('That\'s it — I\'m going! Get away from me!',()=>stingFlee());return;}
+ if(S.boltAfter!=null&&S.qs>=S.boltAfter){markSay(CASE==='cp'?'Guys please — that\'s enough! I\'m going!':'That\'s it — I\'m going! Get away from me!',()=>stingFlee());return;}
  if(mark.susp>=100){stingFlee();return;}
- if(S.patience<=0){markSay('Right, I\'m done here. I\'m going.',()=>stingWalkOff());return;}
+ if(S.patience<=0){markSay(CASE==='cp'?'Guys, please. You are harassing me here, lads. I\'m going.':'Right, I\'m done here. I\'m going.',()=>stingWalkOff());return;}
  showStingChoices();}
 function endSting(){mark.engaged=false;$('sting').classList.add('hidden');if(IS_TOUCH)$('touch').classList.remove('hidden');ACTIVE_CHOICES=[];S=null;}
 function stingWalkOff(){if(STATE!=='STING')return;addTimeline('Subject ended the conversation and walked off');endSting();STATE='APPROACH';if(!['LEAVING','AT_CAR','DEPARTED','FLEEING'].includes(mark.stage))startLeaving(mark);}
@@ -1224,12 +1361,12 @@ const FAIL_TEXT={
  CONDUCT:['Operation called off','Del pulled the plug. Grabbing at someone ends the operation: it puts people at risk and compromises the evidence. The team doesn\'t lay hands on anyone.']};
 function failMission(reason){if(STATE==='MISSION_FAILED'||STATE==='MISSION_COMPLETE')return;if(STATE==='STING')endSting();closeModal();STATE='MISSION_FAILED';M.fail=reason;SFX.fail();P.stats.failed++;if(reason==='FLED')unlock('runner');saveP();
  const[t,d]=FAIL_TEXT[reason];setTimeout(()=>showResults(true,t,d),reason==='CONDUCT'?400:1200);}
-function finishMission(){STATE='MISSION_COMPLETE';const sc=computeScore();M.score=sc;P.stats.completed++;P.stats.best=Math.max(P.stats.best,sc.total);
+function finishMission(){STATE='MISSION_COMPLETE';const sc=computeScore();M.score=sc;P.stats.completed++;P.stats.best=Math.max(P.stats.best,sc.total);if(CASE==='cp')P.cb2=Math.max(P.cb2|0,sc.total);else P.cb1=Math.max(P.cb1|0,sc.total);
  unlock('kingpin');if(!M.contact)unlock('notHim');if(M.contact&&M.markPeak<=10)unlock('calm');if(sc.total>=sc.max)unlock('bang');if(M.result.o==='RELEASED')unlock('notEnough');saveP();SFX.win();
  $('call').classList.add('hidden');const[t,d]=OUT_TEXT[M.result.o];showResults(false,t,d);}
 
 function debriefTips(failed){const t=[],r=M.result;
- const talk=['founder','decoy','stranger','vet'].filter(c=>!M.hist[c].length).map(c=>BRIEF[c].name);
+ const talk=BRIEF_CREW().filter(c=>!M.hist[c].length).map(c=>BRIEF[c].name);
  if(talk.length)t.push(`You didn't speak to ${talk.join(', ')} in the briefing. Jas and Maureen unlock evidence and questions; Ray explains how to time the night.`);
  if(M.read.size<8)t.push(`You opened ${M.read.size} case-file records. Opening every record logs the evidence and unlocks new questions in the room.`);
  if(!hasIntel('attended')&&!M.attendedTime)t.push('You never saw him arrive. Watch near the takeaway so his arrival time is observed, not guessed.');
@@ -1237,7 +1374,8 @@ function debriefTips(failed){const t=[],r=M.result;
  if(!M.contact)t.push('You never spoke to him. Without his own words there is nothing to compare to the chat log.');
  else{if(['WALKING','QUEUING','HOLDING_FOOD','LEAVING'].includes(M.contactStage))t.push(`You approached him while he was ${WINDOWS[M.contactStage]}. The best window is when he\'s waiting for his food.`);
   if(M.statements.length<3)t.push(`You recorded ${M.statements.length} statement${M.statements.length===1?'':'s'}. Ask slowly, easy questions first, and let him answer.`);}
- if(!M.police.requested&&(M.contact||failed))t.push('You never rang the police. Ring them while he\'s waiting for his food, just before you walk over — they need about twenty seconds.');
+ if(!M.police.requested&&(M.contact||failed))t.push('You never rang the police. Ring after your first question or two — they need about twenty seconds, so they arrive as you finish.');
+ if(M.police.requested&&M.contactAt!=null&&M.police.at<=M.contactAt)t.push('You rang the police before speaking to him, so the clock was running while you were still getting your first answer. Ask a question or two first, then ring.');
  if(M.overstate>0)t.push(`${M.overstate} claim${M.overstate===1?'':'s'} in your report went further than the evidence. Say how you know each thing and leave out assumptions.`);
  if(M.conduct>0)t.push('You crossed a conduct line. No blocking, no hands, no threats — he\'s free to leave.');
  if(r&&r.el&&r.el.identity<2)t.push('The identity link could be stronger. The car, the plate and his own words all help.');
@@ -1265,29 +1403,29 @@ function showResults(failed,title,desc){$('hud').classList.add('hidden');$('touc
  hydrateEmblems($('screens'));$('rAgain').onclick=()=>fadeTo(startBriefing);$('rTitle').onclick=toTitle;$('rProf').onclick=showProfile;if($('rChk'))$('rChk').onclick=restartCheckpoint;ACTIVE_CHOICES=failed&&CHK?[restartCheckpoint,()=>fadeTo(startBriefing),toTitle]:[()=>fadeTo(startBriefing),toTitle];}
 
 /* ================= ACHIEVEMENTS ================= */
-const ACH=[{id:'bingo',name:'Nonce Bingo',desc:'Hear every distinct excuse in the game (10).'},{id:'kingpin',name:'Kingpin Hunter',desc:'Complete the campaign (currently one mission: The Takeaway).'},{id:'notHim',name:'It\'s Not Him, It\'s Not Him',desc:'Finish a mission without ever initiating contact with the mark.'},{id:'calm',name:'Everyone Just Calm Down',desc:'Complete a mission with contact made and the mark\'s suspicion never above 10%.'},{id:'runner',name:'We\'ve Got a Runner',desc:'Fail a mission because the mark actually flees the scene.'},{id:'bang',name:'Banged to Rights',desc:'Achieve the maximum evidence and dialogue score (120/120).'},{id:'notEnough',name:'Not Enough Evidence on Him',desc:'Reach the ending where an arrest is followed by release on insufficient evidence.'}];
+const ACH=[{id:'audio',name:'Audiophile',desc:'Play every track on the briefing-room record player.'},{id:'fashion',name:'An Eye for Fashion',desc:'Change a piece of your outfit at the wardrobe.'},{id:'telly',name:'A Bit of Telly',desc:'Flick through every channel on the briefing-room TV.'},{id:'breaker',name:'Break Point',desc:'Break the rack at the pool table in the briefing room.'},{id:'bingo',name:'Nonce Bingo',desc:'Hear every distinct excuse in the game (10).'},{id:'kingpin',name:'Kingpin Hunter',desc:'Complete the campaign (currently one mission: The Takeaway).'},{id:'notHim',name:'It\'s Not Him, It\'s Not Him',desc:'Finish a mission without ever initiating contact with the mark.'},{id:'calm',name:'Everyone Just Calm Down',desc:'Complete a mission with contact made and the mark\'s suspicion never above 10%.'},{id:'runner',name:'We\'ve Got a Runner',desc:'Fail a mission because the mark actually flees the scene.'},{id:'bang',name:'Banged to Rights',desc:'Achieve the maximum evidence and dialogue score (120/120).'},{id:'notEnough',name:'Not Enough Evidence on Him',desc:'Reach the ending where an arrest is followed by release on insufficient evidence.'}];
 function unlock(id){if(P.ach[id])return;P.ach[id]=Date.now();saveP();if(M)M.newAch.push(id);const a=ACH.find(x=>x.id===id);SFX.ach();toast('★ Achievement unlocked',a.name,'#ffd60a');}
 
 /* ================= TITLE / CUSTOMISE / PROFILE ================= */
 function toTitle(){STATE='TITLE';R=null;closeModal();$('hud').classList.add('hidden');$('sting').classList.add('hidden');$('call').classList.add('hidden');$('touch').classList.add('hidden');$('prompt').classList.add('hidden');
- showScreen(`<div class="screen" id="title"><h1>NONCE<br>HUNTER</h1><div class="sim">SIMULATOR</div><div class="tag">CASE NH-014 · THE TAKEAWAY</div><div class="menu">${P.reg?'<button class="btn primary" id="tS">Start mission — The Takeaway</button><button class="btn" id="tProf">Profile & achievements</button><button class="btn" id="tE">Team name & emblem</button><button class="btn" id="tSet">Settings — sound & hints</button>':''}</div>${P.reg?`<div class="teamline">${teamBadge(28)}<span><b style="color:#fff">${esc(P.name)}</b> · ${esc(P.team)}</span></div>`:""}<div style="position:absolute;bottom:34px;max-width:640px;color:#8b93a1;font-size:11px;line-height:1.45;text-align:center;padding:0 14px"><b style="color:#c9ced8">Content note:</b> a work of fiction — every person, account and event is invented. Mature theme: an alleged adult contacting a child online. Nothing explicit is shown; records are summarised or redacted.</div><div style="position:absolute;bottom:12px;color:var(--dim);font-size:11px;text-align:center;padding:0 10px">WASD / arrows · E interact/chat · F start sting · C phone · 1–9 choose · Esc pause · M mute · \` debug</div></div>`);
- hydrateEmblems($('screens'));if(!P.reg){openSignIn('register');return;}$('tS').onclick=()=>fadeTo(startBriefing);$('tProf').onclick=showProfile;$('tE').onclick=()=>openSignIn('edit');$('tSet').onclick=()=>openSettings();ACTIVE_CHOICES=[()=>fadeTo(startBriefing),showProfile,()=>openSignIn('edit')];}
+ showScreen(`<div class="screen" id="title"><h1>NONCE<br>HUNTER</h1><div class="sim">SIMULATOR</div><div class="tag">CASE NH-014 · THE TAKEAWAY</div><div class="menu">${P.reg?''+caseButtons()+'<button class="btn" id="tProf">Profile & achievements</button><button class="btn" id="tE">Team name & emblem</button><button class="btn" id="tSet">Settings — sound & hints</button>':''}</div>${P.reg?`<div class="teamline">${teamBadge(28)}<span><b style="color:#fff">${esc(P.name)}</b> · ${esc(P.team)}</span></div>`:""}<div style="position:absolute;bottom:34px;max-width:640px;color:#8b93a1;font-size:11px;line-height:1.45;text-align:center;padding:0 14px"><b style="color:#c9ced8">Content note:</b> a work of fiction — every person, account and event is invented. Mature theme: an alleged adult contacting a child online. Nothing explicit is shown; records are summarised or redacted.</div><div style="position:absolute;bottom:12px;color:var(--dim);font-size:11px;text-align:center;padding:0 10px">WASD / arrows · E interact/chat · F start sting · C phone · 1–9 choose · Esc pause · M mute · \` debug</div></div>`);
+ hydrateEmblems($('screens'));if(!P.reg){openSignIn('register');return;}$('tS').onclick=()=>startCase('tk');$('tS2').onclick=()=>cpUnlocked()?startCase('cp'):toast('Locked','Score 50 or more on Case 1 — The Takeaway — to unlock the Car Park case.','#ff8a3d');$('tProf').onclick=showProfile;$('tE').onclick=()=>openSignIn('edit');$('tSet').onclick=()=>openSettings();ACTIVE_CHOICES=[()=>startCase('tk'),()=>$('tS2').onclick(),showProfile,()=>openSignIn('edit')];}
 const HAT_COLS=[null,'#141414','#f2f2f2','#c0392b','#1f4e9c','#2a7f62','#e0b13a','#7a3fa0','#e67e22','#6b5b4a'];
 const HAT_COL_NAMES=['Original','Black','White','Red','Royal blue','Racing green','Mustard','Purple','Orange','Tweed brown'];
 const HAIRS=['Bald','Short','Buzz cut','Long','Curly','Quiff','Mohawk','Ponytail','Bun','Side parting'];
 const HAIR_COLS=['#141414','#3b2a1e','#6b4423','#a0522d','#c9a35b','#e6dcc4','#8a8a8a','#b5302b','#2f5fa8','#7a3fa0'];
 const HAIR_COL_NAMES=['Black','Dark brown','Brown','Auburn','Blonde','Platinum','Grey','Ginger','Blue','Purple'];
 const TROUSERS=[{name:'Dark jeans',col:'#2b3a55'},{name:'Light jeans',col:'#6f8fb8'},{name:'Black joggers',col:'#1c1c1f',cuff:true},{name:'Grey joggers',col:'#7d7f85',cuff:true},{name:'Cargo pants',col:'#5b5a3a',pocket:true},{name:'Chinos',col:'#b89b6a'},{name:'Tracksuit bottoms',col:'#2a7f62',stripe:'#ffffff'},{name:'Shorts',col:'#3f5b7a',shorts:true},{name:'Work trousers',col:'#2c2f36',pocket:true},{name:'Red trackies',col:'#a4161a',stripe:'#ffffff'}];
-function lookFrom(d){return{outfit:OUTFITS[d.outfit],hat:d.hat,hatCol:HAT_COLS[d.hatCol||0],skin:'#e0b48f',hair:HAIR_COLS[d.hairCol??1],hs:d.hair??1,trousers:TROUSERS[d.trousers||0],legs:TROUSERS[d.trousers||0].col};}
+function lookFrom(d){return{outfit:OUTFITS[d.outfit],hat:d.hat,hatCol:HAT_COLS[d.hatCol||0],skin:SKINS[d.skin??1]||SKINS[1],hair:HAIR_COLS[d.hairCol??1],hs:d.hair??1,trousers:TROUSERS[d.trousers||0],legs:TROUSERS[d.trousers||0].col};}
 let custDraft=null;
-const LOOK_KEYS=['hat','hatCol','hair','hairCol','outfit','trousers'];
-function openWardrobe(){custDraft={name:P.name,team:P.team,emblem:P.emblem};LOOK_KEYS.forEach(k=>custDraft[k]=P[k]??(k==='hair'||k==='hairCol'?1:0));
+const LOOK_KEYS=['skin','hat','hatCol','hair','hairCol','outfit','trousers'];
+function openWardrobe(){custDraft={name:P.name,team:P.team,emblem:P.emblem};LOOK_KEYS.forEach(k=>custDraft[k]=P[k]??(k==='hair'||k==='hairCol'||k==='skin'?1:0));
  openModal(`<div class="panelbox" style="max-width:820px"><h2 style="font-size:34px;color:var(--amber)">Wardrobe</h2><div class="cust"><div><canvas id="cuP" width="480" height="560"></canvas><p style="font-size:11px;color:var(--dim)">Cosmetic only — no gameplay effect.</p></div><div>
  ${CUST_ROWS.map(r=>`<label>${r[1].toUpperCase()} (${r[2]().length})</label><div class="sel"><button class="btn" data-k="${r[0]}" data-d="-1">◀</button><span id="cv_${r[0]}"></span><button class="btn" data-k="${r[0]}" data-d="1">▶</button></div>`).join('')}
  <div style="display:flex;gap:10px;margin-top:14px"><button class="btn primary" id="wdS">Wear this</button><button class="btn" id="wdB">Cancel</button></div></div></div></div>`,{close:closeModal,type:'wardrobe'});
  const upd=()=>CUST_ROWS.forEach(r=>$('cv_'+r[0]).textContent=r[2]()[custDraft[r[0]]]);
  $('modal').querySelectorAll('.sel .btn[data-k]').forEach(b=>b.onclick=()=>{const k=b.dataset.k,n=CUST_ROWS.find(r=>r[0]===k)[2]().length;custDraft[k]=(custDraft[k]+(+b.dataset.d)+n)%n;SFX.blip();upd();});
- $('wdS').onclick=()=>{LOOK_KEYS.forEach(k=>P[k]=custDraft[k]);saveP();SFX.select();closeModal();bark(player,'Looking sharp.',1.6);};$('wdB').onclick=closeModal;upd();}
+ $('wdS').onclick=()=>{if(LOOK_KEYS.some(k=>(P[k]??(k==='hair'||k==='hairCol'||k==='skin'?1:0))!==custDraft[k]))unlock('fashion');LOOK_KEYS.forEach(k=>P[k]=custDraft[k]);saveP();SFX.select();closeModal();bark(player,'Looking sharp.',1.6);};$('wdB').onclick=closeModal;upd();}
 function openSignIn(mode){mode=typeof mode==='string'?mode:'edit';let emb=P.emblem;const reg=mode==='register';
  openModal(`<div class="panelbox" style="max-width:520px"><h2 style="font-size:34px;color:var(--amber)">${reg?'Join the team':'Team details'}</h2><p style="font-size:13px;color:var(--dim)">${reg?'Enter your name, team name and emblem. You can change them at any time from the banner in the briefing room.':'Changes are saved and carry over to every mission.'}</p>
  <div class="cust" style="grid-template-columns:1fr"><div><label>YOUR NAME</label><input id="siN" maxlength="16" value="${esc(P.reg?P.name:'')}" placeholder="Your name"><label>TEAM NAME</label><input id="siT" maxlength="18" value="${esc(P.reg?P.team:'')}" placeholder="Team name"><label>TEAM EMBLEM</label><div class="embs" id="siE"></div></div></div>
@@ -1297,8 +1435,8 @@ function openSignIn(mode){mode=typeof mode==='string'?mode:'edit';let emb=P.embl
  const go=()=>{P.name=($('siN').value||'').trim()||'Rookie';P.team=($('siT').value||'').trim()||'Night Watch';P.emblem=emb;P.reg=true;saveP();SFX.select();closeModal();
   if(reg||STATE==='TITLE')toTitle();else{renderHUD();bark(player,'Banner updated.',1.6);}};
  $('siGo').onclick=go;if($('siB'))$('siB').onclick=closeModal;ACTIVE_CHOICES=[go];$('siN').addEventListener('keydown',e=>{if(e.key==='Enter')go();});$('siT').addEventListener('keydown',e=>{if(e.key==='Enter')go();});setTimeout(()=>{try{$('siN').focus();}catch(e){}},50);}
-const CUST_ROWS=[['hat','Hat',()=>HATS],['hatCol','Hat colour',()=>HAT_COL_NAMES],['hair','Hair',()=>HAIRS],['hairCol','Hair colour',()=>HAIR_COL_NAMES],['outfit','Top',()=>OUTFITS.map(o=>o.name)],['trousers','Trousers',()=>TROUSERS.map(t=>t.name)]];
-function showCustomise(){STATE='CUSTOMISE';custDraft={name:P.name,team:P.team,hat:P.hat,hatCol:P.hatCol||0,hair:P.hair??1,hairCol:P.hairCol??1,outfit:P.outfit,trousers:P.trousers||0,emblem:P.emblem};
+const CUST_ROWS=[['skin','Skin tone',()=>SKIN_NAMES],['hat','Hat',()=>HATS],['hatCol','Hat colour',()=>HAT_COL_NAMES],['hair','Hair',()=>HAIRS],['hairCol','Hair colour',()=>HAIR_COL_NAMES],['outfit','Top',()=>OUTFITS.map(o=>o.name)],['trousers','Trousers',()=>TROUSERS.map(t=>t.name)]];
+function showCustomise(){STATE='CUSTOMISE';custDraft={name:P.name,team:P.team,skin:P.skin??1,hat:P.hat,hatCol:P.hatCol||0,hair:P.hair??1,hairCol:P.hairCol??1,outfit:P.outfit,trousers:P.trousers||0,emblem:P.emblem};
  showScreen(`<div class="screen" style="background:rgba(4,6,10,.95);overflow:auto;display:block"><div class="panelbox" style="margin:3vh auto"><h2 style="font-size:40px;color:var(--amber)">Character & team</h2><div class="cust"><div><canvas id="cuP" width="480" height="560"></canvas><p style="font-size:11px;color:var(--dim)">Cosmetic only — no gameplay effect.</p></div><div>
  <label>PLAYER NAME</label><input id="cuN" maxlength="16" value="${esc(custDraft.name)}">
  <label>TEAM NAME</label><input id="cuT" maxlength="18" value="${esc(custDraft.team)}">
@@ -1309,7 +1447,7 @@ function showCustomise(){STATE='CUSTOMISE';custDraft={name:P.name,team:P.team,ha
  EMBLEMS.forEach((e,i)=>{const k=emblemCanvas(i,44);k.style.width='';k.style.height='';k.title=e[0];k.onclick=()=>{custDraft.emblem=i;SFX.blip();upd();};$('cuE').appendChild(k);});
  document.querySelectorAll('.sel .btn[data-k]').forEach(b=>b.onclick=()=>{const k=b.dataset.k,n=CUST_ROWS.find(r=>r[0]===k)[2]().length;custDraft[k]=(custDraft[k]+(+b.dataset.d)+n)%n;SFX.blip();upd();});
  $('cuN').oninput=e=>custDraft.name=e.target.value;$('cuT').oninput=e=>custDraft.team=e.target.value;
- $('cuS').onclick=()=>{custDraft.name=(custDraft.name||'').trim()||'Rookie';custDraft.team=(custDraft.team||'').trim()||'Night Watch';Object.assign(P,custDraft);saveP();SFX.win();toast('Saved','Your look and team are stored on this device.');toTitle();};$('cuB').onclick=toTitle;upd();}
+ $('cuS').onclick=()=>{if(LOOK_KEYS.some(k=>(P[k]??(k==='hair'||k==='hairCol'||k==='skin'?1:0))!==custDraft[k]))unlock('fashion');custDraft.name=(custDraft.name||'').trim()||'Rookie';custDraft.team=(custDraft.team||'').trim()||'Night Watch';Object.assign(P,custDraft);saveP();SFX.win();toast('Saved','Your look and team are stored on this device.');toTitle();};$('cuB').onclick=toTitle;upd();}
 function renderCustPreview(){const c=$('cuP');if(!c||!custDraft)return;const g=c.getContext('2d');g.setTransform(1,0,0,1,0,0);g.clearRect(0,0,480,560);
  const sp=g.createRadialGradient(240,420,10,240,420,200);sp.addColorStop(0,'rgba(255,182,39,.18)');sp.addColorStop(1,'rgba(0,0,0,0)');g.fillStyle=sp;g.fillRect(0,0,480,560);
  g.save();g.translate(240,470);g.scale(6.6,6.6);const bl=(perfNow%3800)<130;drawPerson(g,{x:0,y:0,look:lookFrom(custDraft),dir:{x:0,y:1},moving:false,blink:bl});g.restore();
@@ -1328,15 +1466,24 @@ function openPhone(){
  const c3=()=>{closeModal();openEvidence();};
  const d5=()=>{closeModal();toast('Ray',vetTip(),'#45e08a');};
  ACTIVE_CHOICES=[a,b,c3,d5];$('ph1').onclick=a;$('ph2').onclick=b;$('ph3').onclick=c3;$('ph5').onclick=d5;$('ph4').onclick=closeModal;}
-function vetTip(){const pol=M.police,st=mark&&mark.stage;
- if(pol.requested)return 'Police are on their way. Keep it slow and calm, ask the easy questions, and don\'t tell him unless he asks.';
- if(!M.seenMark||!mark.present||st==='ABSENT')return 'Be patient. Stand near the takeaway and watch for a silver estate. Note the time he arrives, then check the plate once it\'s parked.';
- if(mark.car&&mark.car.state==='PARKED'&&!hasIntel('car_scene'))return 'Have a look at the car while it\'s parked — the plate is evidence. Don\'t stand over it for long, though.';
- if(['WALKING'].includes(st))return 'He\'s heading in. Don\'t rush him. If you speak out here he\'ll say he\'s just out for a walk. Wait until he\'s ordered.';
- if(['QUEUING','ORDERING'].includes(st))return 'He hasn\'t ordered yet. Speak to him now and he\'ll bolt after a couple of questions. Hang back, or ring the police first if you can\'t wait.';
- if(['WAITING_FOOD','COLLECT'].includes(st))return pol.requested?'This is the moment. Walk over calmly and ask slowly.':'This is the best moment. Ring the police now, then walk over calmly and ask slowly — easy questions first.';
- if(['HOLDING_FOOD','LEAVING','AT_CAR'].includes(st))return pol.requested?'He\'s about to leave. You\'ll only get a couple of answers — make them count and don\'t block him.':'He\'s leaving. Ring the police now if you\'re going to speak to him. You only get a couple of answers before he runs.';
- return 'Watch, don\'t hover. Check what you\'ve got in the evidence file before you decide.';}
+function vetTip(){if(CASE==='cp')return vetTipCP();const pol=M.police,st=mark&&mark.stage;M.vetSaid=M.vetSaid||new Set();M.vetN=(M.vetN|0)+1;
+ const seen=M.seenMark&&mark.present&&st!=='ABSENT',L=[];
+ if(pol.requested){L.push(['p1','Police are on their way. Keep it slow and calm, ask the easy questions, and don\'t mention them unless he asks.'],['p2','Don\'t crowd him and keep clear of his car. You\'re just a person having a chat.'],['p3','When they arrive, tell them what you saw and what he said — and say which is which.']);}
+ else if(!seen){L.push(['w1','Be patient. Stand near the takeaway and watch for a silver estate. Note the time he arrives.'],['w2','While you wait, open the evidence file on your phone and get your questions straight. The clock stops while you read.'],['w3','Stay a few metres back, look like you\'re waiting for a bus.']);}
+ else if(st==='WALKING')L.push(['k1','He\'s heading in. Don\'t rush him — out here he\'ll just say he\'s out for a walk. Wait until he\'s ordered.'],['k2','Keep your distance and watch where he goes. Arrival time is evidence.']);
+ else if(['QUEUING','ORDERING'].includes(st))L.push(['q1','He hasn\'t ordered yet. Speak now and he\'ll bolt after a few questions. Hang back until he\'s waiting for his food.'],['q2','If you can\'t wait: ask one easy question, then ring the police.']);
+ else if(['WAITING_FOOD','COLLECT'].includes(st))L.push(['f1','This is the best moment. Walk over calmly, ask an easy question or two, then ring the police.'],['f2','Start easy — Thursdays, his food. Save the awkward questions for later, and don\'t cut across his answers.'],['f3','Ask him why the chat said he\'d be here tonight. It\'s a good one now he\'s turned up.']);
+ else if(['HOLDING_FOOD','LEAVING','AT_CAR'].includes(st))L.push(['l1','He\'s leaving. You only get a couple of answers — make them count, and don\'t block him.'],['l2','If he runs, let him. Step clear and write down what you saw.']);
+ const out=[];
+ if(!M.contact&&seen&&!pol.requested)out.push(['g1','You haven\'t spoken to him yet. You need his own words on record — pick your moment and start with something easy.']);
+ if(M.contact&&M.statements.length<3)out.push(['g2','You\'ve got '+M.statements.length+' statement'+(M.statements.length===1?'':'s')+' so far. Aim for three or more before it ends.']);
+ if(M.contact&&!pol.requested)out.push(['g3','You\'ve spoken to him. Ring the police now if you haven\'t — they take about twenty seconds.']);
+ if(!M.attendedTime&&seen)out.push(['g4','Make sure you\'ve actually watched him arrive — the time matters for the timeline.']);
+ if(seen&&mark.car&&mark.car.state==='PARKED'&&!hasIntel('car_scene'))out.push(['car','Once, while it\'s parked: glance at the plate. Don\'t stand over it.']);
+ const all=[...L,...out];
+ for(const t of all)if(!M.vetSaid.has(t[0])){M.vetSaid.add(t[0]);return t[1];}
+ if(!all.length)return 'Watch, don\'t hover. Check what you\'ve got in the evidence file, then decide your next move.';
+ const pool=all.filter(t=>t[0]!=='car');const pick=(pool.length?pool:all)[M.vetN%(pool.length||all.length)];return pick[1];}
 function openRadioMenu(){openPhone();}
 let evTab='suspect';
 function openEvidence(){const wasPaused=paused;paused=true;
@@ -1358,19 +1505,19 @@ function showProfile(){STATE='PROFILE';const got=ACH.filter(a=>P.ach[a.id]).leng
 function getInteractables(){const list=[];if(!R)return list;
  for(const i of R.ints)if(!i.cond||i.cond())list.push(i);
  if(STATE==='BRIEFING_ROOM')for(const n of npcs)list.push({x:n.x,y:n.y,r:56,label:`Talk to ${n.name} (${n.role})`,act:()=>openTalk(n.id),npc:n});
- if(STATE==='APPROACH'){for(const n of npcs){if(!n.present||n.stage==='DEPARTED')continue;if(n.isMark){if(['ORDERING','COLLECT'].includes(n.stage))list.push({x:n.x,y:n.y,r:70,label:'He\'s talking to someone else right now',act:counterBusy,npc:n,mark:false});else if(!['FLEEING','AT_CAR'].includes(n.stage))list.push({x:n.x,y:n.y,r:70,label:'Chat to the man in the grey coat',act:openMarkChat,npc:n,mark:true});}else list.push({x:n.x,y:n.y,r:n===kev?78:50,label:'Talk to '+n.name,act:()=>talkNPC(n),npc:n});}
-  if(mark.car.state==='PARKED')list.push({x:1208,y:604,r:60,label:'Inspect the silver estate',act:()=>{addIntel('car_scene');addTimeline('Checked the silver estate: plate contains “K7”');bark(player,'Mud on the plate, but “K7” is clear in the middle. Same as the photo.');}});}
+ if(STATE==='APPROACH'){for(const n of npcs){if(!n.present||n.stage==='DEPARTED')continue;if(n.isMark){if(['ORDERING','COLLECT'].includes(n.stage))list.push({x:n.x,y:n.y,r:70,label:'He\'s talking to someone else right now',act:counterBusy,npc:n,mark:false});else if(!['FLEEING','AT_CAR'].includes(n.stage))list.push({x:n.x,y:n.y,r:70,label:CASE==='cp'?'Chat to the man on the bench':'Chat to the man in the grey coat',act:openMarkChat,npc:n,mark:true});}else list.push({x:n.x,y:n.y,r:n===kev?78:50,label:'Talk to '+n.name,act:()=>talkNPC(n),npc:n});}
+  if(mark.car.state==='PARKED')list.push({x:CASE==='cp'?mark.car.x:1208,y:CASE==='cp'?mark.car.y+44:604,r:60,label:CASE==='cp'?'Check the blue van':'Inspect the silver estate',act:()=>{addIntel('car_scene');addTimeline('Checked the silver estate: plate contains “K7”');bark(player,'Mud on the plate, but “K7” is clear in the middle. Same as the photo.');}});}
  return list;}
 let nearInt=null;
-function updatePrompt(){nearInt=null;if(UI.modal||!(STATE==='BRIEFING_ROOM'||STATE==='APPROACH')){$('prompt').classList.add('hidden');return;}let best=1e9;for(const i of getInteractables()){const d=dist(player,i)-(i.mark?40:0);if(dist(player,i)<i.r&&d<best){best=d;nearInt=i;}}
+function updatePrompt(){nearInt=null;if(UI.modal||!(STATE==='BRIEFING_ROOM'||STATE==='APPROACH')){$('prompt').classList.add('hidden');return;}let best=1e9;for(const i of getInteractables()){const d=dist(player,i)-(i.mark?40:0)-(i.pri?70:0);if(dist(player,i)<i.r&&d<best){best=d;nearInt=i;}}
  const p=$('prompt');if(nearInt){p.classList.remove('hidden');p.innerHTML=`<kbd>${IS_TOUCH?'USE':'E'}</kbd>${esc(nearInt.label)}`+(nearInt.mark?`&nbsp;&nbsp;<kbd style="background:var(--red);color:#fff">${IS_TOUCH?'STING':'F'}</kbd>Start the sting`:'');p.style.borderColor=nearInt.mark?'var(--red)':'var(--amber)';}else p.classList.add('hidden');}
 function interact(){if(nearInt){SFX.blip();nearInt.act();}}
-function renderHUD(){const h=$('hud');const sb=$('tSt');if(sb){sb.classList.toggle('hidden',STATE!=='APPROACH');sb.classList.toggle('off',!(mark&&STATE==='APPROACH'&&mark.present&&dist(player,mark)<95&&!['ORDERING','COLLECT'].includes(mark.stage)));}if(STATE!=='BRIEFING_ROOM'&&STATE!=='APPROACH'&&STATE!=='POLICE_ARRIVAL'&&STATE!=='STING'){return;}
+function renderHUD(){const h=$('hud');const sb=$('tSt');if(sb){sb.classList.toggle('hidden',STATE!=='APPROACH'&&STATE!=='BRIEFING_ROOM');{const tr=$('tR');if(tr)tr.classList.toggle('off',STATE==='BRIEFING_ROOM');}sb.classList.toggle('off',STATE==='BRIEFING_ROOM'||!(mark&&STATE==='APPROACH'&&mark.present&&dist(player,mark)<95&&!['ORDERING','COLLECT'].includes(mark.stage)));}if(STATE!=='BRIEFING_ROOM'&&STATE!=='APPROACH'&&STATE!=='POLICE_ARRIVAL'&&STATE!=='STING'){return;}
  const phaseName={BRIEFING_ROOM:'Phase 01 · Briefing',APPROACH:'Phase 02 · Approach',STING:'Phase 03 · Sting',POLICE_ARRIVAL:'Phase 03 · Police arriving'}[STATE];
  const clk=STATE==='BRIEFING_ROOM'?'BRIEFING':fmtClock(M.clock);const pol=M.police;
  const eta=pol.requested&&pol.state==='EN_ROUTE'?`POLICE ETA ${Math.max(0,Math.ceil(pol.arriveAt-M.clock))}s`:pol.state==='ARRIVING'?'POLICE ON SCENE':STATE==='APPROACH'?'Meeting time 18:35':'';
  let obj='';
- if(STATE==='BRIEFING_ROOM'){obj=[['Talk to the team — Del, Jas, Maureen, Ray',['founder','decoy','stranger','vet'].every(c=>M.hist[c].length)],['Review the case computer',M.read.size>=6],['Head out via the door, bottom left',false]].map(o=>`<li class="${o[1]?'done':''}">${o[0]}</li>`).join('');}
+ if(STATE==='BRIEFING_ROOM'){obj=[['Talk to the team — '+(CASE==='cp'?'Del, Jas, Ray':'Del, Jas, Maureen, Ray'),BRIEF_CREW().every(c=>M.hist[c].length)],['Review the case computer',M.read.size>=6],['Head out via the door, bottom left',false]].map(o=>`<li class="${o[1]?'done':''}">${o[0]}</li>`).join('');}
  else{const sc=mark.susp>=78?'var(--red)':mark.susp>=50?'#ff8a3d':mark.susp>=25?'var(--amber)':'var(--green)';
   obj=[['Watch him arrive & note the time',!!M.attendedTime],['Check the vehicle',hasIntel('car_scene')],['Make contact — or call it in',M.contact||pol.requested],['Don\'t spook him',mark.susp<50]].map(o=>`<li class="${o[1]?'done':''}">${o[0]}</li>`).join('')+(M.seenMark&&mark.present?`<div style="margin-top:6px">Subject: <b style="color:${sc}">${mark.state.replace('_',' ')}</b> · ${esc(WINDOWS[mark.stage]||mark.stage.toLowerCase().replace('_',' '))}<div class="meter"><i style="width:${mark.susp}%;background:${sc}"></i></div></div>`:'');}
  h.innerHTML=`<div class="tl">${'<span class="emb" data-e="'+P.emblem+'" data-s="34"></span>'}<div><b>${esc(P.team)}</b><small>${phaseName.toUpperCase()}</small></div></div><div class="tc"><div class="clk">${clk}</div><div class="eta">${eta}</div></div><div class="tr"><h4>Objectives</h4><ul style="margin:0;padding:0">${obj}</ul></div>`;hydrateEmblems(h);}
@@ -1381,11 +1528,11 @@ function updatePlayer(dt){if(player.dodge){const d=player.dodge;d.t+=dt;const q=
 let hudT=0;
 function update(dt){
  perfNow=performance.now();
- if(STATE==='BRIEFING_ROOM'){if(cam.zt)cam.zoom=lerp(cam.zoom,cam.zt,.06);for(const n of npcs)n.info=npcHasIntel(n);updatePlayer(dt);for(const n of npcs){const d=dist(player,n);if(d<160){const dx=player.x-n.x,dy=player.y-n.y;n.dir={x:dx/d,y:dy/d};}}cam.x=lerp(cam.x,clamp(player.x,W/2/cam.zoom,R.w-W/2/cam.zoom)||400,.1);cam.y=lerp(cam.y,clamp(player.y,H/2/cam.zoom,R.h-H/2/cam.zoom)||290,.1);if(R.w*cam.zoom<=W)cam.x=R.w/2;if(R.h*cam.zoom<=H)cam.y=R.h/2;}
+ if(STATE==='BRIEFING_ROOM'){if(cam.zt)cam.zoom=lerp(cam.zoom,cam.zt,.06);for(const n of npcs)n.info=npcHasIntel(n);updatePool(dt);updatePlayer(dt);for(const n of npcs){const d=dist(player,n);if(d<160){const dx=player.x-n.x,dy=player.y-n.y;n.dir={x:dx/d,y:dy/d};}}cam.x=lerp(cam.x,clamp(player.x,W/2/cam.zoom,R.w-W/2/cam.zoom)||400,.1);cam.y=lerp(cam.y,clamp(player.y,H/2/cam.zoom,R.h-H/2/cam.zoom)||290,.1);if(R.w*cam.zoom<=W)cam.x=R.w/2;if(R.h*cam.zoom<=H)cam.y=R.h/2;}
  if(['APPROACH','STING','POLICE_ARRIVAL'].includes(STATE)){
   M.clock+=dt;
   if(STATE==='APPROACH')updatePlayer(dt);else{player.moving=false;}
-  markUpdate(dt);updateQueue();for(const n of npcs){if(n.isMark||n===kev)continue;if(['STROLL','BUS','LOITER'].includes(n.stage)||(n.stage==='LEAVING'&&!n.orderName))ambientUpdate(n,dt);else custUpdate(n,dt);}
+  if(CASE==='cp')cpUpdate(dt);else{markUpdate(dt);updateQueue();updateBus(dt);updateDeal(dt);}for(const n of npcs){if(n.isMark||n===kev)continue;if(['STROLL','BUS','LOITER'].includes(n.stage)||(n.stage==='LEAVING'&&!n.orderName))ambientUpdate(n,dt);else custUpdate(n,dt);}
   if(STATE==='POLICE_ARRIVAL'&&mark.detained){mark.engaged=true;}
   for(const n of npcs){updateSuspicion(n,dt);if(n.shake>0)n.shake-=dt;
    if(n.present&&n.state!=='CALM'&&!n.engaged&&n.state!=='FLEEING'){n.glanceT-=dt;if(n.glanceT<0){n.glanceT=n.state==='UNEASY'?3.5:1.8;const dx=player.x-n.x,dy=player.y-n.y,d=Math.hypot(dx,dy)||1;if(!n.moving)n.dir={x:dx/d,y:dy/d};}}
@@ -1393,7 +1540,7 @@ function update(dt){
   if(!M.seenMark&&mark.present&&dist(player,mark)<420){M.seenMark=true;}
   approachHints();
   if(!hasIntel('attended')&&mark.present&&insideShop(mark)&&(insideShop(player)||dist(player,mark)<260)&&M.clock>5){M.attendedSeen=true;addIntel('attended',{title:'Subject seen inside the Golden Fryer (arrival time not observed)'});}
-  for(const k of cars){if(k.markCar){if(k.state==='LEAVING'){const ahead=(k.x-player.x)*(-k.dir);if(!player.dodge&&Math.abs(player.y-k.y)<36&&ahead>0&&ahead<130){player.dodge={t:0,dur:.32,fx:player.x,fy:player.y,tx:player.x,ty:player.y<=k.y?594:694};SFX.honk();bark(player,'Woah — nearly had me!',1.6);k.boost=true;addTimeline('Subject\'s car nearly hit the team member while driving off');}k.v=Math.min(k.boost?560:260,(k.v||0)+(k.boost?520:200)*dt);k.x+=k.v*dt*(k.dir);if(k.x<-200)k.state='GONE';}continue;}k.x+=k.v*k.dir*dt;if(k.dir>0&&k.x>2200)k.x=-200-rnd(0,600);if(k.dir<0&&k.x<-200)k.x=2200+rnd(0,600);
+  for(const k of cars){if(k.markCar){if(k.state==='LEAVING'){const ahead=(k.x-player.x)*(-k.dir);if(!player.dodge&&Math.abs(player.y-k.y)<36&&ahead>0&&ahead<130){player.dodge={t:0,dur:.32,fx:player.x,fy:player.y,tx:player.x,ty:player.y<=k.y?594:694};SFX.honk();bark(player,'Woah — nearly had me!',1.6);k.boost=true;addTimeline('Subject\'s car nearly hit the team member while driving off');}k.v=Math.min(k.boost?560:260,(k.v||0)+(k.boost?520:200)*dt);k.x+=k.v*dt*(k.dir);if(k.x<-200)k.state='GONE';}continue;}if(!(k.dir<0&&busBlocks(k)))k.x+=k.v*k.dir*dt;if(k.dir>0&&k.x>2200)k.x=-200-rnd(0,600);if(k.dir<0&&k.x<-200)k.x=2200+rnd(0,600);
    if(Math.abs(player.x-k.x)<62&&Math.abs(player.y-k.y)<30){if(!k.honked){k.honked=true;SFX.honk();bark(player,'Whoa!',1);}k.v=40;}else{k.honked=false;k.v=lerp(k.v,k.dir>0?160:135,.02);}}
   if(UI.modal&&UI.modal.type==='markchat'&&(STATE!=='APPROACH'||!mark.present||dist(player,mark)>140)){closeModal();if(STATE==='APPROACH')toast('','He\'s moved off.');}
   else if(UI.modal&&UI.modal.type==='markchat'&&['ORDERING','COLLECT'].includes(mark.stage)){closeModal();counterBusy();}
@@ -1426,21 +1573,24 @@ function render(){
  R.floor(ctx);
  const items=[];for(const s of R.solids)items.push({y:s.y+s.h,f:()=>drawSolid(ctx,s)});
  const people=STATE==='BRIEFING_ROOM'?npcs:npcs.filter(n=>n.present);
+ for(const n of people)if(n.bike)items.push({y:n.y+.6,f:()=>drawBike(ctx,n)});
  for(const n of people)items.push({y:n.y,f:()=>drawPerson(ctx,Object.assign({},n,{glow:nearInt&&nearInt.npc===n?(n.isMark?'#ff4d5e':'#ffb627'):(n.isMark&&STATE==='STING'?'#ff4d5e':null)}))});
  for(const o of officers)items.push({y:o.y,f:()=>drawPerson(ctx,o)});
- if(R.name==='street'){for(const k of cars)if(!(k.markCar&&(k.state==='WAITING'||k.state==='GONE')))items.push({y:k.y+k.h/2,f:()=>drawCar(ctx,k)});if(policeCar)items.push({y:policeCar.y+24,f:()=>drawCar(ctx,policeCar)});}
+ if(R.name==='carpark')for(const k of cpCars)if(k.state!=='WAIT')items.push({y:k.y+k.h/2,f:()=>drawCar(ctx,k)});
+ if(R.name==='street'||R.name==='carpark'){for(const k of cars)if(!(k.markCar&&(k.state==='WAITING'||k.state==='GONE')))items.push({y:k.y+k.h/2,f:()=>drawCar(ctx,k)});if(policeCar)items.push({y:policeCar.y+24,f:()=>drawCar(ctx,policeCar)});if(bus&&bus.state!=='WAIT'&&bus.state!=='GONE')items.push({y:bus.y+bus.h/2,f:()=>drawBus(ctx,bus)});}
  items.push({y:player.y,f:()=>drawPerson(ctx,Object.assign({},player,{look:LOOK.player(),glow:STATE==='STING'?'#3fd0ff':null}))});
  items.sort((a,b)=>a.y-b.y).forEach(i=>i.f());
- if(nearInt&&!nearInt.npc){ctx.strokeStyle='#ffb627';ctx.lineWidth=2;ctx.setLineDash([4,4]);ctx.beginPath();const hx=nearInt.hl||nearInt;ctx.arc(hx.x,hx.y,18+Math.sin(perfNow*.008)*3,0,7);ctx.stroke();ctx.setLineDash([]);}
+ if(nearInt&&!nearInt.npc){ctx.strokeStyle='#ffb627';ctx.lineWidth=2;ctx.setLineDash([4,4]);ctx.beginPath();const hx=nearInt.hl||nearInt;ctx.arc(hx.x,hx.y,(hx.hrad||18)+Math.sin(perfNow*.008)*3,0,7);ctx.stroke();ctx.setLineDash([]);}
  if(R.name==='street')drawStreetLights(ctx);
+ if(R.name==='carpark')drawCPLights(ctx);
  if(R.name==='living'){ctx.fillStyle='rgba(255,190,110,.06)';ctx.fillRect(0,0,R.w,R.h);}
  // barks
  barks=barks.filter(b=>b.until>perfNow);ctx.font='12px Inter';ctx.textAlign='center';
  for(const b of barks){const n=b.n;if(n.present===false)continue;const lines=wrap(b.text,30);const w=Math.max(...lines.map(l=>ctx.measureText(l).width))+14,h=lines.length*15+8,x=n.x,y=n.y-70-h;ctx.fillStyle='rgba(255,255,255,.95)';rr(ctx,x-w/2,y,w,h,6);ctx.fill();ctx.beginPath();ctx.moveTo(x-5,y+h);ctx.lineTo(x+5,y+h);ctx.lineTo(x,y+h+7);ctx.fill();ctx.fillStyle='#111';lines.forEach((l,i)=>ctx.fillText(l,x,y+16+i*15));}
- if(R.name==='street'){ctx.setTransform(DPR,0,0,DPR,0,0);ctx.strokeStyle='rgba(190,210,240,.18)';ctx.lineWidth=1;ctx.beginPath();for(let i=0;i<90;i++){const x=(i*137.3+perfNow*.05*((i%3)+2))%(W+40)-20,y=(i*91.7+perfNow*.55*((i%4)+3)/3)%(H+40)-20;ctx.moveTo(x,y);ctx.lineTo(x-2,y+9);}ctx.stroke();}
+ if(R.name==='street'||R.name==='carpark'){ctx.setTransform(DPR,0,0,DPR,0,0);ctx.strokeStyle='rgba(190,210,240,.18)';ctx.lineWidth=1;ctx.beginPath();for(let i=0;i<90;i++){const x=(i*137.3+perfNow*.05*((i%3)+2))%(W+40)-20,y=(i*91.7+perfNow*.55*((i%4)+3)/3)%(H+40)-20;ctx.moveTo(x,y);ctx.lineTo(x-2,y+9);}ctx.stroke();}
  {ctx.setTransform(DPR,0,0,DPR,0,0);const vg=ctx.createRadialGradient(W/2,H/2,Math.min(W,H)*.35,W/2,H/2,Math.max(W,H)*.75);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.45)');ctx.fillStyle=vg;ctx.fillRect(0,0,W,H);}
  // offscreen hint toward takeaway
- if(STATE==='APPROACH'&&!M.seenMark&&P.hints!==false&&dist(player,DOOR_OUT)>260){ctx.setTransform(DPR,0,0,DPR,0,0);const gx=W/2+(DOOR_OUT.x-cam.x)*cam.zoom,gy=H/2+(DOOR_OUT.y-70-cam.y)*cam.zoom,on=gx>50&&gx<W-50&&gy>140&&gy<H-60,bob=Math.sin(perfNow*.006)*5;
+ if(CASE!=='cp'&&STATE==='APPROACH'&&!M.seenMark&&P.hints!==false&&dist(player,DOOR_OUT)>260){ctx.setTransform(DPR,0,0,DPR,0,0);const gx=W/2+(DOOR_OUT.x-cam.x)*cam.zoom,gy=H/2+(DOOR_OUT.y-70-cam.y)*cam.zoom,on=gx>50&&gx<W-50&&gy>140&&gy<H-60,bob=Math.sin(perfNow*.006)*5;
   ctx.fillStyle='rgba(255,182,39,.95)';ctx.strokeStyle='rgba(0,0,0,.6)';ctx.lineWidth=3;ctx.font='700 13px Inter';
   if(on){ctx.beginPath();ctx.moveTo(gx-10,gy-22+bob);ctx.lineTo(gx+10,gy-22+bob);ctx.lineTo(gx,gy-4+bob);ctx.closePath();ctx.stroke();ctx.fill();ctx.textAlign='center';ctx.strokeText('Golden Fryer',gx,gy-30+bob);ctx.fillText('Golden Fryer',gx,gy-30+bob);}
   else{const ex=clamp(gx,60,W-60),ey=clamp(gy,140,H-70),a=Math.atan2(gy-H/2,gx-W/2);ctx.save();ctx.translate(ex,ey);ctx.rotate(a);ctx.beginPath();ctx.moveTo(14+bob*.4,0);ctx.lineTo(-8,-11);ctx.lineTo(-8,11);ctx.closePath();ctx.stroke();ctx.fill();ctx.restore();ctx.textAlign=ex>W/2?'right':'left';const lx=ex>W/2?ex-20:ex+20;ctx.strokeText('Golden Fryer',lx,ey+4);ctx.fillText('Golden Fryer',lx,ey+4);}}
@@ -1453,7 +1603,7 @@ function wrap(t,n){const w=t.split(' '),out=[];let l='';for(const x of w){if((l+
 const MUS={tg:null,name:null,timer:null,step:0,nextT:0,nb:null};
 const mf=m=>440*Math.pow(2,(m-69)/12);
 function mN(m,t,d,o={}){const c=AU.ctx;if(!c||!MUS.tg)return;const g=c.createGain(),a=o.a||.01,v=o.v||.08;g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(v,t+a);g.gain.exponentialRampToValueAtTime(.0001,t+Math.max(d,a+.02));
- const os=c.createOscillator();os.type=o.type||'sine';os.frequency.value=mf(m);if(o.det)os.detune.value=o.det;let src=os;if(o.lp){const f=c.createBiquadFilter();f.type='lowpass';f.frequency.value=o.lp;f.Q.value=o.q||.7;os.connect(f);src=f;}
+ const os=c.createOscillator();os.type=o.type||'sine';os.frequency.value=mf(m);if(o.slide){os.frequency.setValueAtTime(mf(m),t);os.frequency.exponentialRampToValueAtTime(mf(m)*o.slide,t+Math.max(d,.05)*.5);}if(o.det)os.detune.value=o.det;let src=os;if(o.lp){const f=c.createBiquadFilter();f.type='lowpass';f.frequency.value=o.lp;f.Q.value=o.q||.7;os.connect(f);src=f;}
  src.connect(g);g.connect(MUS.tg);os.start(t);os.stop(t+Math.max(d,a+.02)+.05);}
 function mH(t,v=.02,d=.04,f=7000){const c=AU.ctx;if(!c||!MUS.tg)return;if(!MUS.nb||MUS.nb.ctx!==c){const n=Math.floor(c.sampleRate*1),b=c.createBuffer(1,n,c.sampleRate),a=b.getChannelData(0);for(let i=0;i<n;i++)a[i]=Math.random()*2-1;MUS.nb={ctx:c,b};}
  const s=c.createBufferSource();s.buffer=MUS.nb.b;const fl=c.createBiquadFilter();fl.type='highpass';fl.frequency.value=f;const g=c.createGain();g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);s.connect(fl);fl.connect(g);g.connect(MUS.tg);s.start(t,Math.random()*.8,d+.02);}
@@ -1477,6 +1627,8 @@ const MT={
  sting:{bpm:(I)=>108+(I||0)*26,gain:1,play(s,t,sp,I){const bar=Math.floor(s/16)%2,st=s%16;
   if(st===0||st===6||st===8)mK(t,.14+I*.05);mN(st%8===6?45:33,t,sp*.95,{type:'sawtooth',lp:480+I*500,v:.055});
   if(st===0&&bar===0){mN(76,t,3*sp,{type:'square',lp:2000,v:.028});mN(77,t,3*sp,{type:'square',lp:2000,v:.022});}if(st===10)mN(69,t,2*sp,{type:'square',lp:1500,v:.02});if(st%2===1)mH(t,.012,.03,8500);}},
+ donk:{bpm:()=>140,gain:.9,play(s,t,sp){const bar=Math.floor(s/16)%4,st=s%16,root=[45,45,48,43][bar];if(st%4===0)mK(t,.2);if(st%4===2){mN(root,t,sp*1.7,{type:'sawtooth',lp:700,v:.07,a:.004});mN(root+19,t,sp*1.1,{type:'square',lp:1500,v:.035,a:.002,slide:.6});}if(st===4||st===12)mH(t,.05,.09,2500);if(st%2===1)mH(t,.018,.03,9000);if(st===0&&bar%2===0)mN(root+24,t,6*sp,{type:'triangle',lp:2000,v:.03,a:.01});}},
+ chill:{bpm:()=>70,gain:.9,play(s,t,sp){const bar=Math.floor(s/16)%4,st=s%16,ch=[[53,57,60,64],[50,53,57,60],[55,59,62,65],[48,52,55,59]][bar];if(st===0)for(const m of ch){mN(m,t,16*sp,{type:'sawtooth',lp:620,v:.016,a:1.2,det:-5});mN(m,t,16*sp,{type:'sawtooth',lp:620,v:.016,a:1.2,det:5});}if(st===0||st===10)mN(ch[0]-12,t,6*sp,{type:'sine',v:.09,a:.02});if([2,5,8,11,14].includes(st))mN(ch[(st/3|0)%4]+12,t,4*sp,{type:'triangle',lp:1700,v:.04,a:.008});if(st%4===2)mH(t,.007,.05,8000);}},
  call:{bpm:()=>60,gain:.6,play(s,t,sp){const bar=Math.floor(s/16)%4,st=s%16;if(st===0){mN(36,t,16*sp,{type:'sine',v:.09,a:1.2});mN(43,t,16*sp,{type:'sine',v:.05,a:1.5});}if(st===8&&bar%2===1)mN(60+[0,3][bar>1?1:0],t,3*sp,{type:'triangle',lp:900,v:.025,a:.01});}},
  win:{bpm:()=>72,gain:1,play(s,t,sp){const bar=Math.floor(s/16)%4,st=s%16,ch=CH_MAJ[bar];if(st===0)padBar(ch,t,16*sp*1.05,.03,900);if([0,3,6,9,12].includes(st))mN(ch[0][(st/3|0)%3]+24,t,4*sp,{type:'triangle',v:.05,a:.005,lp:3000});}},
  fail:{bpm:()=>54,gain:.9,play(s,t,sp){const bar=Math.floor(s/16)%4,st=s%16,ch=CH_DARK[bar];if(st===0){padBar(ch,t,16*sp*1.05,.028,520);}if(st===8&&bar%2===0)mN(ch[0][0]+12,t,6*sp,{type:'sine',v:.05,a:.02});}}
@@ -1488,14 +1640,182 @@ function setMusic(name){const c=AU.ctx;if(!c||MUS.name===name)return;const now=c
  if(MUS.tg){const old=MUS.tg;try{old.gain.cancelScheduledValues(now);old.gain.setValueAtTime(old.gain.value,now);old.gain.linearRampToValueAtTime(0,now+.9);}catch(e){}setTimeout(()=>{try{old.disconnect();}catch(e){}},1200);}
  MUS.tg=null;MUS.name=name;if(!name||!MT[name])return;const g=c.createGain();g.gain.setValueAtTime(0,now);g.gain.linearRampToValueAtTime(MT[name].gain,now+1.4);g.connect(AU.musBus);MUS.tg=g;MUS.step=0;MUS.nextT=now+.08;
  if(!MUS.timer)MUS.timer=setInterval(musTick,100);}
-function musicFor(st){return({TITLE:'title',PROFILE:'title',CUSTOMISE:'title',BRIEFING_ROOM:'briefing',APPROACH:'approach',STING:'sting',POLICE_ARRIVAL:'call',POLICE_CALL:'call',MISSION_COMPLETE:'win',MISSION_FAILED:'fail'})[st]||null;}
+function musicFor(st){return({TITLE:'title',PROFILE:'title',CUSTOMISE:'title',BRIEFING_ROOM:['briefing','donk','chill'][(P.briefMusic|0)%3],APPROACH:'approach',STING:'sting',POLICE_ARRIVAL:'call',POLICE_CALL:'call',MISSION_COMPLETE:'win',MISSION_FAILED:'fail'})[st]||null;}
 function musicUpdate(){if(!AU.ctx)return;setMusic(musicFor(STATE));}
 let last=performance.now();
 function frame(now){const dt=Math.min(.05,(now-last)/1000);last=now;perfNow=now;try{musicUpdate();if(!paused)update(dt);render();if(STATE==='POLICE_CALL')renderCall();}catch(e){console.error(e);}requestAnimationFrame(frame);}
 function boot(){showScreen(`<div class="screen" id="boot"><h1>NONCE HUNTER<br>SIMULATOR</h1><div class="bb"><i></i></div><p>CLICK OR TAP TO START</p></div>`);const go=()=>{auInit();try{window.focus();}catch(e){}splash();};$('boot').addEventListener('pointerdown',go,{once:true});addEventListener('keydown',function k(){removeEventListener('keydown',k);if(STATE==='BOOT')go();});}
 function splash(){if(STATE!=='BOOT')return;toTitle();}
 // test hooks for automated play-testing (not shown in UI)
-window.__NH={tick(n,dt=1/30){for(let i=0;i<n;i++){perfNow+=dt*1000;update(dt);}render();if(STATE==='POLICE_CALL')renderCall();},get npcs(){return npcs;},get P(){return P;},get kev(){return kev;},get nearInt(){return nearInt;},computeScore,getInteractables,get state(){return STATE;},get M(){return M;},get mark(){return mark;},get player(){return player;},get S(){return S;},get CALL(){return CALL;},startBriefing,startApproach,tryContact,openPhone,openEvidence,get paused(){return paused;},stingButton,openMarkChat,get nearIntLabel(){return nearInt&&nearInt.label;},requestPolice,pickSting,pickCall,interact,openTalk,openComputer,addIntel};
+
+/* ================= CASE 2: CAR PARK ================= */
+const BENCH={x:690,y:578};
+function caseButtons(){const u=cpUnlocked();return '<button class="btn primary" id="tS">Case 1 — The Takeaway'+(P.cb1?' · best '+P.cb1+'/120':'')+'</button><button class="btn '+(u?'primary':'')+'" id="tS2" '+(u?'':'style="opacity:.5"')+'>Case 2 — Car Park'+(u?(P.cb2?' · best '+P.cb2+'/120':''):' 🔒 score 50+ on Case 1')+'</button>';}
+function cpUnlocked(){return (P.cb1|0)>=50||(P.cb1==null&&(P.stats.best|0)>=50);}
+const TK0={INTEL,PHOTOS,SUSPECT_HTML,BRIEF,CHAT,TABS,TOPICS,CONTRAS,MARK_CHAT,INTRO,WINDOWS,mark:LOOK.mark};
+const CPD={};
+CPD.INTEL={
+ log_export:{title:'Chat export from account “Brett115”',src:'Platform export, preserved by the team',conf:'VERIFIED'},
+ log_age:{title:'Profile stated age 14 (19:05); account acknowledged it (19:06)',src:'Chat export',conf:'VERIFIED'},
+ log_flagged:{title:'Message flagged as sexual content — redacted, preserved unaltered',src:'Chat export',conf:'VERIFIED'},
+ car_photo:{title:'Account sent photo of a blue van, plate fragment “…D4…”',src:'Chat export',conf:'VERIFIED'},
+ meet_arranged:{title:'Account proposed meeting: Riverside Car Park, Thursday, about 18:35, by the bench',src:'Chat export',conf:'VERIFIED'},
+ suspect_profile:{title:'Alleged identity: “Brett”, aged 59 — from his linked profile',src:'Open social media (unconfirmed)',conf:'UNCERTAIN'},
+ social_posts:{title:'Profile “Brett” posts about a blue van and checks in at Riverside Car Park',src:'Open social media',conf:'UNCERTAIN'},
+ hacked_note:{title:'Possible hacked-account explanation — platform login data not obtained',src:'Team notes',conf:'UNRESOLVED'},
+ cctv:{title:'CCTV camera covers the car park entrance',src:'Observed on scene',conf:'OBSERVED'},
+ car_scene:{title:'Blue van parked by the bench; plate contains “D4”',src:'Observed on scene',conf:'OBSERVED'},
+ obs_car_exit:{title:'Subject seen getting out of the blue van',src:'Observed on scene',conf:'OBSERVED'},
+ attended:{title:'Subject arrived at Riverside Car Park and sat on the bench',src:'Observed on scene',conf:'OBSERVED'},
+ admit_car:{title:'Subject said the blue van is his',src:'Recorded statement',conf:'STATEMENT'}};
+CPD.PHOTOS=[['profile','Profile picture — “Brett”'],['van','“new wheels” — blue van, plate cropped'],['fish','Holiday snap — Brett and a fish. Jas says the fish looks more trustworthy.']];
+CPD.SUSPECT_HTML=()=>`<div style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-start"><div><div class="mono" style="font-size:11px;color:var(--dim)">NAME (ALLEGED)</div><div style="font-size:20px;font-weight:800">Brett</div><div class="mono" style="font-size:11px;color:var(--dim);margin-top:6px">AGE (ALLEGED)</div><div style="font-size:20px;font-weight:800">59</div><div style="margin-top:6px">${tagHTML('UNCERTAIN')}</div><p style="font-size:11px;color:var(--dim);max-width:200px">Both come from his linked profile. Nothing here is confirmed.</p></div>${photoStrip(118)}</div>`;
+CPD.CHAT=[
+ {ts:'14 Sep 19:02',from:'Brett115',sum:'Opens the conversation. Asks whether the profile is local.',id:'c1',intel:['log_export']},
+ {ts:'14 Sep 19:05',from:'Decoy profile',sum:'States age: 14 (matches profile bio).',id:'c2',intel:['log_export','log_age']},
+ {ts:'14 Sep 19:06',from:'Brett115',sum:'Acknowledges the stated age and continues the conversation.',id:'c3',intel:['log_export','log_age']},
+ {ts:'15 Sep 21:40',from:'Brett115',sum:'<span class="red">CONTENT REDACTED</span> Flagged by the team as sexual content. Preserved unaltered in the export for police; not reproduced here.',id:'c4',intel:['log_export','log_flagged'],flag:'r_flagged'},
+ {ts:'16 Sep 20:11',from:'Brett115',sum:'Sends a photo of a blue van. Plate mostly cropped; “D4” visible.',id:'c5',intel:['log_export','car_photo'],flag:'r_car'},
+ {ts:'17 Sep 18:02',from:'Brett115',sum:'Proposes meeting at Riverside Car Park on Thursday, “about 6:35”, “on the bench by the pay machine”.',id:'c6',intel:['log_export','meet_arranged']}];
+CPD.TABS=Object.assign({},TABS,{
+ overview:()=>`<h3>Case NH-015 — Car Park</h3><p>Team: <b>${esc(P.team)}</b>. Lead: Del.</p><p><b>Objectives</b></p><ol><li>Know the chat log — it is strong.</li><li>Find the blue van among the cars that pull in.</li><li>Confirm the man from the van is the man on the bench.</li><li>Ring the police on contact, then get his account fast — he spooks quickly.</li><li>Hand over to police with an accurate report.</li></ol><p><b>Conduct</b>: no physical contact, no blocking, no threats. Don't question anyone near him — he'll bolt.</p>`,
+ suspect:()=>`<h3>Suspect file</h3>${SUSPECT_HTML()}`+row('sp1','<b>Name & age</b>','“Brett”, 59 — from a profile linked to the account. Found by matching the van in the chat photo and the posts: strong, but still a lead until the man turns up.',{intel:['suspect_profile'],flag:'r_social'}),
+ social:()=>`<h3>Social media</h3>`+row('s1','<b>Profile “Brett”</b> · 4 check-ins','Checks in at Riverside Car Park on four Thursdays. Low-resolution profile photo of a man in a flat cap. <b>Similarity is not identity.</b>',{intel:['social_posts'],flag:'r_social'})+row('s2','<b>“Brett”</b> · post: “new wheels”','Photo of a blue van. Plate not visible.',{intel:['social_posts'],flag:'r_social'})+row('s3','<b>Holiday album</b>','Mostly sunsets and one extremely large fish. Not evidence. Jas insisted it was included.',{}),
+ meet:()=>`<h3>Meeting & routine</h3>`+row('m1','<b>Arranged meeting</b>','Riverside Car Park, by the bench near the pay machine. Thursday, about 18:35. Proposed by Brett115 on 17 Sep.',{intel:['meet_arranged']})+row('m2','<b>What we expect</b>','Several cars will pull in. He drives a blue van. The cars leave their people on foot — find the van and the man from it. He will sit on the bench next to where he parks.',{})+row('m3','<b>Team positions</b>','Jas stays at base. You go alone. Police on standby, roughly 20 seconds out once requested. Questioning anyone near him will spook him.',{}),
+ timeline:()=>TK0.TABS.timeline().replace('Car photo sent','Van photo sent').replace('Meeting proposed','Meeting proposed (car park)'),
+ notes:()=>`<h3>Team notes & unresolved questions</h3>`+row('n1','<b>Who typed the messages?</b>','Not established. Nothing we hold shows who was holding the phone.',{})+row('n2','<b>Possible hacked-account explanation</b>','A hacked account is an explanation to test, not proof either way. Platform login data has not been obtained.',{intel:['hacked_note'],flag:'r_hacked'})+row('n3','<b>Is “Brett” the account holder?</b>','Uncertain. Same van type and a similar profile photo.',{flag:'r_social'})+row('n4','<b>Plate</b>','Only “D4” is visible in the photo. A partial match is a lead, not a match.',{})});
+CPD.BRIEF={
+ founder:{name:'Del',role:'The Founder',bio:'Runs the team. Ex-youth worker. Dry, procedural, allergic to drama.',topics:[
+  {id:'job',q:'What\'s the job tonight?',a:'Riverside Car Park. The chat log is solid — he\'s practically banged to rights on that. What we need is the man himself, and a few words from him. Police decide what happens, not us.'},
+  {id:'plan',q:'Talk me through the plan.',a:'The account said Riverside Car Park, about 18:35, on the bench by the pay machine. He drives a blue van. A few cars will pull in and people will walk off — find the blue van and the man who gets out of it. Ring the police on contact, or just before, then keep it quick. He spooks fast.'},
+  {id:'prove',q:'What can we actually prove?',a:'That an account said certain things to a profile that gave its age. Who was holding the phone is what tonight is about. Don\'t overclaim.'},
+  {id:'rules',q:'Any rules I need to know?',a:'No hands. No blocking. No threats. If he wants to walk, he walks. And don\'t go questioning anyone near him — if he sees that, he runs.',sets:['rules']},
+  {id:'redact',q:'Why is that message redacted?',req:['r_flagged'],a:'Because it\'s evidence, not content. The export is preserved untouched for the police.'},
+  {id:'hack',q:'What if he says the account was hacked?',req:['r_hacked'],a:'Ask sensible questions. When? Did he report it? Who else uses his phone? It might even be true — so we don\'t pretend we know.'},
+  {id:'link',q:'How sure are we it\'s him?',a:'Strong lead. Jas matched the van and the check-ins. But until a man gets out of that van and sits on that bench, it\'s still a lead.'},
+  {id:'unk',q:'What don\'t we know yet?',a:'Who typed the messages. Whether the profile is really him. The full plate. Write down what you see, not what you assume.'}]},
+ decoy:{name:'Jas',role:'The Decoy',bio:'Runs the profile from here. Sharp, tired, meticulous with timestamps.',topics:[
+  {id:'start',q:'How did the chat start?',a:'He messaged first — 14th of September, just after seven. Small talk. Was I local, that kind of thing.'},
+  {id:'age',q:'Who brought up age?',a:'I did, three minutes in. The profile says fourteen and I said it in the chat. He acknowledged it a minute later and carried on. It\'s all in the export.',intel:['log_age']},
+  {id:'meet',q:'How did the meeting get arranged?',a:'He suggested it. Riverside Car Park, Thursday, about 6:35, on the bench by the pay machine. I never pushed.',intel:['meet_arranged']},
+  {id:'face',q:'Did you ever see his face?',a:'No. No calls, no video. The only picture is the van. So I can\'t tell you it\'s him. That\'s your job tonight.'},
+  {id:'carp',q:'Tell me about the van photo.',req:['r_car'],a:'Sent it on the 16th, showing off. Blue van. You can make out “D4” on the plate. The rest is cropped.'},
+  {id:'found',q:'How did we find his profile?',a:'The van, mostly. I searched for pages with a matching blue van and found one with a “new wheels” post and Thursday check-ins at Riverside. It\'s a lead, not proof.'},
+  {id:'where',q:'Where will you be tonight?',a:'Right here on the team channel. Nowhere near him. That\'s the point.'}]},
+ vet:{name:'Ray',role:'The Team Veteran',bio:'Ex-security, years on the team. Quiet, patient, never in a hurry. Smokes. Gives straight advice.',topics:[
+  {id:'police',q:'When should I ring the police?',a:'On contact, or just before it. He spooks fast — you won\'t get long, and they need about twenty seconds. Ring as you walk up, then ask quickly. Don\'t wait for a second question.'},
+  {id:'moment',q:'Where do I find him?',a:'He parks the blue van and sits on the bench next to it. Don\'t chat to anyone near him on the way — if he sees people being questioned, he\'ll run. Go straight to him.'},
+  {id:'evidence',q:'What evidence should I be gathering?',a:'The van\'s plate, him getting out of it, and his own words. The chat log does the heavy lifting. You need him to say the van\'s his, and why he\'s sitting where the account said.'},
+  {id:'fast',q:'How do I use a short window?',a:'Easy ones first — his name, why he\'s here. Then the van, then the account. Skip the small talk. If he gives you something that doesn\'t fit, use it.'},
+  {id:'calm',q:'He keeps saying “guys please”. Now what?',a:'Stay level. He\'ll say he\'s being harassed. Don\'t accuse, don\'t raise your voice. Every question costs him patience, so make each one count.'},
+  {id:'run',q:'What if he runs?',a:'Let him. No hands, no blocking the van. Note what you saw and say it straight.'},
+  {id:'report',q:'What do I say to the police at the end?',a:'Only what you know, and how you know it. “I saw him get out of the van, I checked the plate, he told me this.” Don\'t pad it.'},
+  {id:'phone',q:'Can I get hold of you during the mission?',a:'Any time. Phone → Ask Ray, and I\'ll tell you what I\'d do right now. You can also ring the police from there.'}]}};
+CPD.INTRO=[()=>`Alright, ${P.name}. Tonight's the Riverside Car Park job. A different one — and a tidier one.`,()=>'The chat log is solid. What we\'re missing is the man, and a few words from him. Check the computer, and speak to Jas about the chats.',()=>'Have a word with Ray too. You\'ve got a short window with this one, so his tips are worth hearing. No Maureen this time — nobody round here has seen him.',Object.assign(()=>'Here\'s who we think he is. Brett, 59, blue van. Jas found him from the van photo. And that other picture… don\'t ask. It\'s a fish.',{photos:true}),()=>'It\'s all on the computer and on your phone. Door\'s behind you when you\'re ready — and he spooks easily, so don\'t hang about.'];
+CPD.WINDOWS={WALKING:'walking to the bench',SITTING:'sitting on the bench',LEAVING:'heading back to his van'};
+CPD.MARK_CHAT=[
+ {id:'busy',q:'"Quiet tonight, isn\'t it?"',run:()=>['Always is on a Thursday.',{claim:'thursdays',stmt:'In casual chat, said it is always quiet here on Thursdays'}]},
+ {id:'good',q:'"Is that bench comfy?"',run:()=>['Better than the van seats.',{stmt:'In casual chat, joked the bench is better than the van seats'}]},
+ {id:'time',q:'"Got the time, mate?"',run:()=>['Er... '+fmtClock(M.clock,false)+'.',null]},
+ {id:'wait',q:'"Waiting on someone?"',req:()=>!M.markChat.some(l=>l.id==='wait'),run:()=>mark.susp>20?['Why d\'you ask? Guys please.',null]:['Just sitting. Leave a man in peace, lads.',{stmt:'In casual chat, said he was just sitting there'}]}];
+CPD.TOPICS=[
+ {id:'name',q:'"Can I ask your name?"',run(){if(mark.susp>60)return['Guys please — why would I tell you that?',{stmt:'Refused to give his name'}];return['...Brett. Guys please, what is this?',{claim:'name',stmt:'Gave his first name as Brett'}];}},
+ {id:'why',q:'"What brings you down here tonight?"',run(){return['Just getting some air, lads. Sitting on a bench. Is that illegal now?',{claim:'walk',excuse:'walk',stmt:'Said he was just sitting there getting some air'}];}},
+ {id:'car',q:'"Is the blue van yours?"',req:()=>hasIntel('car_scene')||hasIntel('obs_car_exit'),run(){if(mark.susp<55)return['Yeah, it\'s mine. Guys please, what\'s that got to do with anything?',{claim:'admit_car',stmt:'Confirmed the blue van is his',intel:'admit_car'}];return['Never seen that van before in my life.',{claim:'deny_car',stmt:'Denied owning the blue van'}];}},
+ {id:'account',q:'"Do you use an account called Brett115?"',req:()=>hasIntel('log_export'),run(){return['That got hacked weeks back. Guys please — nothing to do with me.',{claim:'hacked',excuse:'hacked',stmt:'Said the Brett115 account was hacked weeks ago — implying it is his'}];}},
+ {id:'hackwhen',q:'"When did you notice it was hacked? Did you report it?"',good:true,req:()=>C('hacked'),run(){return['I dunno... few weeks? Didn\'t report it. Didn\'t think it mattered.',{stmt:'Could not say when the hack happened; did not report it'}];}},
+ {id:'phone',q:'"Does anyone else use your phone?"',good:true,req:()=>C('hacked'),run(){return['My mate borrows it. Could\'ve been him, couldn\'t it? Guys please.',{claim:'mate',excuse:'mate',stmt:'Suggested a friend who borrows his phone could have sent the messages'}];}},
+ {id:'meet',q:'"Were you meeting anyone here around 18:35?"',req:()=>hasIntel('meet_arranged'),run(){if(C('hacked')||C('thought18')||C('banter'))return['Alright, alright — I came to tell her off. Them chats are wrong. A kid shouldn\'t be online like that.',{claim:'warn',excuse:'warn',stmt:'Said he came to the car park to warn the person he had been messaging'}];return['Meeting someone? No. I\'m sat on a bench. Guys please.',{claim:'no_meet',stmt:'Denied arranging to meet anyone'}];}},
+ {id:'chatnow',q:'"That account said it would be on this bench tonight — and here you are. How come?"',req:()=>hasIntel('meet_arranged'),run(){if(S&&S.stage==='WALKING')return['I\'m only cutting through, lads. I wasn\'t stopping.',{claim:'walk',excuse:'walk',stmt:'Said he was only cutting through and not stopping'}];if(C('hacked'))return['I told you, the account\'s hacked. Whoever wrote that, it wasn\'t me. I just like this bench.',{claim:'coincidence',stmt:'Said the arranged meeting was written by whoever hacked the account and his being here is coincidence'}];return['It\'s my bench. I sit here Thursdays. That\'s a coincidence, that is. Guys please.',{claim:'coincidence',stmt:'Said being on the arranged bench on the arranged night was a coincidence'}];}},
+ {id:'age',q:'"The profile that account spoke to said they were 14."',req:()=>hasIntel('log_age'),run(){return['I thought she was eighteen. Them profiles lie about everything.',{claim:'thought18',excuse:'thought18',stmt:'Said he believed the person was 18'}];}},
+ {id:'flag',q:'"One message from that account was flagged as sexual. It\'s preserved."',req:()=>hasIntel('log_flagged'),run(){return['That? Just banter, lads. Didn\'t mean anything by it.',{claim:'banter',excuse:'banter',stmt:'Described the flagged message as “banter”'}];}}];
+CPD.CONTRAS=[
+ {id:'c_air',when:()=>C('walk')&&hasIntel('meet_arranged'),ev:()=>'meet_arranged',q:()=>'Cite: the account said it would be on this exact bench, tonight, at 18:35.',score:7,a:'...Loads of people sit on benches. You are harassing me here, lads.',stmt:'Had no explanation for being on the exact bench the account named, at the named time'},
+ {id:'c_age',when:()=>C('thought18')&&hasIntel('log_age'),ev:()=>'log_age',q:()=>'Cite chat log 19:06: the account acknowledged the stated age.',score:8,a:'...I didn\'t read it properly. I was going to report it myself, honest.',stmt:'When shown the age acknowledgement, said he had been going to report it',claim:'report',excuse:'report'},
+ {id:'c_hackmate',when:()=>C('hacked')&&C('mate'),q:()=>'"First it was hacked, now it was your mate. Which is it?"',score:6,a:'Could be either! Guys please, I don\'t know, do I?',stmt:'Could not choose between the hacked-account and friend explanations'},
+ {id:'c_banter',when:()=>C('hacked')&&C('banter'),q:()=>'"If the account was hacked, how do you know that message was just banter?"',score:8,a:'I— I\'m just saying, if it was me. Which it wasn\'t.',stmt:'Described the flagged message as banter despite saying the account was hacked'},
+ {id:'c_warn',when:()=>C('warn')&&(C('no_meet')||C('hacked')),q:()=>C('no_meet')?'"Earlier you weren\'t meeting anyone. Now you came to warn her?"':'"If the account was hacked, how did you know where to come?"',score:7,a:'I\'m not saying anything else. Guys please.',stmt:'Gave no explanation for knowing the meeting arrangement'},
+ {id:'c_car',when:()=>C('deny_car')&&hasIntel('obs_car_exit'),ev:()=>'obs_car_exit',q:()=>'Cite: you were seen getting out of the blue van'+(M.obsExitTime?' at '+M.obsExitTime:'')+'.',score:7,a:'...Fine. It\'s my van. Doesn\'t prove anything. Guys please.',stmt:'Admitted the blue van is his after being told he was seen leaving it',claim:'admit_car',intel:'admit_car'}];
+function setCase(c){CASE=c;const X=c==='cp'?CPD:TK0;INTEL=X.INTEL;PHOTOS=X.PHOTOS;SUSPECT_HTML=X.SUSPECT_HTML;BRIEF=X.BRIEF;CHAT=X.CHAT;TABS=X.TABS;TOPICS=X.TOPICS;CONTRAS=X.CONTRAS;MARK_CHAT=X.MARK_CHAT;INTRO=X.INTRO;WINDOWS=X.WINDOWS;LOOK.mark=c==='cp'?LOOK.brett:TK0.mark;}
+function startCase(c){setCase(c);fadeTo(startBriefing);}
+const TXMAP=[['Golden Fryer','Riverside Car Park'],['silver estate','blue van'],['Silver estate','Blue van'],['the takeaway','the car park'],['takeaway','car park'],['Takeaway','Car park'],['BigNorm420','Brett115'],['Norman P','Brett'],['Norman','Brett'],['K7','D4'],['A bald man in a grey coat. He hasn\'t noticed you yet.','A man in a flat cap on a bench. He hasn\'t noticed you yet.'],['Grey coat','Flat cap'],['grey coat','flat cap'],['the high street','the car park'],['high street','car park']];
+function TX(t){if(CASE!=='cp'||typeof t!=='string')return t;for(const[a,b]of TXMAP)if(t.includes(a))t=t.split(a).join(b);return t;}
+{const w=(name,idx)=>{const f=eval(name);eval(name+'=function(...a){for(const i of '+JSON.stringify(idx)+')a[i]=TX(a[i]);return f.apply(this,a);}');};
+ w('toast',[1]);w('bark',[1]);w('transcript',[2]);w('markSay',[0]);w('cSay',[1]);w('addTimeline',[0]);w('openModal',[0]);}
+{const f=cChoice;cChoice=function(p,o){return f(TX(p),o&&o.map(x=>x&&typeof x.text==='string'?Object.assign({},x,{text:TX(x.text)}):x));};}
+function carSpot(){return CASE==='cp'&&mark&&mark.car?{x:mark.car.x+20,y:mark.car.y-mark.car.h/2-4}:{x:1180,y:604};}
+function cpSpookCheck(n){if(!mark||!mark.present||mark.engaged||mark.fled||!['WALKING','SITTING'].includes(mark.stage))return;if(dist(n,mark)<270){M.spooked=true;bark(mark,'Not hanging around for this.');addTimeline('Subject saw the team questioning someone nearby and left');markFlee();}}
+function vetTipCP(){const pol=M.police,st=mark&&mark.stage,L=[];
+ if(pol.requested)L.push('Police are on their way. Keep it quick and level — van, account, why he\'s on that bench.','He\'ll say he\'s being harassed. Stay calm; don\'t tell him they\'re coming unless he asks.');
+ else if(!M.seenMark||!mark.present)L.push('Cars will pull in and people will walk off. Ignore them — find the blue van and the man who gets out of it.','Don\'t chat to the other people. If he sees you questioning anyone near him, he\'ll run.','Glance at the van\'s plate once it\'s parked: “D4”.');
+ else if(st==='WALKING')L.push('That\'s him. He\'s heading for the bench. Give it a moment — he\'ll sit.');
+ else L.push('Go straight to him. Ring the police as you walk up, then ask quickly: name, why he\'s here, the van, the account.','He spooks fast — about four answers. Ring now if you haven\'t.','Use anything that doesn\'t fit — he\'ll say a lot of “guys please”.');
+ M.vetN=(M.vetN|0)+1;return L[M.vetN%L.length];}
+/* car park map */
+function drawCPBench(c,s){drawSolidPlain(c,s);const x=s.x,y=s.y-s.h3;c.fillStyle='#a07a4b';c.fillRect(x,y+2,s.w,6);c.fillStyle='#8a6638';c.fillRect(x,y+10,s.w,4);c.fillStyle='#2a2a2a';c.fillRect(x+4,y+12,4,s.h3);c.fillRect(x+s.w-8,y+12,4,s.h3);}
+function drawCPMachine(c,s){drawSolidPlain(c,s);const x=s.x,y=s.y-s.h3;c.fillStyle='#2b4a73';c.fillRect(x,y,s.w,s.h3);c.fillStyle='#0f1b2d';c.fillRect(x+4,y+4,s.w-8,10);c.fillStyle='#45e08a';c.fillRect(x+6,y+6,s.w-12,3);c.fillStyle='#ffd23f';c.font='6px IBM Plex Mono';c.textAlign='center';c.fillText('PAY',x+s.w/2,y+23);}
+function drawHedge(c,s){const x=s.x,y=s.y-s.h3;c.fillStyle='#132a1a';c.fillRect(x,y,s.w,s.h3+s.h);c.fillStyle='#1d3a24';for(let i=0;i<s.w;i+=22){c.beginPath();c.arc(x+i+8,y+12+((i*7)%9),13,0,7);c.fill();}c.fillStyle='rgba(0,0,0,.25)';c.fillRect(x,y+s.h3,s.w,s.h);}
+function buildCarPark(){
+ const S=[];const a=o=>(S.push(o),o);
+ a({x:0,y:20,w:1500,h:20,h3:48,col:'#1d3a24',draw:drawHedge});
+ const stat=(x,y,col,w=116,h=46)=>a({x:x-w/2,y:y-h/2,w,h,h3:0,col,draw:(c,s)=>drawCar(c,{x:s.x+s.w/2,y:s.y+s.h/2,w:s.w,h:s.h,dir:x%2?1:-1,col})});
+ stat(220,250,'#7a1f2b');stat(520,250,'#4b5563');stat(900,250,'#2e2e2e');stat(1250,250,'#d9dde2');stat(1060,420,'#8a6d3b');stat(240,420,'#1f6f6b');
+ a({x:BENCH.x-46,y:BENCH.y+8,w:92,h:12,h3:22,col:'#6d4c33',draw:drawCPBench});
+ a({x:765,y:560,w:30,h:14,h3:40,col:'#2b4a73',draw:drawCPMachine});
+ a({x:880,y:585,w:18,h:14,h3:26,col:'#2d3a2f'});
+ const van=a({x:560,y:586,w:150,h:56,h3:0,col:'#2f5fa8',off:true,draw:()=>{}});
+ const mk=(o)=>a(Object.assign({h3:0,off:true,draw:()=>{}},o));
+ R_cpSolids=S;
+ return{name:'carpark',w:1500,h:900,solids:S,floor:drawCPFloor,carSolid:van,ints:[
+  {x:140,y:760,r:60,label:'Inspect the CCTV notice',act:()=>{addIntel('cctv');addTimeline('Noted CCTV covering the car park entrance');bark(player,'CCTV covers the entrance. Police can request it.');}},
+  {x:BENCH.x+100,y:BENCH.y+50,r:0,label:'',act:()=>{}}]};}
+let R_cpSolids=null;
+function drawCPFloor(c){c.fillStyle='#1b1d22';c.fillRect(0,0,1500,900);c.fillStyle='#223325';c.fillRect(0,0,1500,60);
+ c.fillStyle='#2a2d33';c.fillRect(0,60,1500,640);c.strokeStyle='rgba(255,255,255,.35)';c.lineWidth=2;
+ for(const y of[250,420,610]){for(let x=100;x<=1450;x+=130){c.beginPath();c.moveTo(x,y-30);c.lineTo(x,y+30);c.stroke();}}
+ c.fillStyle='rgba(255,255,255,.08)';for(let x=40;x<1500;x+=90)c.fillRect(x,340,40,3);
+ c.fillStyle='#34373d';c.fillRect(0,700,1500,110);c.fillStyle='rgba(230,200,40,.65)';c.fillRect(0,752,1500,2);for(let x=0;x<1500;x+=70){c.fillStyle='rgba(255,255,255,.5)';c.fillRect(x,722,34,3);}
+ c.fillStyle='#868a90';c.fillRect(0,810,1500,90);c.fillStyle='#bfc2c6';c.fillRect(0,806,1500,5);
+ c.fillStyle='#e9e5da';c.font='700 14px Inter';c.textAlign='left';c.fillText('RIVERSIDE CAR PARK',40,690);c.fillStyle='rgba(255,255,255,.25)';c.fillText('MAX STAY 4 HRS · PAY & DISPLAY',900,690);
+ c.fillStyle='#caa24c';rr(c,BENCH.x-60,BENCH.y+20,120,40,6);c.globalAlpha=.07;c.fill();c.globalAlpha=1;}
+function drawCPLights(c){c.fillStyle='rgba(8,12,30,.30)';c.fillRect(0,0,R.w,R.h);c.globalCompositeOperation='lighter';
+ for(const[x,y]of[[200,330],[700,330],[1200,330],[700,560],[300,740],[1100,740]]){const g=c.createRadialGradient(x,y,0,x,y,200);g.addColorStop(0,'rgba(255,200,120,.2)');g.addColorStop(1,'rgba(0,0,0,0)');c.fillStyle=g;c.fillRect(x-200,y-200,400,400);}
+ c.globalCompositeOperation='source-over';}
+function buildCarParkNPCs(){
+ queue=[];server={busy:null};kev=null;bus=null;deal=null;cpCars=[];
+ const S=R.solids;
+ mark=mkNPC('mark','The Mark',LOOK.brett,0,0,{present:false,stage:'ABSENT',aware:260,sens:1.1,speed:66,isMark:true,patience:0});
+ const route=(x)=>[{x:x,y:690},{x:-70,y:690}];
+ const mkc=(t0,col,xBay,w,h,fromRight)=>{const sol={x:0,y:0,w,h,h3:0,col,off:true,draw:()=>{}};S.push(sol);const k={x:fromRight?1750:-250,y:742,w,h,dir:fromRight?-1:1,col,v:150,state:'WAIT',t0,solid:sol,path:[{x:xBay+(fromRight?70:-70),y:742},{x:xBay,y:612}]};cpCars.push(k);return k;};
+ const kA=mkc(8,'#7a1f2b',300,116,46,true),kB=mkc(26,'#e9edf1',1000,150,56,true),kC=mkc(42,'#4b5563',1180,116,46,true);
+ const A1=mkNPC('dan','Dan',LOOK.c3,0,0,{present:false,stage:'SCRIPT',speed:60,talk:()=>'Can\'t stop, we\'re late for a table.',route:route(300)}),A2=mkNPC('lou','Lou',LOOK.c1,0,0,{present:false,stage:'SCRIPT',speed:60,talk:()=>'Sorry, love — we\'re in a rush.',route:route(310)});
+ const B1=mkNPC('gaz','Gary',LOOK.c2,0,0,{present:false,stage:'SCRIPT',speed:58,talk:()=>'Just paying for the van, mate.',route:[{x:790,y:596},{x:1100,y:640},{x:1580,y:690}]});
+ const C1=mkNPC('ann','Ann',LOOK.c4,0,0,{present:false,stage:'SCRIPT',speed:50,talk:()=>'Oh, hello dear. Late for bingo.',route:route(1180)});
+ kA.pax=[A1,A2];kB.pax=[B1];kC.pax=[C1];
+ const sue=mkNPC('sue','Sue',LOOK.c5,846,574,{stage:'STAY',aware:150,sens:.3,dir:{x:-1,y:0},talk:()=>'Sorry, love — I\'m on the phone.'});
+ const rob=mkNPC('jay','Jay',LOOK.c6,990,640,{stage:'STAY',aware:150,sens:.3,dir:{x:0,y:-1},talk:()=>'You filming summat? ...Nah.'});
+ npcs=[mark,sue,rob,A1,A2,B1,C1];
+ const mc={x:1750,y:742,dir:-1,v:0,col:'#2f5fa8',w:150,h:56,markCar:true,plate:true,state:'WAITING',path:[]};cars=[mc];mark.car=mc;
+ policeCar=null;officers=[];}
+function cpUpdate(dt){
+ for(const k of cpCars){
+  if(k.state==='WAIT'){if(M.clock>=k.t0)k.state='DRIVING';}
+  else if(k.state==='DRIVING'){const t=k.path[0],dx=t.x-k.x,dy=t.y-k.y,d=Math.hypot(dx,dy),sp=k.v*dt;if(d<=sp){k.x=t.x;k.y=t.y;k.path.shift();if(!k.path.length){k.state='PARKED';SFX.door();k.solid.off=false;k.solid.x=k.x-k.w/2;k.solid.y=k.y-k.h/2;k.exitAt=M.clock+2;}}else{k.x+=dx/d*sp;k.y+=dy/d*sp;k.v=k.path.length>1?150:70;}}
+  else if(k.state==='PARKED'&&k.pax&&M.clock>=k.exitAt){let i=0;for(const n of k.pax){n.present=true;n.x=k.x-20+i*30;n.y=k.y+k.h/2+10;n.path=n.route.map(p=>({...p}));n.go=true;i++;}k.pax=null;}}
+ for(const n of npcs){if(n.stage==='SCRIPT'&&n.go&&n.present){if(stepPath(n,dt)){n.present=false;n.stage='DEPARTED';}}}
+ const v=mark.car;if(v.state==='LEAVING'&&v.y<742)v.y=Math.min(742,v.y+75*dt);
+ cpMarkUpdate(dt);}
+function cpMarkUpdate(dt){const m=mark,c=m.car;
+ if(m.stage==='ABSENT'){
+  if(c.state==='WAITING'&&M.clock>=60){c.state='ARRIVING';c.path=[{x:600,y:742},{x:520,y:612}];c.v=150;}
+  if(c.state==='ARRIVING'){const t=c.path[0],dx=t.x-c.x,dy=t.y-c.y,d=Math.hypot(dx,dy),sp=c.v*dt;if(d<=sp){c.x=t.x;c.y=t.y;c.path.shift();if(!c.path.length){c.state='PARKED';R.carSolid.off=false;R.carSolid.x=c.x-c.w/2;R.carSolid.y=c.y-c.h/2;m.exitAt=M.clock+2;SFX.door();}}else{c.x+=dx/d*sp;c.y+=dy/d*sp;c.v=c.path.length>1?150:70;}}
+  if(c.state==='PARKED'&&M.clock>=m.exitAt){m.present=true;m.stage='WALKING';m.x=c.x+30;m.y=c.y-c.h/2-4;m.path=[{x:BENCH.x,y:BENCH.y}];addTimeline('Blue van parked beside the bench; driver got out');if(dist(player,m)<480){addIntel('obs_car_exit');M.obsExitTime=fmtClock(M.clock,false);}}
+  return;}
+ if(m.stage==='WALKING'){if(m.engaged){m.moving=false;return;}if(stepPath(m,dt)){m.stage='SITTING';m.sitAt=M.clock;m.dir={x:0,y:1};addTimeline('Subject sat down on the bench');if(dist(player,m)<480){M.attendedTime=fmtClock(M.clock,false);addIntel('attended',{title:'Subject arrived at Riverside Car Park at '+M.attendedTime+' and sat on the bench'});}}return;}
+ if(m.stage==='SITTING'){m.moving=false;if(m.engaged)return;if(M.clock-m.sitAt>210){m.abandoned=true;bark(m,'Right, that\'s enough.');addTimeline('Subject got up and left');startLeaving(m);}return;}
+ custUpdate(m,dt);}
+
+window.__NH={vetTip,startCase,get CASE(){return CASE;},tick(n,dt=1/30){for(let i=0;i<n;i++){perfNow+=dt*1000;update(dt);}render();if(STATE==='POLICE_CALL')renderCall();},get npcs(){return npcs;},get P(){return P;},get kev(){return kev;},get nearInt(){return nearInt;},computeScore,getInteractables,get state(){return STATE;},get M(){return M;},get mark(){return mark;},get player(){return player;},get S(){return S;},get CALL(){return CALL;},startBriefing,startApproach,tryContact,openPhone,openEvidence,get paused(){return paused;},stingButton,openMarkChat,get nearIntLabel(){return nearInt&&nearInt.label;},requestPolice,pickSting,pickCall,interact,openTalk,openComputer,addIntel};
 boot();requestAnimationFrame(frame);
 </script>
 </body>
